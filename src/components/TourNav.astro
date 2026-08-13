@@ -1,0 +1,263 @@
+---
+const pathname = Astro.url.pathname.replace(/\/$/, '') || '/';
+
+const tours = [
+  { label: 'Exterior',    href: '/tour/exterior'   },
+  { label: 'Penthouse',   href: '/tour/penthouse'  },
+  { label: 'Piso 2',      href: '/tour/2do-piso'   },
+  { label: 'Piso 1',      href: '/tour/1er-piso'   },
+];
+---
+
+<nav class="tour-nav" aria-label="Navegación de tours">
+  <a href="/" class="tour-nav__logo">
+    <img src="/logo_horizontal.svg" alt="Costamare" height="28" />
+  </a>
+
+  <a href="/" class="tour-nav__back">Website</a>
+
+  <span class="tour-nav__sep" aria-hidden="true">|</span>
+
+  <ul class="tour-nav__links" role="list">
+    {tours.map(({ label, href }) => (
+      <li>
+        <a
+          href={href}
+          class:list={['tour-nav__link', { 'tour-nav__link--active': pathname === href }]}
+          aria-current={pathname === href ? 'page' : undefined}
+        >
+          {label}
+        </a>
+      </li>
+    ))}
+  </ul>
+</nav>
+
+<!-- Burger button (solo mobile) -->
+<button
+  class="tour-burger hidden max-lg:flex fixed bottom-6 right-6 z-9999 items-center justify-center px-4 py-2 rounded-lg bg-[#0d2535] border-0 cursor-pointer shadow-[0_4px_16px_rgba(0,0,0,0.25)] text-white text-sm font-medium"
+  aria-label="Abrir menú"
+  aria-expanded="false"
+  aria-controls="tour-mobile-menu"
+>
+  Menú
+</button>
+
+<!-- Mobile drawer -->
+<div id="tour-mobile-menu" class="tour-mobile" role="dialog" aria-label="Menú de tours">
+  <div class="tour-mobile__handle"></div>
+
+  <a href="/" class="tour-mobile__logo">
+    <img src="/logo_horizontal.svg" alt="Costamare" height="28" />
+  </a>
+
+  <a href="/" class="tour-mobile__back">Website</a>
+
+  <ul class="tour-mobile__links" role="list">
+    {tours.map(({ label, href }) => (
+      <li>
+        <a
+          href={href}
+          class:list={['tour-mobile__link', { 'tour-mobile__link--active': pathname === href }]}
+          aria-current={pathname === href ? 'page' : undefined}
+        >{label}</a>
+      </li>
+    ))}
+  </ul>
+</div>
+
+<style>
+  /* ── Desktop pill ── */
+  .tour-nav {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: #fff;
+    border-radius: 999px;
+    padding: 1rem 2rem;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.14);
+    white-space: nowrap;
+  }
+
+  .tour-nav__logo {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  .tour-nav__logo img {
+    display: block;
+    height: 1.75rem;
+    width: auto;
+  }
+
+  .tour-nav__back {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #1a2e3b;
+    text-decoration: none;
+    padding: 0.4rem 0.875rem;
+    border-radius: 999px;
+    transition: background 0.15s;
+  }
+
+  .tour-nav__back:hover {
+    background: rgba(0, 0, 0, 0.06);
+  }
+
+  .tour-nav__sep {
+    color: #c5cdd4;
+    font-size: 1rem;
+    user-select: none;
+  }
+
+  .tour-nav__links {
+    display: flex;
+    gap: 0.125rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .tour-nav__link {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #1a2e3b;
+    text-decoration: none;
+    padding: 0.4rem 1rem;
+    border-radius: 999px;
+    transition: background 0.15s, color 0.15s;
+  }
+
+  .tour-nav__link:hover:not(.tour-nav__link--active) {
+    background: rgba(0, 0, 0, 0.06);
+  }
+
+  .tour-nav__link--active {
+    background: #0d2535;
+    color: #fff;
+  }
+
+  /* ── Mobile + tablet: ocultar pill ── */
+  @media (max-width: 1023px) {
+    .tour-nav { display: none; }
+  }
+
+  /* ── Mobile drawer ── */
+  .tour-mobile {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 9998;
+    height: 70svh;
+    background: #fff;
+    border-radius: 1.5rem 1.5rem 0 0;
+    box-shadow: 0 -4px 32px rgba(0, 0, 0, 0.18);
+    padding: 1rem 2rem 2rem;
+    display: none;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+    transform: translateY(100%);
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .tour-mobile.is-open {
+    transform: translateY(0);
+  }
+
+  @media (max-width: 1023px) {
+    .tour-mobile { display: flex; }
+  }
+
+  .tour-mobile__handle {
+    width: 2.5rem;
+    height: 4px;
+    background: #c5cdd4;
+    border-radius: 2px;
+    align-self: center;
+    margin-bottom: 0.5rem;
+  }
+
+  .tour-mobile__logo {
+    width: 100%;
+  }
+
+  .tour-mobile__logo img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .tour-mobile__back {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #1a2e3b;
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    border-radius: 999px;
+    transition: background 0.15s;
+  }
+
+  .tour-mobile__back:hover {
+    background: rgba(0, 0, 0, 0.06);
+  }
+
+  .tour-mobile__links {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    width: 100%;
+  }
+
+  .tour-mobile__link {
+    display: block;
+    width: 100%;
+    font-size: 1.25rem;
+    font-weight: 500;
+    color: #1a2e3b;
+    text-decoration: none;
+    padding: 0.75rem 1rem;
+    border-radius: 0.75rem;
+    transition: background 0.15s, color 0.15s;
+    box-sizing: border-box;
+  }
+
+  .tour-mobile__link:hover:not(.tour-mobile__link--active) {
+    background: rgba(0, 0, 0, 0.06);
+  }
+
+  .tour-mobile__link--active {
+    background: #0d2535;
+    color: #fff;
+  }
+</style>
+
+<style is:global>
+  @media (max-width: 1023px) {
+    .psv-map {
+      width: 160px !important;
+      height: 160px !important;
+    }
+  }
+</style>
+
+<script>
+  const burger = document.querySelector('.tour-burger') as HTMLButtonElement | null;
+  const menu = document.getElementById('tour-mobile-menu');
+
+  burger?.addEventListener('click', () => {
+    const isOpen = menu!.classList.toggle('is-open');
+    burger.setAttribute('aria-expanded', String(isOpen));
+  });
+</script>

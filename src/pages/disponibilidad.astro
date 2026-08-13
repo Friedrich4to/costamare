@@ -1,0 +1,113 @@
+---
+export const prerender = false;
+import Layout from '../layouts/Layout.astro';
+import Disponibilidad_Section from '../components/Disponibilidad_Section.astro';
+import { env } from 'cloudflare:workers';
+
+interface UTRow {
+  id: number;
+  price_usd: number;
+  interior_m2: number;
+  total_m2: number;
+  spaces: string;
+  tour_url: string;
+}
+
+interface URow {
+  id: number;
+  unit_id: string;
+  label: string;
+  status: string;
+  floor: number;
+  unit_type_id: number;
+}
+
+type ParsedUT = Omit<UTRow, 'spaces'> & {
+  spaces: { name: string; m2: number }[];
+};
+
+let unitTypes: ParsedUT[] = [];
+let units: URow[] = [];
+
+try {
+  const db = env.DB;
+  if (db) {
+    const [utRes, uRes] = await Promise.all([
+      db.prepare('SELECT id, price_usd, interior_m2, total_m2, spaces, tour_url FROM unit_types ORDER BY id').all<UTRow>(),
+      db.prepare('SELECT * FROM units ORDER BY unit_id').all<URow>(),
+    ]);
+    unitTypes = (utRes.results ?? []).map((ut: UTRow) => ({
+      ...ut,
+      spaces: JSON.parse(ut.spaces || '[]'),
+    }));
+    units = uRes.results ?? [];
+  }
+} catch (e) {
+  console.error('disponibilidad page DB error:', e);
+}
+---
+
+<Layout title="Disponibilidad" bare={true}>
+  <div class="px-[4vw] pt-10 pb-4">
+  <div class="max-w-7xl mx-auto flex flex-col gap-6">
+    <!-- Logo -->
+    <img src="/logo_horizontal.svg" alt="Costamare" class="h-10 w-auto self-start" />
+
+    <!-- Ir al sitio web -->
+    <a
+      href="/"
+      class="self-start flex items-center gap-2 px-5 py-2.5 text-sm rounded-full bg-gray-100 border border-base/20 hover:bg-base hover:text-white transition-colors duration-500 no-underline"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      Ir al sitio web
+    </a>
+
+    <!-- Título -->
+    <h1 class="font-display font-bold text-4xl">Unidades y disponibilidad</h1>
+
+    <!-- Descargar listado de precios -->
+    <button
+      id="page-pdf-btn"
+      class="self-start flex items-center gap-2 px-5 py-2.5 text-sm rounded-full bg-gray-100 border border-base/20 hover:bg-base hover:text-white transition-colors duration-500"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="7 10 12 15 17 10"/>
+        <line x1="12" y1="15" x2="12" y2="3"/>
+      </svg>
+      Descargar listado de precios
+    </button>
+  </div>
+  </div>
+  <Disponibilidad_Section units={units} unitTypes={unitTypes} hideHeader={true} />
+</Layout>
+
+<script>
+  const pdfBtn = document.getElementById('page-pdf-btn') as HTMLButtonElement | null;
+  pdfBtn?.addEventListener('click', async () => {
+    const originalHTML = pdfBtn.innerHTML;
+    pdfBtn.disabled = true;
+    pdfBtn.textContent = 'Generando PDF…';
+    try {
+      const res = await fetch('/api/pdf', { method: 'POST' });
+      if (!res.ok) throw new Error();
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'listado-precios-costamare.pdf';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch {
+      alert('Error generando el PDF. Inténtalo de nuevo.');
+    } finally {
+      pdfBtn.disabled = false;
+      pdfBtn.innerHTML = originalHTML;
+    }
+  });
+</script>

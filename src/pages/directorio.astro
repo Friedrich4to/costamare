@@ -1,0 +1,122 @@
+---
+import Layout from '../layouts/Layout.astro'
+---
+
+<Layout title="Directorio" bare>
+  <!-- Fixed background (visible on tablet/desktop behind the card) -->
+  <div
+    class="fixed inset-0 -z-10 bg-[url('/bg.avif')] bg-cover bg-center"
+    aria-hidden="true"
+  ></div>
+
+  <main class="relative min-h-screen flex flex-col items-center">
+    <!-- Card: full-screen on mobile, constrained + centered on md+ -->
+    <div class="bg-white w-full min-h-screen md:min-h-0 md:max-w-135 md:mt-24 md:mb-8 md:rounded-2xl shadow-xl overflow-hidden">
+
+      <!-- Hero image — mobile only -->
+      <img
+        src="/bg.avif"
+        alt=""
+        class="block md:hidden w-full h-[50svh] object-cover"
+      />
+
+      <!-- Content -->
+      <div class="flex flex-col items-center gap-6">
+
+        <!-- Logo + icons wrapper with padding -->
+        <div class="flex flex-col items-center gap-6 pt-8 px-8">
+
+        <!-- Logo -->
+        <img src="/logo.svg" alt="Costamare" style="width: 320px; height: auto;" />
+
+        <!-- Social icons -->
+        <div class="flex gap-4">
+          <a
+            href="mailto:contacto@costamare.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Email"
+            class="hover:opacity-70 transition-opacity"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" style="width: 36px; height: auto;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect width="20" height="16" x="2" y="4" rx="2"/>
+              <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+            </svg>
+          </a>
+          <a
+            href="https://instagram.com/costamare.rd"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Instagram"
+            class="hover:opacity-70 transition-opacity"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" style="width: 36px; height: auto;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/>
+              <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+              <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/>
+            </svg>
+          </a>
+        </div>
+
+        </div><!-- end logo+icons wrapper -->
+
+        <!-- Links list -->
+        <ul class="w-full mt-6">
+          <li>
+            <a
+              href="/"
+              class="block w-full text-[24px] text-center py-6 bg-gray-100 border-t border-b border-base/20 hover:bg-base hover:text-white transition-colors duration-500 cursor-pointer"
+            >
+              Website
+            </a>
+          </li>
+          <li>
+            <a
+              href="/tour/exterior"
+              class="block w-full text-[24px] text-center py-6 bg-gray-100 border-b border-base/20 hover:bg-base hover:text-white transition-colors duration-500 cursor-pointer"
+              target="_blank"
+            >
+              Tour 360°
+            </a>
+          </li>
+          <li>
+            <a
+              href="https://drive.google.com/drive/folders/10hPJtbZXNwX-jAOMK-MbdEr1X1elWkwL?usp=drive_link"
+              class="block w-full text-[24px] text-center py-6 bg-gray-100 border-b border-base/20 hover:bg-base hover:text-white transition-colors duration-500 cursor-pointer"
+              target="_blank"
+            >
+              Dossier
+            </a>
+          </li>
+          <li>
+            <a
+              href="https://drive.google.com/drive/folders/1wqQcjW-FOY9WJNz8fN_ijt1938W8z_S1?usp=sharing"
+              class="block w-full text-[24px] text-center py-6 bg-gray-100 border-b border-base/20 hover:bg-base hover:text-white transition-colors duration-500 cursor-pointer"
+              target="_blank"
+            >
+              Unidades
+            </a>
+          </li>
+          <li>
+            <a
+              href="https://drive.google.com/drive/folders/1-k2HQfQS-hM2qfpU7B4Cu8d7WmeTllmR?usp=sharing"
+              class="block w-full text-[24px] text-center py-6 bg-gray-100 border-b border-base/20 hover:bg-base hover:text-white transition-colors duration-500 cursor-pointer"
+              target="_blank"
+            >
+              Lista de precios
+            </a>
+          </li>
+          <li>
+            <a
+              href="/maqueta"
+              class="block w-full text-[24px] text-center py-6 bg-gray-100 border-b border-base/20 hover:bg-base hover:text-white transition-colors duration-500 cursor-pointer"
+            >
+              Maqueta virtual
+            </a>
+          </li>
+        </ul>
+
+      </div>
+    </div>
+  </main>
+</Layout>

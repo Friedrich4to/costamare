@@ -1,0 +1,656 @@
+---
+export const prerender = false;
+import Layout from '../layouts/Layout.astro';
+import { env } from 'cloudflare:workers';
+
+interface UTRow {
+  id: number;
+  type_key: string;
+  name: string;
+  price_usd: number;
+  interior_m2: number;
+  terraza_m2: number | null;
+  total_m2: number;
+  spaces: string;
+  features: string;
+  tour_url: string;
+  optional_package_label: string | null;
+  optional_package_price: number | null;
+  gallery: string;
+}
+
+interface URow {
+  id: number;
+  unit_id: string;
+  label: string;
+  status: string;
+  floor: number;
+  unit_type_id: number;
+}
+
+type ParsedUT = Omit<UTRow, 'spaces' | 'features' | 'gallery'> & {
+  spaces: { name: string; m2: number }[];
+  features: string[];
+  gallery: string[];
+};
+
+let unitTypes: ParsedUT[] = [];
+let units: URow[] = [];
+let dbError = false;
+
+try {
+  const db = env.DB;
+  if (db) {
+    const [utRes, uRes] = await Promise.all([
+      db.prepare('SELECT * FROM unit_types ORDER BY id').all<UTRow>(),
+      db.prepare('SELECT * FROM units ORDER BY unit_id').all<URow>(),
+    ]);
+    unitTypes = (utRes.results ?? []).map(ut => ({
+      ...ut,
+      spaces: JSON.parse(ut.spaces || '[]'),
+      features: JSON.parse(ut.features || '[]'),
+      gallery: JSON.parse(ut.gallery || '[]'),
+    }));
+    units = uRes.results ?? [];
+  } else {
+    dbError = true;
+  }
+} catch (e) {
+  dbError = true;
+  console.error('administrar DB error:', e);
+}
+---
+
+<Layout title="Administración" bare={true}>
+  <!-- ── Auth overlay ─────────────────────────────────────── -->
+  <div id="auth-overlay" class="fixed inset-0 z-50 flex items-center justify-center" style="background:rgba(7,50,71,0.97);backdrop-filter:blur(4px)">
+    <div style="background:#fff;border-radius:1.25rem;padding:2.5rem;width:100%;max-width:22rem;margin:1rem;box-shadow:0 25px 60px rgba(0,0,0,0.4)">
+      <p class="admin-logo">Costamare</p>
+      <h1 style="font-size:1.25rem;font-weight:600;color:#073247;margin:0 0 0.25rem">Panel de Administración</h1>
+      <p style="font-size:0.8rem;color:#9ca3af;margin:0 0 1.75rem">Introduce tu API Key para continuar</p>
+      <input id="api-key-input" type="password" placeholder="API Key" autocomplete="current-password"
+        style="width:100%;border:1.5px solid #E3E3E3;border-radius:0.6rem;padding:0.7rem 0.9rem;font-size:0.875rem;color:#073247;box-sizing:border-box;font-family:inherit;outline:none;transition:border-color .15s"
+        onfocus="this.style.borderColor='#073247'" onblur="this.style.borderColor='#E3E3E3'"
+      />
+      <p id="auth-error" style="display:none;color:#C23E3E;font-size:0.8rem;margin:0.5rem 0 0">Clave incorrecta. Inténtalo de nuevo.</p>
+      <button id="auth-submit" style="width:100%;margin-top:1rem;background:#073247;color:#fff;border:none;border-radius:0.6rem;padding:0.8rem;font-size:0.875rem;font-weight:600;cursor:pointer;font-family:inherit;transition:opacity .15s" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+        Ingresar
+      </button>
+    </div>
+  </div>
+
+  <!-- ── Admin panel ─────────────────────────────────────── -->
+  <div id="admin-panel" style="display:none;min-height:100vh;background:#F0F0F0">
+
+    <!-- Sticky header -->
+    <header style="position:sticky;top:0;z-index:40;background:#073247;padding:0 1.5rem;height:3.75rem;display:flex;align-items:center;justify-content:space-between">
+      <div style="display:flex;align-items:center;gap:0.75rem">
+        <span style="font-family:var(--font-display);font-weight:700;color:#fff;font-size:1.1rem;letter-spacing:.04em">Costamare</span>
+        <span style="color:rgba(255,255,255,.45);font-size:0.8rem">Panel de Administración</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:1rem">
+        <a href="/disponibilidad_admin" style="color:rgba(255,255,255,.65);font-size:0.8rem;text-decoration:none;transition:color .15s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,.65)'">Vista rápida</a>
+        <button id="logout-btn" style="background:rgba(255,255,255,.12);color:rgba(255,255,255,.8);border:none;border-radius:0.5rem;padding:0.4rem 0.9rem;font-size:0.8rem;cursor:pointer;font-family:inherit;transition:background .15s" onmouseover="this.style.background='rgba(255,255,255,.2)'" onmouseout="this.style.background='rgba(255,255,255,.12)'">
+          Cerrar sesión
+        </button>
+      </div>
+    </header>
+
+    {dbError && (
+      <div style="margin:2rem auto;max-width:40rem;background:#fef2f2;border:1px solid #fca5a5;border-radius:.75rem;padding:1rem 1.25rem;color:#991b1b;font-size:.875rem">
+        Error de conexión con la base de datos. Verifica que la D1 esté configurada correctamente.
+      </div>
+    )}
+
+    <div style="max-width:72rem;margin:0 auto;padding:2rem 1.25rem 8rem">
+
+      <!-- ── Sección: Tipos de Unidad ────────────────── -->
+      <section style="margin-bottom:3rem">
+        <h2 class="section-title">Tipos de Unidad</h2>
+        <div class="ut-grid">
+          {unitTypes.map(ut => (
+            <div class="ut-card" data-unit-type-id={ut.id}>
+              <!-- Card header -->
+              <div style="background:#073247;padding:1rem 1.25rem">
+                <p style="font-weight:700;color:#fff;font-size:1rem;margin:0">{ut.name}</p>
+                <p style="font-size:0.72rem;color:rgba(255,255,255,.4);margin:0.15rem 0 0;font-family:monospace">{ut.type_key}</p>
+              </div>
+
+              <!-- Card body -->
+              <div style="padding:1.25rem;display:flex;flex-direction:column;gap:1rem">
+
+                <!-- Name + Price -->
+                <div class="field-row-2">
+                  <div class="field-group">
+                    <label class="field-label">Nombre</label>
+                    <input type="text" data-field="name" value={ut.name} class="field-input" />
+                  </div>
+                  <div class="field-group">
+                    <label class="field-label">Precio (USD)</label>
+                    <input type="number" data-field="price_usd" value={ut.price_usd} min="0" step="1" class="field-input" />
+                  </div>
+                </div>
+
+                <!-- Areas -->
+                <div class="field-row-3">
+                  <div class="field-group">
+                    <label class="field-label">Interior m²</label>
+                    <input type="number" data-field="interior_m2" value={ut.interior_m2} step="0.01" class="field-input" />
+                  </div>
+                  <div class="field-group">
+                    <label class="field-label">Terraza m²</label>
+                    <input type="number" data-field="terraza_m2" value={ut.terraza_m2 ?? ''} step="0.01" placeholder="—" class="field-input" />
+                  </div>
+                  <div class="field-group">
+                    <label class="field-label">Total m²</label>
+                    <input type="number" data-field="total_m2" value={ut.total_m2} step="0.01" class="field-input" />
+                  </div>
+                </div>
+
+                <!-- Tour URL -->
+                <div class="field-group">
+                  <label class="field-label">URL del Tour</label>
+                  <input type="text" data-field="tour_url" value={ut.tour_url ?? ''} class="field-input" />
+                </div>
+
+                <!-- Optional package -->
+                <div class="field-row-2">
+                  <div class="field-group">
+                    <label class="field-label">Paquete opcional</label>
+                    <input type="text" data-field="optional_package_label" value={ut.optional_package_label ?? ''} placeholder="Descripción" class="field-input" />
+                  </div>
+                  <div class="field-group">
+                    <label class="field-label">Precio paquete (USD)</label>
+                    <input type="number" data-field="optional_package_price" value={ut.optional_package_price ?? ''} min="0" step="1" placeholder="—" class="field-input" />
+                  </div>
+                </div>
+
+                <!-- Spaces -->
+                <div class="field-group">
+                  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem">
+                    <label class="field-label" style="margin:0">Espacios</label>
+                    <button type="button" class="add-space-btn" style="font-size:.75rem;color:#073247;background:none;border:none;cursor:pointer;font-weight:600;font-family:inherit;padding:0">+ Agregar</button>
+                  </div>
+                  <div class="spaces-list" style="display:flex;flex-direction:column;gap:.5rem">
+                    {ut.spaces.map(s => (
+                      <div class="space-row" style="display:flex;gap:.5rem;align-items:center">
+                        <input type="text" value={s.name} placeholder="Espacio" class="field-input" style="flex:1;min-width:0" />
+                        <input type="number" value={s.m2} placeholder="m²" step="0.01" class="field-input" style="width:5.5rem;flex-shrink:0" />
+                        <button type="button" class="remove-space-btn" style="color:#C23E3E;background:none;border:none;cursor:pointer;font-size:1.2rem;line-height:1;padding:0 .25rem;flex-shrink:0">×</button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <!-- Features -->
+                <div class="field-group">
+                  <label class="field-label">Características <span style="font-weight:400;text-transform:none;letter-spacing:0;color:#9ca3af">(separadas por comas)</span></label>
+                  <input type="text" data-field="features" value={ut.features.join(', ')} placeholder="Balcón, Terraza privada" class="field-input" />
+                </div>
+
+                <!-- Gallery -->
+                <div class="field-group">
+                  <label class="field-label">Galería <span style="font-weight:400;text-transform:none;letter-spacing:0;color:#9ca3af">(una URL por línea)</span></label>
+                  <textarea data-field="gallery" rows={Math.max(2, ut.gallery.length + 1)} class="field-input" style="resize:vertical;font-family:monospace;font-size:.8rem">{ut.gallery.join('\n')}</textarea>
+                </div>
+
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <!-- ── Sección: Unidades ───────────────────────── -->
+      <section>
+        <h2 class="section-title">Unidades</h2>
+        <div style="background:#fff;border-radius:.875rem;border:1px solid #E3E3E3;overflow:hidden">
+
+          <!-- Desktop header -->
+          <div class="units-header">
+            <span style="width:5.5rem;flex-shrink:0">ID</span>
+            <span style="flex:1">Nombre</span>
+            <span style="width:4.5rem;flex-shrink:0;text-align:center">Piso</span>
+            <span style="width:11rem;flex-shrink:0">Disponibilidad</span>
+            <span style="width:11rem;flex-shrink:0">Tipo</span>
+          </div>
+
+          <!-- Unit rows -->
+          {units.map((unit, i) => (
+            <div
+              class="unit-row"
+              data-unit-id={unit.unit_id}
+              data-unit-type-id={unit.unit_type_id}
+              style={i < units.length - 1 ? 'border-bottom:1px solid #F0F0F0' : ''}
+            >
+              <!-- ID -->
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem" class="unit-row-header-mobile">
+                <span style="font-family:monospace;font-weight:700;font-size:.95rem;color:#073247">{unit.unit_id}</span>
+                <span class="floor-tag">Piso {unit.floor}</span>
+              </div>
+
+              <!-- Name (desktop only) -->
+              <div class="unit-name-desktop" style="flex:1;font-size:.875rem;color:#6b7280;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{unit.label}</div>
+
+              <!-- Floor (desktop only) -->
+              <div class="unit-floor-desktop" style="width:4.5rem;flex-shrink:0;text-align:center;font-size:.875rem;color:#6b7280">{unit.floor}</div>
+
+              <!-- Status -->
+              <div class="unit-field-col" style="--col-w:11rem">
+                <label class="mobile-label">Disponibilidad</label>
+                <select data-field="status" class="status-select field-select">
+                  <option value="available" selected={unit.status === 'available'}>Disponible</option>
+                  <option value="reserved" selected={unit.status === 'reserved'}>Reservado</option>
+                  <option value="sold" selected={unit.status === 'sold'}>Vendido</option>
+                </select>
+              </div>
+
+              <!-- Type -->
+              <div class="unit-field-col" style="--col-w:11rem">
+                <label class="mobile-label">Tipo</label>
+                <select data-field="unit_type_id" class="field-select">
+                  {unitTypes.map(ut => (
+                    <option value={ut.id} selected={unit.unit_type_id === ut.id}>{ut.name}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          ))}
+
+        </div>
+      </section>
+
+    </div><!-- /content -->
+
+    <!-- Sticky save bar -->
+    <div style="position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #E3E3E3;padding:.875rem 1.5rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;z-index:30">
+      <span id="save-status" style="font-size:.875rem;color:#6b7280"></span>
+      <div style="display:flex;align-items:center;gap:.75rem">
+        <button id="download-btn" style="display:inline-flex;align-items:center;gap:.45rem;background:#F0F0F0;color:#073247;border:1.5px solid rgba(7,50,71,.2);border-radius:.625rem;padding:.7rem 1.25rem;font-size:.875rem;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;transition:background .15s,color .15s" onmouseover="this.style.background='#073247';this.style.color='#fff'" onmouseout="this.style.background='#F0F0F0';this.style.color='#073247'">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Descargar listado
+        </button>
+        <button id="save-btn" style="background:#073247;color:#fff;border:none;border-radius:.625rem;padding:.7rem 2rem;font-size:.875rem;font-weight:600;cursor:pointer;font-family:inherit;transition:opacity .15s;white-space:nowrap" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+          Guardar cambios
+        </button>
+      </div>
+    </div>
+
+  </div><!-- /admin-panel -->
+</Layout>
+
+<style>
+  .admin-logo {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.5rem;
+    color: #073247;
+    letter-spacing: .06em;
+    margin: 0 0 .75rem;
+  }
+  .section-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #073247;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    margin: 0 0 1.25rem;
+  }
+  .field-label {
+    display: block;
+    font-size: .7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: #9ca3af;
+    margin-bottom: .3rem;
+  }
+  .field-input {
+    width: 100%;
+    border: 1.5px solid #E3E3E3;
+    border-radius: .5rem;
+    padding: .5rem .75rem;
+    font-size: .875rem;
+    color: #073247;
+    background: #fff;
+    box-sizing: border-box;
+    font-family: inherit;
+    outline: none;
+    transition: border-color .15s;
+  }
+  .field-input:focus { border-color: #073247; }
+  .field-select {
+    width: 100%;
+    border: 1.5px solid #E3E3E3;
+    border-radius: .5rem;
+    padding: .5rem .75rem;
+    font-size: .85rem;
+    color: #073247;
+    background: #fff;
+    box-sizing: border-box;
+    font-family: inherit;
+    outline: none;
+    cursor: pointer;
+    transition: border-color .15s, background-color .15s, color .15s;
+  }
+  .field-select:focus { border-color: #073247; }
+  .field-group { display: flex; flex-direction: column; }
+  .field-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
+  .field-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: .75rem; }
+
+  /* Unit type cards grid */
+  .ut-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+  @media (min-width: 1024px) {
+    .ut-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+  .ut-card {
+    background: #fff;
+    border-radius: .875rem;
+    border: 1px solid #E3E3E3;
+    overflow: hidden;
+  }
+
+  /* Units table */
+  .units-header {
+    display: none;
+    padding: .6rem 1.25rem;
+    background: #f9fafb;
+    border-bottom: 1px solid #E3E3E3;
+    font-size: .7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: #9ca3af;
+  }
+  @media (min-width: 768px) {
+    .units-header { display: flex; align-items: center; gap: 1rem; }
+  }
+  .unit-row {
+    padding: 1rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: .75rem;
+    margin: .5rem;
+    border-radius: .625rem;
+    border: 1px solid #E3E3E3;
+    background: #fff;
+  }
+  @media (min-width: 768px) {
+    .unit-row {
+      flex-direction: row;
+      align-items: center;
+      gap: 1rem;
+      margin: 0;
+      border-radius: 0;
+      border: none;
+    }
+  }
+  .unit-row-header-mobile { display: flex; }
+  .unit-name-desktop { display: none; }
+  .unit-floor-desktop { display: none; }
+  @media (min-width: 768px) {
+    .unit-row-header-mobile { display: contents; }
+    .unit-row-header-mobile > span:first-child { width: 5.5rem; flex-shrink: 0; }
+    .unit-row-header-mobile > .floor-tag { display: none; }
+    .unit-name-desktop { display: block; }
+    .unit-floor-desktop { display: block; }
+  }
+  .unit-field-col {
+    display: flex;
+    flex-direction: column;
+  }
+  @media (min-width: 768px) {
+    .unit-field-col {
+      width: var(--col-w);
+      flex-shrink: 0;
+    }
+  }
+  .floor-tag {
+    font-size: .72rem;
+    background: #f3f4f6;
+    color: #6b7280;
+    padding: .2rem .6rem;
+    border-radius: 999px;
+  }
+  .mobile-label {
+    display: block;
+    font-size: .72rem;
+    color: #9ca3af;
+    margin-bottom: .25rem;
+  }
+  @media (min-width: 768px) {
+    .mobile-label { display: none; }
+  }
+</style>
+
+<script>
+  const STORAGE_KEY = 'costamare_admin_key';
+
+  const STATUS_COLORS: Record<string, { bg: string; color: string; border: string }> = {
+    available: { bg: '#f0fdf4', color: '#166534', border: '#86efac' },
+    reserved:  { bg: '#fffbeb', color: '#92400e', border: '#fde68a' },
+    sold:      { bg: '#fef2f2', color: '#991b1b', border: '#fca5a5' },
+  };
+
+  function colorizeStatus(sel: HTMLSelectElement) {
+    const c = STATUS_COLORS[sel.value];
+    if (c) {
+      sel.style.backgroundColor = c.bg;
+      sel.style.color = c.color;
+      sel.style.borderColor = c.border;
+    }
+  }
+
+  function initStatusColors() {
+    document.querySelectorAll<HTMLSelectElement>('.status-select').forEach(sel => {
+      colorizeStatus(sel);
+      sel.addEventListener('change', () => colorizeStatus(sel));
+    });
+  }
+
+  function createSpaceRow(name = '', m2 = '') {
+    const div = document.createElement('div');
+    div.className = 'space-row';
+    div.style.cssText = 'display:flex;gap:.5rem;align-items:center';
+    div.innerHTML = `
+      <input type="text" value="${name}" placeholder="Espacio"
+        class="field-input" style="flex:1;min-width:0"
+        onfocus="this.style.borderColor='#073247'" onblur="this.style.borderColor='#E3E3E3'" />
+      <input type="number" value="${m2}" placeholder="m²" step="0.01"
+        class="field-input" style="width:5.5rem;flex-shrink:0"
+        onfocus="this.style.borderColor='#073247'" onblur="this.style.borderColor='#E3E3E3'" />
+      <button type="button" class="remove-space-btn"
+        style="color:#C23E3E;background:none;border:none;cursor:pointer;font-size:1.2rem;line-height:1;padding:0 .25rem;flex-shrink:0">×</button>
+    `;
+    return div;
+  }
+
+  // Event delegation for spaces
+  document.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement;
+    if (target.classList.contains('remove-space-btn')) {
+      target.closest('.space-row')?.remove();
+    }
+    if (target.classList.contains('add-space-btn')) {
+      const card = target.closest('[data-unit-type-id]');
+      const list = card?.querySelector('.spaces-list');
+      if (list) list.appendChild(createSpaceRow());
+    }
+  });
+
+  function collectUnitTypes() {
+    return Array.from(document.querySelectorAll<HTMLElement>('.ut-card[data-unit-type-id]')).map(card => {
+      const get = (field: string) =>
+        (card.querySelector(`[data-field="${field}"]`) as HTMLInputElement | HTMLTextAreaElement)?.value ?? '';
+
+      const spaces = Array.from(card.querySelectorAll('.space-row')).map(row => {
+        const inputs = row.querySelectorAll<HTMLInputElement>('input');
+        return { name: inputs[0]?.value.trim() ?? '', m2: parseFloat(inputs[1]?.value ?? '0') || 0 };
+      }).filter(s => s.name);
+
+      const features = get('features').split(',').map(f => f.trim()).filter(Boolean);
+      const gallery = get('gallery').split('\n').map(g => g.trim()).filter(Boolean);
+
+      return {
+        id: parseInt(card.dataset.unitTypeId!),
+        name: get('name'),
+        price_usd: parseFloat(get('price_usd')) || 0,
+        interior_m2: parseFloat(get('interior_m2')) || 0,
+        terraza_m2: get('terraza_m2') ? parseFloat(get('terraza_m2')) : null,
+        total_m2: parseFloat(get('total_m2')) || 0,
+        tour_url: get('tour_url'),
+        optional_package_label: get('optional_package_label') || null,
+        optional_package_price: get('optional_package_price') ? parseFloat(get('optional_package_price')) : null,
+        spaces,
+        features,
+        gallery,
+      };
+    });
+  }
+
+  function collectUnits() {
+    return Array.from(document.querySelectorAll<HTMLElement>('.unit-row[data-unit-id]')).map(row => ({
+      unit_id: row.dataset.unitId!,
+      status: (row.querySelector('[data-field="status"]') as HTMLSelectElement).value,
+      unit_type_id: parseInt((row.querySelector('[data-field="unit_type_id"]') as HTMLSelectElement).value),
+    }));
+  }
+
+  async function verifyKey(key: string): Promise<boolean> {
+    try {
+      const res = await fetch('/api/admin/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key }),
+      });
+      return res.ok && (await res.json()).ok === true;
+    } catch { return false; }
+  }
+
+  function showPanel() {
+    (document.getElementById('auth-overlay') as HTMLElement).style.display = 'none';
+    (document.getElementById('admin-panel') as HTMLElement).style.display = 'block';
+    initStatusColors();
+  }
+
+  // Check stored key on load
+  const storedKey = sessionStorage.getItem(STORAGE_KEY);
+  if (storedKey) {
+    verifyKey(storedKey).then(ok => {
+      if (ok) showPanel();
+      else sessionStorage.removeItem(STORAGE_KEY);
+    });
+  }
+
+  // Auth submit
+  const authInput = document.getElementById('api-key-input') as HTMLInputElement;
+  const authBtn = document.getElementById('auth-submit') as HTMLButtonElement;
+  const authError = document.getElementById('auth-error') as HTMLElement;
+
+  authInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') authBtn.click(); });
+
+  authBtn.addEventListener('click', async () => {
+    const key = authInput.value.trim();
+    if (!key) return;
+
+    authBtn.disabled = true;
+    authBtn.textContent = 'Verificando...';
+    authError.style.display = 'none';
+
+    const ok = await verifyKey(key);
+    if (ok) {
+      sessionStorage.setItem(STORAGE_KEY, key);
+      showPanel();
+    } else {
+      authError.style.display = 'block';
+      authBtn.disabled = false;
+      authBtn.textContent = 'Ingresar';
+    }
+  });
+
+  // Logout
+  document.getElementById('logout-btn')?.addEventListener('click', () => {
+    sessionStorage.removeItem(STORAGE_KEY);
+    location.reload();
+  });
+
+  // Download PDF
+  const downloadBtn = document.getElementById('download-btn') as HTMLButtonElement;
+  downloadBtn?.addEventListener('click', async () => {
+    const originalHTML = downloadBtn.innerHTML;
+    downloadBtn.disabled = true;
+    downloadBtn.textContent = 'Generando PDF…';
+
+    try {
+      const res = await fetch('/api/pdf', { method: 'POST' });
+      if (!res.ok) throw new Error('Error del servidor');
+
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'listado-precios-costamare.pdf';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch {
+      alert('Error generando el PDF. Inténtalo de nuevo.');
+    } finally {
+      downloadBtn.disabled = false;
+      downloadBtn.innerHTML = originalHTML;
+    }
+  });
+
+  // Save
+  const saveBtn = document.getElementById('save-btn') as HTMLButtonElement;
+  const saveStatus = document.getElementById('save-status') as HTMLElement;
+
+  saveBtn.addEventListener('click', async () => {
+    const key = sessionStorage.getItem(STORAGE_KEY);
+    if (!key) return;
+
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Guardando...';
+    saveStatus.textContent = '';
+    saveStatus.style.color = '#6b7280';
+
+    try {
+      const unitTypes = collectUnitTypes();
+      const units = collectUnits();
+
+      const [utRes, uRes] = await Promise.all([
+        fetch('/api/admin/save-unit-types', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ key, unitTypes }),
+        }),
+        fetch('/api/admin/save-units', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ key, units }),
+        }),
+      ]);
+
+      const [utData, uData] = await Promise.all([utRes.json(), uRes.json()]);
+
+      if (utData.ok && uData.ok) {
+        saveStatus.textContent = '✓ Cambios guardados correctamente';
+        saveStatus.style.color = '#166534';
+      } else {
+        saveStatus.textContent = '✗ Error al guardar. Inténtalo de nuevo.';
+        saveStatus.style.color = '#991b1b';
+      }
+    } catch {
+      saveStatus.textContent = '✗ Error de conexión';
+      saveStatus.style.color = '#991b1b';
+    } finally {
+      saveBtn.disabled = false;
+      saveBtn.textContent = 'Guardar cambios';
+      setTimeout(() => { saveStatus.textContent = ''; }, 5000);
+    }
+  });
+</script>

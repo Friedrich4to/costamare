@@ -1,0 +1,191 @@
+---
+const slides = [
+  { src: '/assets/aerea.avif',  alt: 'Vista aérea' },
+  { src: '/assets/pool_2.avif', alt: 'Piscina' },
+  { src: '/assets/terraza.avif',alt: 'Terraza' },
+  { src: '/assets/sala.avif',   alt: 'Sala' },
+  { src: '/assets/sala_2.avif', alt: 'Sala 2' },
+  { src: '/assets/gym.avif',    alt: 'Gimnasio' },
+]
+---
+
+<section id="galeria" class="py-16 flex flex-col gap-8">
+  <h2 class="px-[4vw] font-display text-4xl md:text-5xl font-bold">Galería</h2>
+
+  <div class="embla relative">
+    <div class="embla__viewport" data-lightbox-trigger>
+      <div class="embla__container">
+        {slides.map(({ src, alt }) => (
+          <div class="embla__slide">
+            <img
+              src={src}
+              data-full={src}
+              alt={alt}
+              loading="lazy"
+            />
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <button class="embla__btn embla__prev" aria-label="Anterior">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <button class="embla__btn embla__next" aria-label="Siguiente">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </button>
+  </div>
+
+  <div class="embla__dots px-[4vw]" aria-hidden="true"></div>
+</section>
+
+<style>
+  .embla {
+    position: relative;
+    width: 100%;
+  }
+
+  .embla__viewport {
+    overflow: hidden;
+    width: 100%;
+  }
+
+  .embla__container {
+    display: flex;
+    gap: 12px;
+    user-select: none;
+  }
+
+  .embla__slide {
+    flex: 0 0 auto;
+    height: 55vh;
+    overflow: hidden;
+    border-radius: 16px;
+  }
+
+  @media (max-width: 640px) {
+    .embla__slide {
+      height: 50svh;
+    }
+  }
+
+  .embla__slide img {
+    height: 100%;
+    width: auto;
+    max-width: 88vw;
+    object-fit: cover;
+    cursor: pointer;
+    display: block;
+    transition: transform 0.45s ease, opacity 0.2s;
+  }
+
+  .embla__slide img:hover {
+    transform: scale(1.06);
+    opacity: 0.92;
+  }
+
+  .embla__btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    background: rgba(7, 50, 71, 0.85);
+    color: #F4F4F4;
+    border: none;
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s, opacity 0.2s;
+    backdrop-filter: blur(4px);
+  }
+
+  .embla__btn:hover {
+    background: rgba(7, 50, 71, 1);
+  }
+
+  .embla__btn:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+
+  .embla__prev { left: 12px; }
+  .embla__next { right: 12px; }
+
+  .embla__dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .embla__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(7, 50, 71, 0.25);
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+  }
+
+  .embla__dot.is-selected {
+    background: #073247;
+    transform: scale(1.3);
+  }
+</style>
+
+<script>
+  import EmblaCarousel from 'embla-carousel'
+
+  const viewport = document.querySelector<HTMLElement>('.embla__viewport')!
+  const dotsContainer = document.querySelector<HTMLElement>('.embla__dots')!
+  const prevBtn = document.querySelector<HTMLButtonElement>('.embla__prev')!
+  const nextBtn = document.querySelector<HTMLButtonElement>('.embla__next')!
+  const emblaEl = document.querySelector<HTMLElement>('.embla')!
+
+  const embla = EmblaCarousel(viewport, { loop: true, align: 'start', padding: { left: '4vw', right: '4vw' } })
+
+  // Build dots
+  const slideCount = embla.scrollSnapList().length
+  const dots: HTMLButtonElement[] = Array.from({ length: slideCount }, (_, i) => {
+    const dot = document.createElement('button')
+    dot.className = 'embla__dot'
+    dot.setAttribute('aria-label', `Ir a imagen ${i + 1}`)
+    dot.addEventListener('click', () => embla.scrollTo(i))
+    dotsContainer.appendChild(dot)
+    return dot
+  })
+
+  function updateDots() {
+    const selected = embla.selectedScrollSnap()
+    dots.forEach((dot, i) => dot.classList.toggle('is-selected', i === selected))
+  }
+
+  embla.on('select', updateDots)
+  updateDots()
+
+  prevBtn.addEventListener('click', () => embla.scrollPrev())
+  nextBtn.addEventListener('click', () => embla.scrollNext())
+
+  // Auto-scroll — pauses on hover
+  const AUTO_DELAY = 3500
+  let timer: ReturnType<typeof setInterval> | null = null
+
+  function startAuto() {
+    if (timer) return
+    timer = setInterval(() => embla.scrollNext(), AUTO_DELAY)
+  }
+
+  function stopAuto() {
+    if (timer) { clearInterval(timer); timer = null }
+  }
+
+  emblaEl.addEventListener('mouseenter', stopAuto)
+  emblaEl.addEventListener('mouseleave', startAuto)
+
+  startAuto()
+</script>

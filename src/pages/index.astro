@@ -1,0 +1,174 @@
+---
+export const prerender = false;
+import Layout from '../layouts/Layout.astro';
+import Amenidades from '../components/Amenidades.astro';
+import Galeria from '../components/Galeria.astro';
+import Lightbox from '../components/Lightbox.astro';
+import Unidades from '../components/Unidades.astro';
+import Disponibilidad_Section from '../components/Disponibilidad_Section.astro';
+import MapaBavaro from '../components/MapaBavaro.astro';
+import Pagos from '../components/Pagos.astro';
+import '@photo-sphere-viewer/core/index.css';
+import { env } from 'cloudflare:workers';
+
+interface UTRow {
+  id: number;
+  type_key: string;
+  name: string;
+  price_usd: number;
+  interior_m2: number;
+  terraza_m2: number | null;
+  total_m2: number;
+  spaces: string;
+  features: string;
+  tour_url: string;
+  optional_package_label: string | null;
+  optional_package_price: number | null;
+  gallery: string;
+}
+
+interface URow {
+  id: number;
+  unit_id: string;
+  label: string;
+  status: string;
+  floor: number;
+  unit_type_id: number;
+}
+
+type ParsedUT = Omit<UTRow, 'spaces' | 'features' | 'gallery'> & {
+  spaces: { name: string; m2: number }[];
+  features: string[];
+  gallery: string[];
+};
+
+let unitTypes: ParsedUT[] = [];
+let units: URow[] = [];
+
+try {
+  const db = env.DB;
+  if (db) {
+    const [utRes, uRes] = await Promise.all([
+      db.prepare('SELECT * FROM unit_types ORDER BY id').all<UTRow>(),
+      db.prepare('SELECT * FROM units ORDER BY unit_id').all<URow>(),
+    ]);
+    unitTypes = (utRes.results ?? []).map(ut => ({
+      ...ut,
+      spaces: JSON.parse(ut.spaces || '[]'),
+      features: JSON.parse(ut.features || '[]'),
+      gallery: JSON.parse(ut.gallery || '[]'),
+    }));
+    units = uRes.results ?? [];
+  }
+} catch (e) {
+  console.error('index DB error:', e);
+}
+---
+
+<Layout title="Inicio">
+  <main>
+    <section class="relative h-svh flex flex-col items-center">
+      <img
+        src="/assets/pool_nobg.avif"
+        alt=""
+        class="sm:hidden absolute bottom-0 w-full h-[70svh] object-cover object-bottom pointer-events-none"
+      />
+      <img
+        src="/assets/front.avif"
+        alt=""
+        class="hidden sm:block absolute bottom-0 w-full h-[90svh] object-cover object-center pointer-events-none"
+      />
+      <div class="relative z-10 flex flex-col items-center gap-6 p-8 mt-[10svh]">
+
+        <img src="/logo_horizontal.svg" alt="Costamare" style="width: 720px; h-auto" />
+
+        <div class="flex flex-col sm:flex-row gap-4">
+          <a
+            href="/dossier.pdf"
+            download="dossier-costamare.pdf"
+            class="px-6 py-3 text-[18px] rounded-full bg-gray-100 border border-base/20 hover:bg-base hover:text-white transition-colors duration-500 cursor-pointer no-underline"
+          >
+            Descargar Dossier
+          </a>
+        </div>
+
+      </div>
+    </section>
+    <section id="descripcion" class="px-[4vw] py-16 flex items-center justify-center">
+      <div class="w-full max-w-7xl flex flex-col md:flex-row gap-12 items-center">
+
+        <div class="w-full md:w-1/2">
+          <img src="/assets/pool_2.avif" alt="Costamare" class="md:hidden w-full h-full object-cover rounded-2xl" />
+          <img src="/assets/pool_1.avif" alt="Costamare" class="hidden md:block w-full h-full object-cover rounded-2xl" />
+        </div>
+
+        <div class="w-full md:w-1/2 flex flex-col gap-8">
+          <img src="/logo_horizontal.svg" alt="Costamare" class="h-10 w-auto" />
+
+          <div class="flex flex-col gap-4 text-base leading-relaxed">
+            <p>Es un desarrollo de baja densidad ubicado en Costa Cana, Bávaro, diseñado para combinar arquitectura contemporánea con alta rentabilidad.</p>
+            <p class="hidden md:block">Su posicionamiento estratégico en Punta Cana lo convierte en una opción sólida para inversores que buscan ingresos pasivos a través del mercado de alquileres a corto-largo plazo, con potencial de valorización garantizado por su diseño, calidad y ubicación.</p>
+          </div>
+
+          <ul class="flex flex-col divide-y divide-base/20">
+            <li class="py-4 text-lg"><span class="font-display font-bold">12</span> Apartamentos</li>
+            <li class="py-4 text-lg">Residencial <span class="font-display font-bold">Costa Cana</span></li>
+            <li class="py-4 text-lg">Entrega en Diciembre <span class="font-display font-bold">2027</span></li>
+            <li class="py-4 text-lg">Apartamentos de <span class="font-display font-bold">55m² y 60m²</span></li>
+          </ul>
+        </div>
+
+      </div>
+    </section>
+    <Amenidades />
+    <Galeria />
+    <Lightbox />
+    <section id="maqueta" class="relative w-full h-[70svh] flex items-center justify-center overflow-hidden">
+      <div id="maqueta-psv" class="absolute inset-0 w-full h-full" style="pointer-events:none;"></div>
+      <div class="absolute inset-0 bg-base/50"></div>
+      <a
+        href="/tour/exterior"
+        class="relative z-10 px-8 py-4 text-[18px] rounded-full bg-white text-base hover:bg-base hover:text-white transition-colors duration-300"
+      >
+        Explorar <strong class="font-display font-bold">Tour virtual</strong>
+      </a>
+    </section>
+    <Unidades unitTypes={unitTypes} />
+    <div class="w-[80vw] mx-auto h-0.5 bg-base/20"></div>
+    <Disponibilidad_Section units={units} unitTypes={unitTypes} />
+    <MapaBavaro />
+    <Pagos />
+  </main>
+</Layout>
+
+<script>
+  import { Viewer } from '@photo-sphere-viewer/core';
+
+  const container = document.getElementById('maqueta-psv') as HTMLElement;
+
+  const viewer = new Viewer({
+    container,
+    panorama: '/tour/ext/piscina.avif',
+    navbar: false,
+    defaultZoomLvl: 0,
+    moveSpeed: 0,
+    zoomSpeed: 0,
+    mousewheel: false,
+    mousemove: false,
+    touchmoveTwoFingers: false,
+    keyboard: false,
+  });
+
+  viewer.addEventListener('ready', () => {
+    let yaw = 0;
+    const SPEED = 0.0004;
+
+    function autoRotate() {
+      yaw += SPEED;
+      viewer.rotate({ yaw, pitch: 0 });
+      requestAnimationFrame(autoRotate);
+    }
+
+    requestAnimationFrame(autoRotate);
+  }, { once: true });
+</script>

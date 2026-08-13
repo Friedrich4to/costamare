@@ -1,0 +1,141 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import TourNav from '../../components/TourNav.astro';
+import '@photo-sphere-viewer/core/index.css';
+import '@photo-sphere-viewer/virtual-tour-plugin/index.css';
+import '@photo-sphere-viewer/map-plugin/index.css';
+---
+
+<Layout title="Tour 2do Piso" bare={true}>
+  <TourNav />
+  <div class="viewer-wrap">
+    <div id="psv-container"></div>
+  </div>
+</Layout>
+
+<style>
+  .viewer-wrap {
+    position: relative;
+    width: 100vw;
+    height: 100svh;
+    overflow: hidden;
+  }
+
+  #psv-container {
+    width: 100%;
+    height: 100%;
+  }
+
+</style>
+
+<script>
+  import { Viewer } from '@photo-sphere-viewer/core';
+  import { VirtualTourPlugin } from '@photo-sphere-viewer/virtual-tour-plugin';
+  import { MapPlugin } from '@photo-sphere-viewer/map-plugin';
+  
+
+  const nodes = [
+    {
+      id: 'sala',
+      panorama: '/tour/apt_1/sala_1erpiso.avif',
+      name: 'Sala',
+      map: { x: 380, y: 580 },
+      links: [{ nodeId: 'cocina', position: { yaw: '356deg', pitch: '-15deg' } }],
+    },
+    {
+      id: 'cocina',
+      panorama: '/tour/apt_1/cocina_1erpiso.avif',
+      name: 'Cocina',
+      map: { x: 380, y: 300 },
+      links: [
+        { nodeId: 'sala',        position: { yaw: '176deg', pitch: '-15deg' } },
+        { nodeId: 'entrada_hab', position: { yaw: '270deg', pitch: '-15deg' } },
+        { nodeId: 'lavado', position: { yaw: '310deg', pitch: '-15deg' } },
+      ],
+    },
+    {
+      id: 'entrada_hab',
+      panorama: '/tour/apt_2/entrada-hab.avif',
+      name: 'Entrada Hab.',
+      map: { x: 220, y: 300 },
+      links: [
+        { nodeId: 'cocina', position: { yaw: '70deg',  pitch: '-25deg' } },
+        { nodeId: 'hab',    position: { yaw: '220deg', pitch: '-25deg' } },
+        { nodeId: 'lavado', position: { yaw: '0deg', pitch: '-25deg' } },
+      ],
+    },
+    {
+      id: 'hab',
+      panorama: '/tour/apt_2/hab.avif',
+      name: 'Habitación',
+      map: { x: 140, y: 470 },
+      links: [
+        { nodeId: 'entrada_hab',    position: { yaw: '30deg', pitch: '-25deg' } },
+        { nodeId: 'walking_closet', position: { yaw: '4deg',  pitch: '-25deg' } },
+      ],
+    },
+    {
+      id: 'walking_closet',
+      panorama: '/tour/apt_2/walking.avif',
+      name: 'Walking Closet',
+      map: { x: 130, y: 220 },
+      links: [
+        { nodeId: 'hab',  position: { yaw: '184deg', pitch: '-15deg' } },
+        { nodeId: 'bath', position: { yaw: '0deg',   pitch: '-15deg' } },
+      ],
+    },
+    {
+      id: 'bath',
+      panorama: '/tour/apt_2/bath.avif',
+      name: 'Baño de visitas',
+      map: { x: 130, y: 80 },
+      links: [{ nodeId: 'walking_closet', position: { yaw: '180deg', pitch: '-45deg' } }],
+    },
+    {
+      id: 'lavado',
+      panorama: '/tour/apt_2/lavado.avif',
+      name: 'Area de lavado',
+      map: { x: 230, y: 160 },
+      links: [
+        { nodeId: 'cocina',  position: { yaw: '150deg', pitch: '-20deg' } },
+        { nodeId: 'lavado-bath', position: { yaw: '0deg',   pitch: '-15deg' } },
+        { nodeId: 'entrada_hab', position: { yaw: '180deg',   pitch: '-20deg' } },
+      ],
+    },
+    {
+      id: 'lavado-bath',
+      panorama: '/tour/apt_2/lavado-bath.avif',
+      name: 'Baño',
+      map: { x: 230, y: 80 },
+      links: [
+        { nodeId: 'lavado', position: { yaw: '180deg', pitch: '-45deg' } },
+        { nodeId: 'entrada_hab', position: { yaw: '185deg', pitch: '-15deg' } },
+      ],
+    },
+  ];
+
+  new Viewer({
+    container: document.getElementById('psv-container') as HTMLElement,
+    navbar: false,
+    defaultZoomLvl: 0,
+    plugins: [
+      [MapPlugin, {
+        size: '300px',
+        defaultZoom: 30,
+        minZoom: 10,
+        maxZoom: 100,
+        shape: 'square'
+      }],
+      [VirtualTourPlugin, {
+        positionMode: 'manual',
+        renderMode: '2d',
+        arrowStyle: { size: { width: 40, height: 40 } },
+        nodes,
+        map: {
+          imageUrl: '/assets/units/p1_map.png',
+          center: { x: 240, y: 420 },
+        }
+      }],
+    ],
+  });
+</script>

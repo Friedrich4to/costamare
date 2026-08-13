@@ -1,0 +1,333 @@
+---
+interface ParsedUT {
+  id: number;
+  type_key: string;
+  name: string;
+  price_usd: number;
+  interior_m2: number;
+  total_m2: number;
+  spaces: { name: string; m2: number }[];
+  tour_url: string;
+  gallery: string[];
+}
+
+interface Props {
+  unitTypes: ParsedUT[];
+}
+
+const { unitTypes } = Astro.props;
+
+const typeKeys = unitTypes.map(ut => ut.type_key);
+const tabLabels = Object.fromEntries(unitTypes.map(ut => [ut.type_key, ut.name]));
+const defaultKey = typeKeys[0] ?? '';
+const defaultUT = unitTypes[0];
+
+const unitsJson = JSON.stringify(
+  Object.fromEntries(unitTypes.map(ut => [ut.type_key, {
+    priceUSD:   ut.price_usd,
+    interiorM2: ut.interior_m2,
+    spaces:     ut.spaces,
+    tourUrl:    ut.tour_url,
+    gallery:    ut.gallery,
+  }]))
+);
+---
+
+<section id="unidades" class="px-[4vw] py-16">
+  <script type="application/json" id="u-data" set:html={unitsJson}></script>
+
+  <div class="max-w-7xl mx-auto flex flex-col md:flex-row gap-12">
+
+    <!-- Left column -->
+    <div class="w-full md:w-1/2 flex flex-col justify-start gap-6">
+
+      <!-- Tab selector -->
+      <nav class="flex items-center" aria-label="Tipo de unidad">
+        {typeKeys.map((key, i) => (
+          <>
+            <button
+              data-tab={key}
+              class:list={[
+                'u-tab font-display cursor-pointer pb-1 border-b-2 transition-all duration-200 text-base md:text-lg',
+                key === defaultKey
+                  ? 'font-extrabold border-base'
+                  : 'font-bold border-transparent opacity-40 hover:opacity-70',
+              ]}
+            >
+              {tabLabels[key]}
+            </button>
+            {i < typeKeys.length - 1 && (
+              <span class="mx-3 opacity-30 select-none pointer-events-none">|</span>
+            )}
+          </>
+        ))}
+      </nav>
+
+      <!-- Unit details -->
+      <div class="flex flex-col gap-3">
+        <p id="u-price" class="font-sans font-bold text-2xl md:text-3xl">
+          US$ {(defaultUT?.price_usd ?? 0).toLocaleString('en-US')}
+        </p>
+
+        <p class="text-[rgba(7,50,71,0.65)]">
+          Interior&nbsp;&nbsp;<span id="u-interior" class="font-semibold text-base">{defaultUT?.interior_m2 ?? 0} m²</span>
+        </p>
+
+        <p class="text-[1.4rem] font-bold leading-none">—</p>
+
+        <ul id="u-spaces" class="flex flex-col gap-2">
+          {(defaultUT?.spaces ?? []).map((s: { name: string; m2: number }) => (
+            <li class="flex justify-between items-baseline gap-6 py-[0.6rem] border-b border-base/10 last:border-b-0">
+              <span class="text-[0.95rem] text-[rgba(7,50,71,0.7)]">{s.name}</span>
+              <span class="whitespace-nowrap text-[1.05rem] font-bold ml-0.5">
+                <strong>{s.m2.toFixed(2)}</strong>&nbsp;<strong>m²</strong>
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <!-- Tour button -->
+      <a
+        id="u-tour-btn"
+        href={defaultUT?.tour_url ?? '#'}
+        class="inline-flex items-center gap-[0.4rem] self-start px-[1.6rem] py-3 rounded-full bg-base text-white no-underline leading-none transition-colors duration-200 hover:bg-base/80"
+      >
+        <span class="text-[0.9rem] opacity-80">Explorar</span>
+        <strong class="font-display font-bold text-[1rem]">Recorrido 360°</strong>
+      </a>
+
+      <!-- Building floorplan -->
+      <div class="relative w-full max-w-xs mt-2 bg-white">
+        <img id="fp-1er-piso" src="/assets/unit-p1.svg" alt="" class="absolute inset-0 w-full h-full" aria-hidden="true" />
+        <img id="fp-2do-piso" src="/assets/unit-p2.svg" alt="" class="absolute inset-0 w-full h-full hidden" aria-hidden="true" />
+        <img id="fp-penthouse" src="/assets/unit-ph.svg" alt="" class="absolute inset-0 w-full h-full hidden" aria-hidden="true" />
+        <img src="/assets/unit-build.svg" alt="Plano del edificio" class="relative w-full z-10" />
+      </div>
+    </div>
+
+    <!-- Right column: carousel -->
+    <div class="w-full md:w-1/2 flex flex-col gap-4 order-first md:order-0">
+      <div class="u-embla relative">
+        <div class="u-embla__viewport" data-lightbox-trigger>
+          <div class="u-embla__container" id="u-slides">
+            {(defaultUT?.gallery ?? []).map((src: string, i: number) => (
+              <div class="u-embla__slide">
+                <img src={src} data-full={src} alt={`Vista ${i + 1}`} loading="lazy" />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <button class="u-embla__btn u-embla__prev" aria-label="Anterior">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <button class="u-embla__btn u-embla__next" aria-label="Siguiente">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+
+      <div class="u-embla__dots" aria-hidden="true"></div>
+    </div>
+
+  </div>
+</section>
+
+<style is:global>
+  /* ── Carousel ───────────────────────────────── */
+  .u-embla {
+    position: relative;
+    width: 100%;
+  }
+  .u-embla__viewport {
+    overflow: hidden;
+    width: 100%;
+    height: 50svh;
+    border-radius: 16px;
+  }
+
+  @media (min-width: 768px) {
+    .u-embla__viewport {
+      height: 80svh;
+    }
+  }
+  .u-embla__container {
+    display: flex;
+    user-select: none;
+    height: 100%;
+  }
+  .u-embla__slide {
+    flex: 0 0 100%;
+    min-width: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .u-embla__slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+    cursor: pointer;
+  }
+
+  /* ── Carousel buttons ───────────────────────── */
+  .u-embla__btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    background: rgba(7, 50, 71, 0.82);
+    color: #F4F4F4;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s;
+    backdrop-filter: blur(4px);
+  }
+  .u-embla__btn:hover { background: rgba(7, 50, 71, 1); }
+  .u-embla__btn:disabled { display: none; }
+  .u-embla__prev { left: 10px; }
+  .u-embla__next { right: 10px; }
+
+  /* ── Dots ───────────────────────────────────── */
+  .u-embla__dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    min-height: 8px;
+  }
+  .u-embla__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(7, 50, 71, 0.25);
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+  }
+  .u-embla__dot.is-selected {
+    background: #073247;
+    transform: scale(1.3);
+  }
+</style>
+
+<script>
+  import EmblaCarousel from 'embla-carousel';
+
+  type Space = { name: string; m2: number };
+  type UnitData = {
+    priceUSD: number;
+    interiorM2: number;
+    spaces: Space[];
+    tourUrl: string;
+    gallery: string[];
+  };
+
+  const allUnits: Record<string, UnitData> = JSON.parse(
+    document.getElementById('u-data')!.textContent!
+  );
+
+  const typeKeysList = Object.keys(allUnits);
+  const floorMap: Record<string, string> = Object.fromEntries(
+    typeKeysList.map(k => [k, `fp-${k}`])
+  );
+  const floorImgs = typeKeysList.map(k => document.getElementById(`fp-${k}`)!);
+
+  const viewport   = document.querySelector<HTMLElement>('.u-embla__viewport')!;
+  const slidesEl   = document.getElementById('u-slides')!;
+  const dotsEl     = document.querySelector<HTMLElement>('.u-embla__dots')!;
+  const prevBtn    = document.querySelector<HTMLButtonElement>('.u-embla__prev')!;
+  const nextBtn    = document.querySelector<HTMLButtonElement>('.u-embla__next')!;
+  const priceEl    = document.getElementById('u-price')!;
+  const interiorEl = document.getElementById('u-interior')!;
+  const spacesEl   = document.getElementById('u-spaces')!;
+  const tourBtn    = document.getElementById('u-tour-btn') as HTMLAnchorElement;
+  const tabs       = document.querySelectorAll<HTMLButtonElement>('.u-tab');
+
+  let embla: ReturnType<typeof EmblaCarousel> | null = null;
+
+  function updateButtons() {
+    const single = embla!.scrollSnapList().length <= 1;
+    prevBtn.disabled = single;
+    nextBtn.disabled = single;
+  }
+
+  function buildDots() {
+    dotsEl.innerHTML = '';
+    const count = embla!.scrollSnapList().length;
+    if (count <= 1) return;
+    const dots: HTMLButtonElement[] = Array.from({ length: count }, (_, i) => {
+      const dot = document.createElement('button');
+      dot.className = 'u-embla__dot';
+      dot.setAttribute('aria-label', `Imagen ${i + 1}`);
+      dot.addEventListener('click', () => embla!.scrollTo(i));
+      dotsEl.appendChild(dot);
+      return dot;
+    });
+    function sync() {
+      const sel = embla!.selectedScrollSnap();
+      dots.forEach((d, i) => d.classList.toggle('is-selected', i === sel));
+    }
+    embla!.on('select', sync);
+    sync();
+  }
+
+  function initEmbla() {
+    if (embla) embla.destroy();
+    embla = EmblaCarousel(viewport, { loop: true, align: 'start', containScroll: false });
+    updateButtons();
+    buildDots();
+  }
+
+  prevBtn.addEventListener('click', () => embla?.scrollPrev());
+  nextBtn.addEventListener('click', () => embla?.scrollNext());
+
+  function spaceItem(s: Space) {
+    return `<li class="flex justify-between items-baseline gap-6 py-[0.6rem] border-b border-base/10 last:border-b-0">
+      <span class="text-[0.95rem] text-[rgba(7,50,71,0.7)]">${s.name}</span>
+      <span class="whitespace-nowrap text-[1.05rem] font-bold ml-0.5"><strong>${s.m2.toFixed(2)}</strong>&nbsp;<strong>m²</strong></span>
+    </li>`;
+  }
+
+  function switchTab(type: string) {
+    const unit = allUnits[type];
+    if (!unit) return;
+
+    tabs.forEach(btn => {
+      const active = btn.dataset.tab === type;
+      btn.classList.toggle('font-extrabold', active);
+      btn.classList.toggle('border-base', active);
+      btn.classList.toggle('font-bold', !active);
+      btn.classList.toggle('border-transparent', !active);
+      btn.classList.toggle('opacity-40', !active);
+      btn.classList.toggle('hover:opacity-70', !active);
+    });
+
+    priceEl.textContent = `US$ ${unit.priceUSD.toLocaleString('en-US')}`;
+    interiorEl.textContent = `${unit.interiorM2} m²`;
+    tourBtn.href = unit.tourUrl;
+
+    spacesEl.innerHTML = unit.spaces.map(spaceItem).join('');
+
+    floorImgs.forEach(img => img.classList.add('hidden'));
+    document.getElementById(floorMap[type])?.classList.remove('hidden');
+
+    slidesEl.innerHTML = unit.gallery
+      .map((src, i) => `<div class="u-embla__slide"><img src="${src}" data-full="${src}" alt="Vista ${i + 1}" loading="lazy" /></div>`)
+      .join('');
+
+    initEmbla();
+  }
+
+  tabs.forEach(btn => {
+    btn.addEventListener('click', () => switchTab(btn.dataset.tab!));
+  });
+
+  initEmbla();
+</script>

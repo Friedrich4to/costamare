@@ -1,0 +1,370 @@
+---
+export const prerender = false;
+import { env } from 'cloudflare:workers';
+
+interface UTRow {
+  id: number;
+  price_usd: number;
+  interior_m2: number;
+  terraza_m2: number | null;
+  total_m2: number;
+  optional_package_label: string | null;
+  optional_package_price: number | null;
+}
+
+interface URow {
+  unit_id: string;
+  status: string;
+  floor: number;
+  unit_type_id: number;
+}
+
+let units: URow[] = [];
+let unitTypes: UTRow[] = [];
+
+try {
+  const db = env.DB;
+  const [utRes, uRes] = await Promise.all([
+    db.prepare(
+      'SELECT id, price_usd, interior_m2, terraza_m2, total_m2, optional_package_label, optional_package_price FROM unit_types ORDER BY id'
+    ).all<UTRow>(),
+    db.prepare(
+      'SELECT unit_id, status, floor, unit_type_id FROM units ORDER BY unit_id'
+    ).all<URow>(),
+  ]);
+  unitTypes = utRes.results ?? [];
+  units = uRes.results ?? [];
+} catch (e) {
+  console.error('disponibilidad-print DB error:', e);
+}
+
+const utMap = new Map(unitTypes.map(ut => [ut.id, ut]));
+
+const now = new Date();
+const dateStr = now.toLocaleDateString('es-DO', { day: 'numeric', month: 'long', year: 'numeric' });
+
+const rows = units.map(u => {
+  const ut = utMap.get(u.unit_type_id);
+  return {
+    id: u.unit_id.toUpperCase(),
+    status: u.status,
+    interiorM2: ut?.interior_m2 ?? 0,
+    terrazaM2: ut?.terraza_m2 ?? null,
+    totalM2: ut?.total_m2 ?? 0,
+    priceUSD: ut?.price_usd ?? 0,
+  };
+});
+
+const optionalPackages = unitTypes.filter(
+  (ut, i, arr) =>
+    ut.optional_package_label &&
+    arr.findIndex(x => x.optional_package_label === ut.optional_package_label) === i
+);
+
+const statusLabel: Record<string, string> = {
+  available: 'Disponible',
+  reserved:  'Reservado',
+  sold:      'Vendido',
+};
+const statusColor: Record<string, string> = {
+  available: '#397207',
+  reserved:  '#B8900D',
+  sold:      '#C23E3E',
+};
+---
+
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width" />
+  <title>Listado de precios – Costamare</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    @font-face {
+      font-family: 'BlackMango';
+      src: url('/fonts/BlackMangoVariableGX.woff2') format('woff2');
+      font-weight: 100 900;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --base:   #073247;
+      --green:  #397207;
+      --yellow: #B8900D;
+      --red:    #C23E3E;
+    }
+
+    html, body { height: 1056px; }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      color: var(--base);
+      background: #ffffff;
+      padding: 0;
+      max-width: 860px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Header ───────────────────────────────── */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 8px;
+      margin-bottom: 16px;
+    }
+    .logo { height: 34px; width: auto; }
+
+    /* ── Title block ──────────────────────────── */
+    .title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 10px;
+    }
+    h1 {
+      font-family: 'BlackMango', sans-serif;
+      font-size: 36px;
+      font-weight: 700;
+      line-height: 1.1;
+    }
+    .update-date {
+      font-family: 'Outfit', sans-serif;
+      font-size: 16px;
+      font-weight: 300;
+      white-space: nowrap;
+    }
+    .title-rule {
+      width: 200px;
+      height: 2px;
+      background: var(--base);
+      margin-bottom: 12px;
+    }
+    .meta { font-size: 15px; margin-bottom: 4px; }
+    .meta strong { font-weight: 700; }
+    .includes-label { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+    .includes-detail { font-size: 15px; margin-bottom: 14px; }
+    .section-rule {
+      width: 100%;
+      height: 1px;
+      background: rgba(7,50,71,0.18);
+      margin-bottom: 12px;
+    }
+
+    /* ── Table ────────────────────────────────── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 14px;
+    }
+    thead th {
+      font-family: 'BlackMango', sans-serif;
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--base);
+      padding: 6px 10px;
+      border-bottom: 1px solid rgba(7,50,71,0.18);
+    }
+    thead th.c { text-align: center; }
+    thead th.r { text-align: right; }
+
+    tbody tr { border-bottom: 1px solid rgba(7,50,71,0.07); }
+    tbody td {
+      font-size: 14px;
+      padding: 7px 10px;
+      vertical-align: middle;
+    }
+    tbody td.c { text-align: center; }
+    tbody td.r { text-align: right; }
+    tbody td.dim { color: rgba(7,50,71,0.35); text-align: center; }
+
+    .unit-id {
+      font-family: 'BlackMango', sans-serif;
+      font-weight: 700;
+      font-size: 14px;
+    }
+    .status { font-weight: 600; }
+    .price  { font-weight: 700; }
+
+    /* ── Optional package ─────────────────────── */
+    .optional {
+      font-size: 14px;
+      margin-bottom: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .optional strong { font-weight: 700; }
+
+    /* ── Footer ───────────────────────────────── */
+    .footer {
+      background: var(--base);
+      color: #ffffff;
+      padding: 20px 40px 24px;
+    }
+    .footer-title {
+      font-family: 'BlackMango', sans-serif;
+      font-size: 24px;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+    .footer-title em {
+      font-style: italic;
+      font-weight: 300;
+    }
+    .steps {
+      display: flex;
+      justify-content: center;
+    }
+    .step {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      flex: 1;
+      padding: 0 20px;
+      border-right: 1px solid rgba(255,255,255,0.18);
+    }
+    .step:last-child { border-right: none; }
+    .step-num {
+      font-family: 'BlackMango', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      opacity: 0.45;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+    .step-body { display: flex; flex-direction: column; gap: 3px; }
+    .step-amount {
+      font-family: 'BlackMango', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1.1;
+    }
+    .step-label { font-size: 12px; opacity: 0.65; }
+    .margin {
+      padding: 24px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    /* ── Print ────────────────────────────────── */
+    @media print {
+      @page { margin: 0; size: Letter portrait; }
+      body  { padding: 0; max-width: none; }
+      .footer { margin: 0; }
+      a { text-decoration: none; }
+      .no-print { display: none; }
+      * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="margin">
+    <!-- Header -->
+    <div class="header">
+      <img src="/logo_horizontal.svg" alt="Costamare" class="logo" />
+    </div>
+    <!-- Title -->
+    <div class="title-row">
+      <h1>Listado de precios</h1>
+      <span class="update-date">Actualizado en {dateStr}</span>
+    </div>
+    <div class="title-rule"></div>
+    <p class="meta">*Inicio <strong>Diciembre 2026</strong> – Entrega <strong>Diciembre 2027</strong></p>
+    <p class="includes-label">*Todos los apartamentos incluyen:</p>
+    <p class="includes-detail">1 Habitación &nbsp;—&nbsp; 2 Baños &nbsp;—&nbsp; 1 Parqueo de 12.50mts</p>
+    <div class="section-rule"></div>
+    <!-- Table -->
+    <table>
+      <thead>
+        <tr>
+          <th>Apto.</th>
+          <th class="c">M² Const.</th>
+          <th class="c">M² Terraza</th>
+          <th class="c">Total M²</th>
+          <th class="c">Estatus</th>
+          <th class="r">Precio</th>
+        </tr>
+      </thead>
+      <tbody>
+        {rows.map(row => (
+          <tr>
+            <td><span class="unit-id">{row.id}</span></td>
+            <td class="c">{row.interiorM2}m2</td>
+            {row.terrazaM2
+              ? <td class="c">{row.terrazaM2}m2</td>
+              : <td class="dim">n/a</td>
+            }
+            <td class="c">{row.totalM2}m2</td>
+            <td class="c">
+              <span class="status" style={`color:${statusColor[row.status] ?? 'inherit'}`}>
+                {statusLabel[row.status] ?? row.status}
+              </span>
+            </td>
+            <td class="r">
+              {!['reserved', 'sold'].includes(row.status) && (
+                <span class="price">US$ {row.priceUSD.toLocaleString('en-US')}</span>
+              )}
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+    <!-- Optional packages -->
+    {optionalPackages.map(pkg => (
+      <div class="optional">
+        <p><strong>*Paquete opcional para Penthouse</strong></p>
+        <p>US$ {pkg.optional_package_price?.toLocaleString('en-US')} &nbsp;—&nbsp; {pkg.optional_package_label}</p>
+      </div>
+    ))}
+  </div>
+
+  <!-- Payment plan footer -->
+  <div class="footer">
+    <p class="footer-title"><em>Plan flexible</em> diseñado para inversionistas</p>
+    <div class="steps">
+      <div class="step">
+        <span class="step-num">1</span>
+        <div class="step-body">
+          <span class="step-amount">US$ 1,000</span>
+          <span class="step-label">Reservación</span>
+        </div>
+      </div>
+      <div class="step">
+        <span class="step-num">2</span>
+        <div class="step-body">
+          <span class="step-amount">10%</span>
+          <span class="step-label">Separación a la firma del contrato.</span>
+        </div>
+      </div>
+      <div class="step">
+        <span class="step-num">3</span>
+        <div class="step-body">
+          <span class="step-amount">25%</span>
+          <span class="step-label">Durante la construcción.</span>
+        </div>
+      </div>
+      <div class="step">
+        <span class="step-num">4</span>
+        <div class="step-body">
+          <span class="step-amount">65%</span>
+          <span class="step-label">Contra entrega.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

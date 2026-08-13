@@ -1,0 +1,415 @@
+---
+export const prerender = false;
+import Layout from '../layouts/Layout.astro';
+import { env } from 'cloudflare:workers';
+
+interface URow {
+  id: number;
+  unit_id: string;
+  label: string;
+  status: string;
+  floor: number;
+  unit_type_id: number;
+}
+
+let units: URow[] = [];
+let dbError = false;
+
+try {
+  const db = env.DB;
+  if (db) {
+    const res = await db.prepare('SELECT * FROM units ORDER BY unit_id').all<URow>();
+    units = res.results ?? [];
+  } else {
+    dbError = true;
+  }
+} catch (e) {
+  dbError = true;
+  console.error('disponibilidad_admin DB error:', e);
+}
+
+const FLOOR_LABEL: Record<number, string> = { 1: '1er Piso', 2: '2do Piso', 3: 'Penthouse' };
+---
+
+<Layout title="Disponibilidad" bare={true}>
+
+  <!-- ── Auth overlay ─────────────────────────────────────── -->
+  <div id="auth-overlay" class="fixed inset-0 z-50 flex items-center justify-center" style="background:rgba(7,50,71,0.97);backdrop-filter:blur(4px)">
+    <div style="background:#fff;border-radius:1.25rem;padding:2.5rem;width:100%;max-width:22rem;margin:1rem;box-shadow:0 25px 60px rgba(0,0,0,0.4)">
+      <p class="admin-logo">Costamare</p>
+      <h1 style="font-size:1.25rem;font-weight:600;color:#073247;margin:0 0 0.25rem">Disponibilidad</h1>
+      <p style="font-size:0.8rem;color:#9ca3af;margin:0 0 1.75rem">Introduce tu API Key para continuar</p>
+      <input id="api-key-input" type="password" placeholder="API Key" autocomplete="current-password"
+        style="width:100%;border:1.5px solid #E3E3E3;border-radius:0.6rem;padding:0.7rem 0.9rem;font-size:0.875rem;color:#073247;box-sizing:border-box;font-family:inherit;outline:none;transition:border-color .15s"
+        onfocus="this.style.borderColor='#073247'" onblur="this.style.borderColor='#E3E3E3'"
+      />
+      <p id="auth-error" style="display:none;color:#C23E3E;font-size:0.8rem;margin:0.5rem 0 0">Clave incorrecta. Inténtalo de nuevo.</p>
+      <button id="auth-submit" style="width:100%;margin-top:1rem;background:#073247;color:#fff;border:none;border-radius:0.6rem;padding:0.8rem;font-size:0.875rem;font-weight:600;cursor:pointer;font-family:inherit;transition:opacity .15s" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+        Ingresar
+      </button>
+    </div>
+  </div>
+
+  <!-- ── Main panel ─────────────────────────────────────── -->
+  <div id="admin-panel" style="display:none;min-height:100vh;background:#F0F0F0">
+
+    <!-- Sticky header -->
+    <header style="position:sticky;top:0;z-index:40;background:#073247;padding:0 1.5rem;height:3.75rem;display:flex;align-items:center;justify-content:space-between">
+      <div style="display:flex;align-items:center;gap:0.75rem">
+        <span style="font-family:var(--font-display);font-weight:700;color:#fff;font-size:1.1rem;letter-spacing:.04em">Costamare</span>
+        <span style="color:rgba(255,255,255,.45);font-size:0.8rem">Disponibilidad</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:1rem">
+        <a href="/administrar" style="color:rgba(255,255,255,.65);font-size:0.8rem;text-decoration:none;transition:color .15s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,.65)'">Panel completo</a>
+        <button id="logout-btn" style="background:rgba(255,255,255,.12);color:rgba(255,255,255,.8);border:none;border-radius:0.5rem;padding:0.4rem 0.9rem;font-size:0.8rem;cursor:pointer;font-family:inherit;transition:background .15s" onmouseover="this.style.background='rgba(255,255,255,.2)'" onmouseout="this.style.background='rgba(255,255,255,.12)'">
+          Cerrar sesión
+        </button>
+      </div>
+    </header>
+
+    {dbError && (
+      <div style="margin:2rem auto;max-width:40rem;background:#fef2f2;border:1px solid #fca5a5;border-radius:.75rem;padding:1rem 1.25rem;color:#991b1b;font-size:.875rem">
+        Error de conexión con la base de datos.
+      </div>
+    )}
+
+    <div style="max-width:48rem;margin:0 auto;padding:2rem 1.25rem 8rem">
+
+      <h2 class="section-title">Disponibilidad de Unidades</h2>
+      <p style="font-size:.875rem;color:#6b7280;margin:-0.75rem 0 1.5rem">Selecciona el estado de cada unidad y guarda los cambios.</p>
+
+      <!-- Units card -->
+      <div style="background:#fff;border-radius:.875rem;border:1px solid #E3E3E3;overflow:hidden">
+
+        <!-- Desktop header -->
+        <div class="units-header">
+          <span style="width:5.5rem;flex-shrink:0">ID</span>
+          <span style="flex:1">Nombre</span>
+          <span style="width:7rem;flex-shrink:0;text-align:center">Piso</span>
+          <span style="width:12rem;flex-shrink:0">Disponibilidad</span>
+        </div>
+
+        <!-- Unit rows -->
+        {units.map((unit, i) => (
+          <div
+            class="unit-row"
+            data-unit-id={unit.unit_id}
+            data-unit-type-id={unit.unit_type_id}
+            style={i < units.length - 1 ? 'border-bottom:1px solid #F0F0F0' : ''}
+          >
+            <!-- Mobile header: ID + floor -->
+            <div class="unit-row-mobile-header">
+              <span style="font-family:monospace;font-weight:700;font-size:.95rem;color:#073247">{unit.unit_id}</span>
+              <span class="floor-tag">{FLOOR_LABEL[unit.floor] ?? `Piso ${unit.floor}`}</span>
+            </div>
+
+            <!-- Desktop: ID -->
+            <div class="unit-id-desktop">
+              <span style="font-family:monospace;font-weight:700;font-size:.95rem;color:#073247">{unit.unit_id}</span>
+            </div>
+
+            <!-- Desktop: Name -->
+            <div class="unit-name-desktop" style="flex:1;font-size:.875rem;color:#6b7280;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{unit.label}</div>
+
+            <!-- Desktop: Floor -->
+            <div class="unit-floor-desktop" style="width:7rem;flex-shrink:0;text-align:center">
+              <span class="floor-tag">{FLOOR_LABEL[unit.floor] ?? `Piso ${unit.floor}`}</span>
+            </div>
+
+            <!-- Status dropdown -->
+            <div class="status-col">
+              <label class="mobile-label">Disponibilidad</label>
+              <select data-field="status" class="status-select field-select">
+                <option value="available" selected={unit.status === 'available'}>Disponible</option>
+                <option value="reserved" selected={unit.status === 'reserved'}>Reservado</option>
+                <option value="sold" selected={unit.status === 'sold'}>Vendido</option>
+              </select>
+            </div>
+          </div>
+        ))}
+
+      </div>
+    </div><!-- /content -->
+
+    <!-- Sticky save bar -->
+    <div style="position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #E3E3E3;padding:.875rem 1.5rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;z-index:30">
+      <span id="save-status" style="font-size:.875rem;color:#6b7280"></span>
+      <div style="display:flex;align-items:center;gap:.75rem">
+        <button id="download-btn" style="display:inline-flex;align-items:center;gap:.45rem;background:#F0F0F0;color:#073247;border:1.5px solid rgba(7,50,71,.2);border-radius:.625rem;padding:.7rem 1.25rem;font-size:.875rem;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;transition:background .15s,color .15s" onmouseover="this.style.background='#073247';this.style.color='#fff'" onmouseout="this.style.background='#F0F0F0';this.style.color='#073247'">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Descargar listado
+        </button>
+        <button id="save-btn" style="background:#073247;color:#fff;border:none;border-radius:.625rem;padding:.7rem 2rem;font-size:.875rem;font-weight:600;cursor:pointer;font-family:inherit;transition:opacity .15s;white-space:nowrap" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+          Guardar cambios
+        </button>
+      </div>
+    </div>
+
+  </div><!-- /admin-panel -->
+</Layout>
+
+<style>
+  .admin-logo {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.5rem;
+    color: #073247;
+    letter-spacing: .06em;
+    margin: 0 0 .75rem;
+  }
+  .section-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #073247;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    margin: 0 0 .5rem;
+  }
+  .field-select {
+    width: 100%;
+    border: 1.5px solid #E3E3E3;
+    border-radius: .5rem;
+    padding: .5rem .75rem;
+    font-size: .875rem;
+    color: #073247;
+    background: #fff;
+    box-sizing: border-box;
+    font-family: inherit;
+    outline: none;
+    cursor: pointer;
+    transition: border-color .15s, background-color .15s, color .15s;
+  }
+  .field-select:focus { border-color: #073247; }
+
+  /* Units table */
+  .units-header {
+    display: none;
+    padding: .6rem 1.25rem;
+    background: #f9fafb;
+    border-bottom: 1px solid #E3E3E3;
+    font-size: .7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: #9ca3af;
+  }
+  @media (min-width: 640px) {
+    .units-header { display: flex; align-items: center; gap: 1rem; }
+  }
+
+  .unit-row {
+    padding: 1rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: .75rem;
+    margin: .5rem;
+    border-radius: .625rem;
+    border: 1px solid #E3E3E3;
+    background: #fff;
+  }
+  @media (min-width: 640px) {
+    .unit-row {
+      flex-direction: row;
+      align-items: center;
+      gap: 1rem;
+      margin: 0;
+      border-radius: 0;
+      border: none;
+    }
+  }
+
+  .unit-row-mobile-header { display: flex; justify-content: space-between; align-items: center; }
+  .unit-id-desktop { display: none; width: 5.5rem; flex-shrink: 0; }
+  .unit-name-desktop { display: none; }
+  .unit-floor-desktop { display: none; }
+  @media (min-width: 640px) {
+    .unit-row-mobile-header { display: none; }
+    .unit-id-desktop { display: block; }
+    .unit-name-desktop { display: block; }
+    .unit-floor-desktop { display: flex; justify-content: center; }
+  }
+
+  .status-col {
+    display: flex;
+    flex-direction: column;
+  }
+  @media (min-width: 640px) {
+    .status-col { width: 12rem; flex-shrink: 0; }
+  }
+
+  .floor-tag {
+    font-size: .72rem;
+    background: #f3f4f6;
+    color: #6b7280;
+    padding: .2rem .6rem;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .mobile-label {
+    display: block;
+    font-size: .72rem;
+    color: #9ca3af;
+    margin-bottom: .25rem;
+  }
+  @media (min-width: 640px) {
+    .mobile-label { display: none; }
+  }
+</style>
+
+<script>
+  const STORAGE_KEY = 'costamare_admin_key';
+
+  const STATUS_COLORS: Record<string, { bg: string; color: string; border: string }> = {
+    available: { bg: '#f0fdf4', color: '#166534', border: '#86efac' },
+    reserved:  { bg: '#fffbeb', color: '#92400e', border: '#fde68a' },
+    sold:      { bg: '#fef2f2', color: '#991b1b', border: '#fca5a5' },
+  };
+
+  function colorizeStatus(sel: HTMLSelectElement) {
+    const c = STATUS_COLORS[sel.value];
+    if (c) {
+      sel.style.backgroundColor = c.bg;
+      sel.style.color = c.color;
+      sel.style.borderColor = c.border;
+    }
+  }
+
+  function initStatusColors() {
+    document.querySelectorAll<HTMLSelectElement>('.status-select').forEach(sel => {
+      colorizeStatus(sel);
+      sel.addEventListener('change', () => colorizeStatus(sel));
+    });
+  }
+
+  function collectUnits() {
+    return Array.from(document.querySelectorAll<HTMLElement>('.unit-row[data-unit-id]')).map(row => ({
+      unit_id: row.dataset.unitId!,
+      status: (row.querySelector('[data-field="status"]') as HTMLSelectElement).value,
+      unit_type_id: parseInt(row.dataset.unitTypeId!),
+    }));
+  }
+
+  async function verifyKey(key: string): Promise<boolean> {
+    try {
+      const res = await fetch('/api/admin/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key }),
+      });
+      return res.ok && (await res.json()).ok === true;
+    } catch { return false; }
+  }
+
+  function showPanel() {
+    (document.getElementById('auth-overlay') as HTMLElement).style.display = 'none';
+    (document.getElementById('admin-panel') as HTMLElement).style.display = 'block';
+    initStatusColors();
+  }
+
+  // Check stored key on load
+  const storedKey = sessionStorage.getItem(STORAGE_KEY);
+  if (storedKey) {
+    verifyKey(storedKey).then(ok => {
+      if (ok) showPanel();
+      else sessionStorage.removeItem(STORAGE_KEY);
+    });
+  }
+
+  // Auth submit
+  const authInput = document.getElementById('api-key-input') as HTMLInputElement;
+  const authBtn = document.getElementById('auth-submit') as HTMLButtonElement;
+  const authError = document.getElementById('auth-error') as HTMLElement;
+
+  authInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') authBtn.click(); });
+
+  authBtn.addEventListener('click', async () => {
+    const key = authInput.value.trim();
+    if (!key) return;
+
+    authBtn.disabled = true;
+    authBtn.textContent = 'Verificando...';
+    authError.style.display = 'none';
+
+    const ok = await verifyKey(key);
+    if (ok) {
+      sessionStorage.setItem(STORAGE_KEY, key);
+      showPanel();
+    } else {
+      authError.style.display = 'block';
+      authBtn.disabled = false;
+      authBtn.textContent = 'Ingresar';
+    }
+  });
+
+  // Logout
+  document.getElementById('logout-btn')?.addEventListener('click', () => {
+    sessionStorage.removeItem(STORAGE_KEY);
+    location.reload();
+  });
+
+  // Download PDF
+  const downloadBtn = document.getElementById('download-btn') as HTMLButtonElement;
+  downloadBtn?.addEventListener('click', async () => {
+    const originalHTML = downloadBtn.innerHTML;
+    downloadBtn.disabled = true;
+    downloadBtn.textContent = 'Generando PDF…';
+
+    try {
+      const res = await fetch('/api/pdf', { method: 'POST' });
+      if (!res.ok) throw new Error('Error del servidor');
+
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'listado-precios-costamare.pdf';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch {
+      alert('Error generando el PDF. Inténtalo de nuevo.');
+    } finally {
+      downloadBtn.disabled = false;
+      downloadBtn.innerHTML = originalHTML;
+    }
+  });
+
+  // Save
+  const saveBtn = document.getElementById('save-btn') as HTMLButtonElement;
+  const saveStatus = document.getElementById('save-status') as HTMLElement;
+
+  saveBtn.addEventListener('click', async () => {
+    const key = sessionStorage.getItem(STORAGE_KEY);
+    if (!key) return;
+
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Guardando...';
+    saveStatus.textContent = '';
+
+    try {
+      const units = collectUnits();
+      const res = await fetch('/api/admin/save-units', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key, units }),
+      });
+      const data = await res.json();
+
+      if (data.ok) {
+        saveStatus.textContent = '✓ Cambios guardados correctamente';
+        saveStatus.style.color = '#166534';
+      } else {
+        saveStatus.textContent = '✗ Error al guardar. Inténtalo de nuevo.';
+        saveStatus.style.color = '#991b1b';
+      }
+    } catch {
+      saveStatus.textContent = '✗ Error de conexión';
+      saveStatus.style.color = '#991b1b';
+    } finally {
+      saveBtn.disabled = false;
+      saveBtn.textContent = 'Guardar cambios';
+      setTimeout(() => { saveStatus.textContent = ''; }, 5000);
+    }
+  });
+</script>

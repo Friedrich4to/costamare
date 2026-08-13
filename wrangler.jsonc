@@ -1,0 +1,31 @@
+{
+	"compatibility_date": "2026-03-24",
+  "compatibility_flags": ["nodejs_compat_v2"],
+	"name": "costamare",
+	"account_id": "670e6731f4a6cd43490e12eb4357e19e",
+	"main": "@astrojs/cloudflare/entrypoints/server",
+	"assets": {
+		"directory": "./dist",
+		"binding": "ASSETS"
+	},
+	"observability": {
+		"enabled": true
+	},
+	"kv_namespaces": [
+    {
+      "binding": "SESSION",
+      "id": "b3a0ceb00a54431297f4b582b433a23a"
+    }
+  ],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "costamare-db",
+      "database_id": "8a804132-1f37-441b-b6d0-068d4d5e0734"
+    }
+  ],
+  "browser": {
+    "binding": "BROWSER",
+    "remote": true
+  }
+}

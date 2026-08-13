@@ -1,0 +1,44 @@
+{
+  "name": "costamare-web",
+  "type": "module",
+  "version": "0.0.1",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "dev:cf": "wrangler dev --remote",
+    "dev:cf:build": "astro build && wrangler dev --remote",
+    "generate-types": "wrangler types"
+  },
+  "dependencies": {
+    "@astrojs/cloudflare": "^13.3.1",
+    "@astrojs/react": "^5.0.4",
+    "@photo-sphere-viewer/core": "^5.14.1",
+    "@photo-sphere-viewer/map-plugin": "^5.14.1",
+    "@photo-sphere-viewer/plan-plugin": "^5.14.1",
+    "@photo-sphere-viewer/virtual-tour-plugin": "^5.14.1",
+    "@sparkjsdev/spark": "^2.0.0",
+    "@tailwindcss/vite": "^4.2.4",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "astro": "^6.1.8",
+    "embla-carousel": "^8.6.0",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5",
+    "react-is": "^19.2.5",
+    "styled-components": "^6.4.1",
+    "tailwindcss": "^4.2.4",
+    "three": "^0.180.0",
+    "wrangler": "^4.88.0"
+  },
+  "overrides": {
+    "vite": "^7"
+  },
+  "devDependencies": {
+    "@types/leaflet": "^1.9.21"
+  }
+}

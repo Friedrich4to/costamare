@@ -1,0 +1,183 @@
+---
+---
+
+<section id="map" class="w-full px-[4vw] py-16">
+  <div class="max-w-7xl mx-auto flex flex-col lg:flex-row lg:h-[80svh] gap-8">
+
+    <!-- Map -->
+    <div class="w-full h-[50svh] md:h-[60svh] lg:flex-1 lg:h-auto relative overflow-hidden rounded-2xl">
+      <div id="mapbox-container" class="w-full h-full"></div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="w-full lg:w-80 flex flex-col h-full justify-center gap-5 lg:overflow-hidden">
+
+      <h2 class="text-3xl font-bold text-base">Lugares de interés</h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-1 gap-2 content-start lg:overflow-y-auto lg:flex-1">
+
+        <button id="btn-bravo" class="poi-btn h-fit p-4 flex items-center text-left rounded-xl border border-base/15 overflow-hidden transition-all duration-300">
+          <div class="flex-1">
+            <p class="text-sm font-semibold leading-snug">Supermercado Bravo</p>
+            <p id="time-bravo" class="time text-sm text-base/70 mt-0.5">3 minutos</p>
+          </div>
+        </button>
+
+        <button id="btn-downtown" class="poi-btn h-fit p-4 flex items-center text-left rounded-xl border border-base/15 overflow-hidden transition-all duration-300">
+          <div class="flex-1">
+            <p class="text-sm font-semibold leading-snug">Downtown Center</p>
+            <p id="time-downtown" class="time text-sm text-base/70 mt-0.5">3 minutos</p>
+          </div>
+        </button>
+
+        <button id="btn-cocobongo" class="poi-btn h-fit p-4 flex items-center text-left rounded-xl border border-base/15 overflow-hidden transition-all duration-300">
+          <div class="flex-1">
+            <p class="text-sm font-semibold leading-snug">Cocobongo</p>
+            <p id="time-cocobongo" class="time text-sm text-base/70 mt-0.5">6 minutos</p>
+          </div>
+        </button>
+
+        <button id="btn-hospital" class="poi-btn h-fit p-4 flex items-center text-left rounded-xl border border-base/15 overflow-hidden transition-all duration-300">
+          <div class="flex-1">
+            <p class="text-sm font-semibold leading-snug">Hospital IMG</p>
+            <p id="time-hospital" class="time text-sm text-base/70 mt-0.5">8 minutos</p>
+          </div>
+        </button>
+
+        <button id="btn-toro" class="poi-btn h-fit p-4 flex items-center text-left rounded-xl border border-base/15 overflow-hidden transition-all duration-300">
+          <div class="flex-1">
+            <p class="text-sm font-semibold leading-snug">Playa Cabeza de Toro</p>
+            <p id="time-toro" class="time text-sm text-base/70 mt-0.5">11 minutos</p>
+          </div>
+        </button>
+
+        <button id="btn-aeropuerto" class="poi-btn h-fit p-4 flex items-center text-left rounded-xl border border-base/15 overflow-hidden transition-all duration-300">
+          <div class="flex-1">
+            <p class="text-sm font-semibold leading-snug">Aeropuerto Punta Cana</p>
+            <p id="time-aeropuerto" class="time text-sm text-base/70 mt-0.5">13 minutos</p>
+          </div>
+        </button>
+
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<style>
+  .poi-btn {
+    cursor: pointer;
+    background: transparent;
+  }
+  .poi-btn:hover {
+    border-color: rgba(7, 50, 71, 0.35);
+    background-color: rgba(7, 50, 71, 0.04);
+  }
+  .poi-btn.is-active {
+    background-color: var(--color-base);
+    border-color: var(--color-base);
+    color: white;
+  }
+  .poi-btn.is-active .time {
+    color: rgba(255, 255, 255, 0.55);
+  }
+</style>
+
+<link href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css" rel="stylesheet" />
+<script is:inline src="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js"></script>
+<script is:inline>
+  const TOKEN = 'MAPBOX_TOKEN_REMOVED';
+  mapboxgl.accessToken = TOKEN;
+
+  const PROJECT = [-68.403255, 18.628856];
+
+  const pois = [
+    { id: 'bravo',      coords: [-68.397886, 18.635195], label: 'Supermercado Bravo',         icon: 'bravo' },
+    { id: 'downtown',   coords: [-68.39807,  18.63893],  label: 'Downtown Center',             icon: 'downtown' },
+    { id: 'cocobongo',  coords: [-68.395008, 18.635136], label: 'Cocobongo',                   icon: 'cocobongo' },
+    { id: 'hospital',   coords: [-68.429847, 18.662997], label: 'Hospital IMG',                icon: 'hopsital_img' },
+    { id: 'toro',       coords: [-68.35505,  18.64877],  label: 'Playa Cabeza de Toro',        icon: 'toro' },
+    { id: 'aeropuerto', coords: [-68.36698,  18.56466],  label: 'Aeropuerto Punta Cana',       icon: 'airport' },
+  ];
+
+  function makeImageMarker(filename, width) {
+    const el = document.createElement('div');
+    el.style.cssText = 'cursor:pointer;';
+    el.innerHTML = `<img src="/assets/maps_icons/${filename}.png" style="width:${width}px;height:auto;display:block;" alt="">`;
+    return el;
+  }
+
+  const map = new mapboxgl.Map({
+    container: 'mapbox-container',
+    style: 'mapbox://styles/mapbox/streets-v12',
+    center: PROJECT,
+    zoom: 13,
+  });
+
+  // Project marker (not a POI, no route)
+  new mapboxgl.Marker({ element: makeImageMarker('hriv', 200) })
+    .setLngLat(PROJECT)
+    .addTo(map);
+
+  // POI markers — store element refs for click wiring
+  pois.forEach((poi) => {
+    poi.markerEl = makeImageMarker(poi.icon, 40);
+    new mapboxgl.Marker({ element: poi.markerEl })
+      .setLngLat(poi.coords)
+      .addTo(map);
+  });
+
+  const routeCache = {};
+
+  async function fetchRoute(poi) {
+    const [lng1, lat1] = PROJECT;
+    const [lng2, lat2] = poi.coords;
+    const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${lng1},${lat1};${lng2},${lat2}?geometries=geojson&access_token=${TOKEN}`;
+    const res = await fetch(url);
+    const data = await res.json();
+    return data.routes[0];
+  }
+
+  map.on('load', () => {
+    map.addSource('route', {
+      type: 'geojson',
+      data: { type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: [] } },
+    });
+    map.addLayer({
+      id: 'route',
+      type: 'line',
+      source: 'route',
+      layout: { 'line-join': 'round', 'line-cap': 'round' },
+      paint: { 'line-color': '#073247', 'line-width': 4, 'line-opacity': 0.85 },
+    });
+  });
+
+  function showRoute(poi) {
+    const route = routeCache[poi.id];
+    if (!route) return;
+
+    map.getSource('route').setData({ type: 'Feature', properties: {}, geometry: route.geometry });
+
+    const bounds = route.geometry.coordinates.reduce(
+      (b, c) => b.extend(c),
+      new mapboxgl.LngLatBounds(route.geometry.coordinates[0], route.geometry.coordinates[0])
+    );
+    map.fitBounds(bounds, { padding: 80 });
+  }
+
+  let activeBtn = null;
+
+  async function activate(poi) {
+    if (activeBtn) activeBtn.classList.remove('is-active');
+    const btn = document.getElementById(`btn-${poi.id}`);
+    btn.classList.add('is-active');
+    activeBtn = btn;
+    if (!routeCache[poi.id]) routeCache[poi.id] = await fetchRoute(poi);
+    showRoute(poi);
+  }
+
+  pois.forEach((poi) => {
+    document.getElementById(`btn-${poi.id}`).addEventListener('click', () => activate(poi));
+    poi.markerEl.addEventListener('click', () => activate(poi));
+  });
+</script>

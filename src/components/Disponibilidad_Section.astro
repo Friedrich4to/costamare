@@ -1,0 +1,300 @@
+---
+interface UTRow {
+  id: number;
+  price_usd: number;
+  interior_m2: number;
+  total_m2: number;
+  spaces: { name: string; m2: number }[];
+  tour_url: string;
+}
+
+interface URow {
+  id: number;
+  unit_id: string;
+  label: string;
+  status: string;
+  floor: number;
+  unit_type_id: number;
+}
+
+interface Props {
+  units: URow[];
+  unitTypes: UTRow[];
+  hideHeader?: boolean;
+}
+
+const { units: rawUnits, unitTypes, hideHeader = false } = Astro.props;
+
+const utMap = new Map(unitTypes.map(ut => [ut.id, ut]));
+
+const units = rawUnits.map(u => {
+  const ut = utMap.get(u.unit_type_id);
+  return {
+    id:         u.unit_id.toLowerCase(),
+    label:      u.label,
+    status:     u.status,
+    floor:      u.floor,
+    priceUSD:   ut?.price_usd   ?? 0,
+    interiorM2: ut?.interior_m2 ?? 0,
+    totalM2:    ut?.total_m2    ?? 0,
+    spaces:     ut?.spaces      ?? [],
+    tourUrl:    ut?.tour_url    ?? '#',
+  };
+});
+
+type Unit = typeof units[0];
+
+const statusDot: Record<string, string> = {
+  available: 'bg-green-500',
+  reserved:  'bg-yellow-500',
+  sold:      'bg-red-500',
+};
+const statusText: Record<string, string> = {
+  available: 'text-green-700',
+  reserved:  'text-yellow-700',
+  sold:      'text-red-700',
+};
+const statusBg: Record<string, string> = {
+  available: 'bg-green-50',
+  reserved:  'bg-yellow-50',
+  sold:      'bg-red-50',
+};
+const statusLabel: Record<string, string> = {
+  available: 'Disponible',
+  reserved:  'Reservado',
+  sold:      'Vendido',
+};
+const floorLabel: Record<number, string> = {
+  1: 'Piso 1',
+  2: 'Piso 2',
+  3: 'Penthouse',
+};
+
+function getBeds(unit: Unit) {
+  return Math.max(1, unit.spaces.filter(s => s.name.toLowerCase().includes('dormitorio')).length);
+}
+function getBaths(unit: Unit) {
+  return Math.max(1, unit.spaces.filter(s =>
+    s.name.toLowerCase().includes('baño') || s.name.toLowerCase().includes('visitas')
+  ).length);
+}
+
+const sg = 'opacity-0 hover:opacity-50 transition-opacity duration-200 cursor-pointer';
+---
+
+<section id="disponibilidad" class:list={["px-[4vw]", hideHeader ? "pt-4 pb-16" : "py-16"]}>
+  <div class="max-w-7xl mx-auto">
+
+    {!hideHeader && (
+      <div class="mb-8">
+        <h2 class="font-display font-bold text-3xl mb-4">Disponibilidad</h2>
+        <button
+          id="d-pdf-btn"
+          class="flex items-center gap-2 px-5 py-2.5 text-sm rounded-full bg-gray-100 border border-base/20 hover:bg-base hover:text-white transition-colors duration-500 cursor-pointer"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          Descargar lista PDF
+        </button>
+      </div>
+    )}
+
+    <div class="flex flex-col-reverse lg:flex-row gap-8 items-start">
+
+      <!-- Left on desktop / bottom on tablet+mobile: unit cards list -->
+      <div class="w-full lg:w-[35%] grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-3">
+        {units.map(unit => {
+          const beds  = getBeds(unit);
+          const baths = getBaths(unit);
+          return (
+            <div
+              class="d-unit-card border border-base/20 rounded-xl overflow-hidden cursor-pointer select-none"
+              data-unit={unit.id}
+            >
+              <!-- Collapsed header -->
+              <div class="flex items-center justify-between px-4 py-3 gap-3">
+                <div class="flex items-center gap-2.5 min-w-0">
+                  <span class="font-display font-bold text-lg shrink-0">{unit.id}</span>
+                  <span class:list={['flex items-center gap-1.5 text-sm shrink-0 px-2 py-0.5 rounded-full', statusText[unit.status], statusBg[unit.status]]}>
+                    <span class:list={['w-2 h-2 rounded-full shrink-0', statusDot[unit.status]]}></span>
+                    {statusLabel[unit.status]}
+                  </span>
+                </div>
+                <div class="flex items-center gap-3 shrink-0">
+                  <span class="text-sm text-[rgba(7,50,71,0.5)]">{unit.totalM2} m²</span>
+                  {!['reserved', 'sold'].includes(unit.status) && (
+                    <span class="font-bold text-sm">US$ {unit.priceUSD.toLocaleString('en-US')}</span>
+                  )}
+                  <svg
+                    class="d-chevron shrink-0 transition-transform duration-200"
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="14" height="14" viewBox="0 0 24 24"
+                    fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round"
+                  >
+                    <polyline points="6 9 12 15 18 9"/>
+                  </svg>
+                </div>
+              </div>
+
+              <!-- Expanded detail -->
+              <div class="d-unit-detail hidden px-4 pb-4">
+                <div class="flex flex-col gap-3 pt-3 border-t border-base/10">
+
+                  <!-- Info row -->
+                  <div class="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-[rgba(7,50,71,0.75)]">
+                    <span class="font-semibold">{floorLabel[unit.floor]}</span>
+                    <span class="flex items-center gap-1.5">
+                      <img src="/assets/icons/size.svg" alt="" class="h-4 w-auto" aria-hidden="true" />
+                      <span class="opacity-40">{unit.interiorM2} m²</span>
+                      <span class="opacity-30 select-none mx-0.5">|</span>
+                      {unit.totalM2} m²
+                    </span>
+                    <span class="flex items-center gap-1.5">
+                      <img src="/assets/icons/room.svg" alt="" class="h-4 w-auto" aria-hidden="true" />
+                      {beds}
+                    </span>
+                    <span class="flex items-center gap-1.5">
+                      <img src="/assets/icons/bath.svg" alt="" class="h-4 w-auto" aria-hidden="true" />
+                      {baths}
+                    </span>
+                    <span class="flex items-center gap-1.5">
+                      <img src="/assets/icons/parking.svg" alt="" class="h-4 w-auto" aria-hidden="true" />
+                      1
+                    </span>
+                  </div>
+
+                  <!-- Buttons -->
+                  <a
+                    href={unit.tourUrl}
+                    class="block text-center px-4 py-3 rounded-lg bg-base text-white font-bold text-sm leading-none hover:bg-base/80 transition-colors duration-200 no-underline"
+                  >
+                    Explorar Tour virtual
+                  </a>
+                  <a
+                    href={`/assets/units_info/${unit.id.toUpperCase()}.pdf`}
+                    download
+                    class="block text-center px-4 py-3 rounded-lg border border-base/25 text-[rgba(7,50,71,0.7)] text-sm font-medium hover:bg-base/5 transition-colors duration-200 no-underline"
+                  >
+                    Descargar ficha técnica
+                  </a>
+
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <!-- Right on desktop / top on tablet+mobile: building elevation -->
+      <div class="w-full lg:flex-1 lg:min-w-0 lg:sticky lg:top-[10svh] pt-0 lg:pt-24">
+        <div class="relative">
+        <svg
+          class="absolute inset-0 w-full h-full"
+          viewBox="0 0 1920 879"
+          xmlns="http://www.w3.org/2000/svg"
+          aria-hidden="true"
+        >
+          <!-- Floor 1 -->
+          <g data-unit="s101" class={`d-unit-shape ${sg}`}><rect x="1426" y="612" width="374" height="171" fill="#073247"/></g>
+          <g data-unit="s102" class={`d-unit-shape ${sg}`}><rect x="960"  y="612" width="369" height="171" fill="#073247"/></g>
+          <g data-unit="s103" class={`d-unit-shape ${sg}`}><rect x="591"  y="612" width="369" height="171" fill="#073247"/></g>
+          <g data-unit="s104" class={`d-unit-shape ${sg}`}><rect x="120"  y="612" width="371" height="171" fill="#073247"/></g>
+          <!-- Floor 2 -->
+          <g data-unit="s201" class={`d-unit-shape ${sg}`}><rect x="1426" y="447" width="374" height="165" fill="#073247"/></g>
+          <g data-unit="s202" class={`d-unit-shape ${sg}`}><rect x="960"  y="447" width="369" height="165" fill="#073247"/></g>
+          <g data-unit="s203" class={`d-unit-shape ${sg}`}><rect x="591"  y="447" width="369" height="165" fill="#073247"/></g>
+          <g data-unit="s204" class={`d-unit-shape ${sg}`}><rect x="120"  y="447" width="371" height="165" fill="#073247"/></g>
+          <!-- Penthouse -->
+          <g data-unit="s301" class={`d-unit-shape ${sg}`}>
+            <path d="M1429 111H1800V447H1429V111Z" fill="#073247"/>
+            <path d="M1539 97H1798V111H1539V97Z"   fill="#073247"/>
+          </g>
+          <g data-unit="s302" class={`d-unit-shape ${sg}`}>
+            <path d="M960 111H1329V447H960V111Z"  fill="#073247"/>
+            <path d="M960 97H1215V111H960V97Z"    fill="#073247"/>
+          </g>
+          <g data-unit="s303" class={`d-unit-shape ${sg}`}>
+            <path d="M591 111H960V447H591V111Z"  fill="#073247"/>
+            <path d="M704 97H960V111H704V97Z"    fill="#073247"/>
+          </g>
+          <g data-unit="s304" class={`d-unit-shape ${sg}`}>
+            <path d="M120 111H499V447H120V111Z"  fill="#073247"/>
+            <path d="M120 97H381V111H120V97Z"    fill="#073247"/>
+          </g>
+        </svg>
+
+        <img
+          src="/assets/unidades/units-base-building.svg"
+          alt="Plano del edificio"
+          class="relative w-full pointer-events-none"
+        />
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<script>
+  function getShape(unitId: string) {
+    return document.querySelector<SVGGElement>(`.d-unit-shape[data-unit="${unitId}"]`);
+  }
+
+  function openUnit(unitId: string) {
+    document.querySelectorAll<HTMLElement>('.d-unit-card').forEach(card => {
+      const detail  = card.querySelector<HTMLElement>('.d-unit-detail');
+      const chevron = card.querySelector<SVGElement>('.d-chevron');
+      const shape   = getShape(card.dataset.unit!);
+      if (card.dataset.unit === unitId) {
+        const opening = detail!.classList.contains('hidden');
+        detail!.classList.toggle('hidden', !opening);
+        chevron!.style.transform  = opening ? 'rotate(180deg)' : '';
+        if (shape) shape.style.opacity = opening ? '0.5' : '';
+        if (opening) card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      } else {
+        detail!.classList.add('hidden');
+        chevron!.style.transform = '';
+        if (shape) shape.style.opacity = '';
+      }
+    });
+  }
+
+  document.querySelectorAll<HTMLElement>('.d-unit-card').forEach(card => {
+    card.addEventListener('click', () => openUnit(card.dataset.unit!));
+  });
+
+  document.querySelectorAll<SVGGElement>('.d-unit-shape').forEach(shape => {
+    shape.addEventListener('click', () => openUnit(shape.dataset.unit!));
+  });
+
+  const pdfBtn = document.getElementById('d-pdf-btn') as HTMLButtonElement | null;
+  pdfBtn?.addEventListener('click', async () => {
+    const originalHTML = pdfBtn.innerHTML;
+    pdfBtn.disabled = true;
+    pdfBtn.textContent = 'Generando PDF…';
+
+    try {
+      const res = await fetch('/api/pdf', { method: 'POST' });
+      if (!res.ok) throw new Error();
+
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'listado-precios-costamare.pdf';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch {
+      alert('Error generando el PDF. Inténtalo de nuevo.');
+    } finally {
+      pdfBtn.disabled = false;
+      pdfBtn.innerHTML = originalHTML;
+    }
+  });
+</script>
