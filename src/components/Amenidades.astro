@@ -1,17 +1,17 @@
 ---
 const amenidades = [
-  { label: 'Gimnasio equipado',       img: '/assets/gym.avif'     },
-  { label: 'Área social con Piscina', img: '/assets/pool_1.avif'  },
-  { label: 'Terraza amueblada',       img: '/assets/terraza.avif' },
-  { label: 'Área de Barbecue',        img: '/assets/pool_2.avif'  },
-  { label: 'Jardines preciosos',      img: '/assets/aerea.avif'   },
-  { label: 'Parqueos privados',       img: '/assets/front.avif'   },
+  { label: 'Gimnasio equipado',       img: '/assets/placeholder.avif' },
+  { label: 'Área social con Piscina', img: '/assets/placeholder.avif' },
+  { label: 'Terraza amueblada',       img: '/assets/placeholder.avif' },
+  { label: 'Área de Barbecue',        img: '/assets/placeholder.avif' },
+  { label: 'Jardines preciosos',      img: '/assets/placeholder.avif' },
+  { label: 'Parqueos privados',       img: '/assets/placeholder.avif' },
 ];
 ---
 
 <section id="amenidades" class="px-[4vw] py-20">
   <div class="w-full max-w-7xl mx-auto">
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
       {amenidades.map(({ label, img }, i) => {
         const imgLeft = i % 2 === 0;
         return (

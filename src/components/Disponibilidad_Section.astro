@@ -24,6 +24,8 @@ const units = rawUnits.map(u => ({
   numero:         u.numero,
   disponibilidad: u.disponibilidad,
   m2:             u.m2,
+  patio_m2:       u.patio_m2,
+  terraza_m2:     u.terraza_m2,
   m2_total:       u.m2_total,
   tourUrl:        u.tour_url ?? '#',
   precio:         u.precio,
@@ -114,27 +116,61 @@ const sg = 'opacity-0 hover:opacity-50 transition-opacity duration-200 cursor-po
             <div class="d-unit-detail hidden px-4 pb-4">
               <div class="flex flex-col gap-3 pt-3 border-t border-base/10">
 
-                <!-- Info row -->
-                <div class="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-base/75">
-                  <span class="flex items-center gap-1.5">
-                    <img src="/assets/icons/size.svg" alt="" class="h-4 w-auto" aria-hidden="true" />
-                    <span class="opacity-40">{unit.m2} m²</span>
-                    <span class="opacity-30 select-none mx-0.5">|</span>
-                    {unit.m2_total} m²
-                  </span>
+                <!-- Info rows -->
+                <div class="flex flex-col gap-2 text-sm text-base/75">
+
+                  <!-- Areas -->
+                  <div class="flex flex-wrap items-center gap-x-4 gap-y-1.5">
+                    <span class="flex items-center gap-1.5">
+                      <img src="/assets/icons/size.svg" alt="" class="h-4 w-auto" aria-hidden="true" />
+                      <span class="opacity-50">{unit.m2} m² interior</span>
+                    </span>
+                    {unit.patio_m2 && (
+                      <span class="flex items-center gap-1 opacity-50">
+                        <span class="opacity-60">+</span>
+                        {unit.patio_m2} m² patio
+                      </span>
+                    )}
+                    {unit.terraza_m2 && (
+                      <span class="flex items-center gap-1 opacity-50">
+                        <span class="opacity-60">+</span>
+                        {unit.terraza_m2} m² terraza
+                      </span>
+                    )}
+                    {(unit.patio_m2 || unit.terraza_m2) && (
+                      <span class="font-medium text-base/90">= {unit.m2_total} m² total</span>
+                    )}
+                  </div>
+
+                  <!-- Fixed features -->
+                  <div class="flex items-center gap-x-4 gap-y-1.5 flex-wrap">
+                    <span class="flex items-center gap-1.5">
+                      <img src="/assets/icons/room.svg" alt="" class="h-4 w-auto" aria-hidden="true" />
+                      2 habitaciones
+                    </span>
+                    <span class="flex items-center gap-1.5">
+                      <img src="/assets/icons/bath.svg" alt="" class="h-4 w-auto" aria-hidden="true" />
+                      2 baños
+                    </span>
+                    <span class="flex items-center gap-1.5">
+                      <img src="/assets/icons/parqueo.svg" alt="" class="h-4 w-auto" aria-hidden="true" />
+                      1 parqueo
+                    </span>
+                  </div>
+
                 </div>
 
                 <!-- Buttons -->
                 <a
                   href={unit.tourUrl}
-                  class="block text-center px-4 py-3 rounded-lg bg-base text-white font-bold text-sm leading-none hover:bg-base/80 transition-colors duration-200 no-underline"
+                  class="block text-center px-4 py-3 rounded-lg bg-base text-white font-bold text-sm leading-none hover:bg-base/80 transition-colors duration-200 no-underline pointer-events-none opacity-40"
                 >
                   Explorar Tour 360°
                 </a>
                 <a
                   href={`/assets/units_info/${unit.id.toUpperCase()}.pdf`}
                   download
-                  class="block text-center px-4 py-3 rounded-lg border border-base/25 text-base/70 text-sm font-medium hover:bg-base/5 transition-colors duration-200 no-underline"
+                  class="block text-center px-4 py-3 rounded-lg border border-base/25 text-base/70 text-sm font-medium hover:bg-base/5 transition-colors duration-200 no-underline pointer-events-none opacity-40"
                 >
                   Descargar ficha técnica
                 </a>

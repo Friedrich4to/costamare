@@ -1,6 +1,15 @@
 @import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&display=swap');
 @import "tailwindcss";
 
+@font-face {
+  font-family: 'BlackMango';
+  src: url('/fonts/BlackMangoVariableGX.woff2') format('woff2'),
+       url('/fonts/BlackMangoVariableGX.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
 @theme {
   --color-base: #1D1D1D;
   --color-white: #F4F4F4;
@@ -11,6 +20,7 @@
   --color-gray-200: #E3E3E3;
   --font-sans: 'Bricolage Grotesque', sans-serif;
   --font-display: 'Bricolage Grotesque', sans-serif;
+  --font-black-mango: 'BlackMango', sans-serif;
 }
 
 @layer base {

@@ -44,14 +44,14 @@ try {
       <div class="flex flex-col sm:flex-row gap-3 mb-10">
         <a
           href="/tour/exterior"
-          class="px-7 py-3 rounded-full bg-base text-white font-medium hover:bg-base/80 transition-colors duration-300 no-underline text-center"
+          class="px-7 py-3 rounded-full bg-base text-white font-medium hover:bg-base/80 transition-colors duration-300 no-underline text-center pointer-events-none opacity-40"
         >
           Tour 360°
         </a>
         <a
           href="/dossier.pdf"
           download="dossier-costamare.pdf"
-          class="px-7 py-3 text-base rounded-full border border-base font-medium hover:bg-base hover:text-white transition-colors duration-300 no-underline text-center"
+          class="px-7 py-3 text-base rounded-full border border-base font-medium hover:bg-base hover:text-white transition-colors duration-300 no-underline text-center pointer-events-none opacity-40"
         >
           Descargar Dossier
         </a>
@@ -59,7 +59,7 @@ try {
 
       <div class="w-full flex-1 min-h-0">
         <img
-          src="/2.png"
+          src="assets/hero.png"
           alt="Costamare"
           class="w-full h-full object-cover object-center block"
         />
@@ -69,16 +69,16 @@ try {
     <section id="descripcion" class="px-[4vw] py-20">
       <div class="w-full max-w-7xl mx-auto flex flex-col gap-10">
 
-        <p class="leading-tight text-[2.75rem]">
+        <p class="leading-tight text-[2rem] lg:text-[2.75rem]">
           <strong>Costamare</strong> es un desarrollo de baja densidad diseñado para
           combinar arquitectura contemporánea con alta rentabilidad.
         </p>
 
-        <div class="flex flex-col md:flex-row gap-16 items-start">
-          <div id="info-watermark-container" class="w-full md:w-1/2 flex items-center justify-center">
+        <div class="flex flex-col lg:flex-row gap-16">
+          <div id="info-watermark-container" class="w-full lg:w-1/2 flex items-center justify-center self-center">
             <span
               id="info-watermark"
-              class="font-display font-bold uppercase leading-none select-none pointer-events-none whitespace-nowrap"
+              class="font-black-mango font-bold uppercase leading-none select-none pointer-events-none whitespace-nowrap"
               style="color: rgba(29,29,29,0.06);"
               aria-hidden="true"
             >
@@ -86,10 +86,10 @@ try {
             </span>
           </div>
 
-          <ul class="w-full md:w-1/2 flex flex-col gap-4">
-            <li style="font-size: 2.5rem;"><strong class="font-bold">12</strong> Apartamentos</li>
-            <li style="font-size: 2.5rem;">Entrega en <strong class="font-bold">Diciembre 2027</strong></li>
-            <li style="font-size: 2.5rem;">Residencial <strong class="font-bold">Costa Cana</strong></li>
+          <ul class="w-full lg:w-1/2 flex flex-col gap-4">
+            <li class="text-[2rem] lg:text-[2.5rem]"><strong class="font-bold">12</strong> Apartamentos</li>
+            <li class="text-[2rem] lg:text-[2.5rem]">Entrega en <strong class="font-bold">Diciembre 2027</strong></li>
+            <li class="text-[2rem] lg:text-[2.5rem]">Residencial <strong class="font-bold">Costa Cana</strong></li>
           </ul>
         </div>
 
