@@ -4,43 +4,26 @@ import Layout from '../layouts/Layout.astro';
 import Disponibilidad_Section from '../components/Disponibilidad_Section.astro';
 import { env } from 'cloudflare:workers';
 
-interface UTRow {
-  id: number;
-  price_usd: number;
-  interior_m2: number;
-  total_m2: number;
-  spaces: string;
-  tour_url: string;
-}
-
 interface URow {
   id: number;
-  unit_id: string;
-  label: string;
-  status: string;
-  floor: number;
-  unit_type_id: number;
+  numero: string;
+  m2: number;
+  patio_m2: number | null;
+  terraza_m2: number | null;
+  m2_total: number;
+  disponibilidad: string;
+  tour_url: string | null;
+  gallery: string;
+  precio: number;
 }
 
-type ParsedUT = Omit<UTRow, 'spaces'> & {
-  spaces: { name: string; m2: number }[];
-};
-
-let unitTypes: ParsedUT[] = [];
 let units: URow[] = [];
 
 try {
   const db = env.DB;
   if (db) {
-    const [utRes, uRes] = await Promise.all([
-      db.prepare('SELECT id, price_usd, interior_m2, total_m2, spaces, tour_url FROM unit_types ORDER BY id').all<UTRow>(),
-      db.prepare('SELECT * FROM units ORDER BY unit_id').all<URow>(),
-    ]);
-    unitTypes = (utRes.results ?? []).map((ut: UTRow) => ({
-      ...ut,
-      spaces: JSON.parse(ut.spaces || '[]'),
-    }));
-    units = uRes.results ?? [];
+    const res = await db.prepare('SELECT * FROM units ORDER BY numero').all<URow>();
+    units = res.results ?? [];
   }
 } catch (e) {
   console.error('disponibilidad page DB error:', e);
@@ -51,7 +34,7 @@ try {
   <div class="px-[4vw] pt-10 pb-4">
   <div class="max-w-7xl mx-auto flex flex-col gap-6">
     <!-- Logo -->
-    <img src="/logo_horizontal.svg" alt="Costamare" class="h-10 w-auto self-start" />
+    <img src="/logo.svg" alt="Costamare" class="h-10 w-auto self-start" />
 
     <!-- Ir al sitio web -->
     <a
@@ -82,7 +65,7 @@ try {
     </button>
   </div>
   </div>
-  <Disponibilidad_Section units={units} unitTypes={unitTypes} hideHeader={true} />
+  <Disponibilidad_Section units={units} hideHeader={true} />
 </Layout>
 
 <script>

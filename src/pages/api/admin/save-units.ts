@@ -4,12 +4,18 @@ import { env } from 'cloudflare:workers';
 export const prerender = false;
 
 interface UnitPayload {
-  unit_id: string;
-  status: string;
-  unit_type_id: number;
+  numero: string;
+  m2: number;
+  patio_m2: number | null;
+  terraza_m2: number | null;
+  m2_total: number;
+  disponibilidad: string;
+  tour_url: string | null;
+  gallery: string[];
+  precio: number;
 }
 
-const VALID_STATUSES = new Set(['available', 'reserved', 'sold']);
+const VALID_DISPONIBILIDAD = new Set(['available', 'reserved', 'sold']);
 
 export const POST: APIRoute = async ({ request }) => {
   let body: { key?: string; units?: UnitPayload[] };
@@ -29,18 +35,28 @@ export const POST: APIRoute = async ({ request }) => {
   }
 
   for (const u of body.units) {
-    if (!VALID_STATUSES.has(u.status)) {
-      return json({ ok: false, error: `Invalid status: ${u.status}` }, 400);
+    if (!VALID_DISPONIBILIDAD.has(u.disponibilidad)) {
+      return json({ ok: false, error: `Invalid disponibilidad: ${u.disponibilidad}` }, 400);
     }
   }
 
   try {
     const stmt = db.prepare(
-      'UPDATE units SET status = ?, unit_type_id = ? WHERE unit_id = ?'
+      'UPDATE units SET m2=?, patio_m2=?, terraza_m2=?, m2_total=?, disponibilidad=?, tour_url=?, gallery=?, precio=? WHERE numero=?'
     );
 
     await db.batch(
-      body.units.map(u => stmt.bind(u.status, u.unit_type_id, u.unit_id))
+      body.units.map(u => stmt.bind(
+        u.m2,
+        u.patio_m2 ?? null,
+        u.terraza_m2 ?? null,
+        u.m2_total,
+        u.disponibilidad,
+        u.tour_url ?? null,
+        JSON.stringify(u.gallery ?? []),
+        u.precio,
+        u.numero,
+      ))
     );
 
     return json({ ok: true }, 200);

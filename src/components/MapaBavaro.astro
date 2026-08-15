@@ -70,8 +70,8 @@
     background: transparent;
   }
   .poi-btn:hover {
-    border-color: rgba(7, 50, 71, 0.35);
-    background-color: rgba(7, 50, 71, 0.04);
+    border-color: rgba(29, 29, 29, 0.35);
+    background-color: rgba(29, 29, 29, 0.04);
   }
   .poi-btn.is-active {
     background-color: var(--color-base);
@@ -83,12 +83,9 @@
   }
 </style>
 
-<link href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css" rel="stylesheet" />
-<script is:inline src="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js"></script>
+<link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet" />
+<script is:inline src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
 <script is:inline>
-  const TOKEN = 'MAPBOX_TOKEN_REMOVED';
-  mapboxgl.accessToken = TOKEN;
-
   const PROJECT = [-68.403255, 18.628856];
 
   const pois = [
@@ -107,22 +104,22 @@
     return el;
   }
 
-  const map = new mapboxgl.Map({
+  const map = new maplibregl.Map({
     container: 'mapbox-container',
-    style: 'mapbox://styles/mapbox/streets-v12',
+    style: 'https://tiles.openfreemap.org/styles/liberty',
     center: PROJECT,
     zoom: 13,
   });
 
   // Project marker (not a POI, no route)
-  new mapboxgl.Marker({ element: makeImageMarker('hriv', 200) })
+  new maplibregl.Marker({ element: makeImageMarker('hriv', 200) })
     .setLngLat(PROJECT)
     .addTo(map);
 
   // POI markers — store element refs for click wiring
   pois.forEach((poi) => {
     poi.markerEl = makeImageMarker(poi.icon, 40);
-    new mapboxgl.Marker({ element: poi.markerEl })
+    new maplibregl.Marker({ element: poi.markerEl })
       .setLngLat(poi.coords)
       .addTo(map);
   });
@@ -132,7 +129,7 @@
   async function fetchRoute(poi) {
     const [lng1, lat1] = PROJECT;
     const [lng2, lat2] = poi.coords;
-    const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${lng1},${lat1};${lng2},${lat2}?geometries=geojson&access_token=${TOKEN}`;
+    const url = `https://router.project-osrm.org/route/v1/driving/${lng1},${lat1};${lng2},${lat2}?geometries=geojson&overview=full`;
     const res = await fetch(url);
     const data = await res.json();
     return data.routes[0];
@@ -148,7 +145,7 @@
       type: 'line',
       source: 'route',
       layout: { 'line-join': 'round', 'line-cap': 'round' },
-      paint: { 'line-color': '#073247', 'line-width': 4, 'line-opacity': 0.85 },
+      paint: { 'line-color': '#1D1D1D', 'line-width': 4, 'line-opacity': 0.85 },
     });
   });
 
@@ -160,7 +157,7 @@
 
     const bounds = route.geometry.coordinates.reduce(
       (b, c) => b.extend(c),
-      new mapboxgl.LngLatBounds(route.geometry.coordinates[0], route.geometry.coordinates[0])
+      new maplibregl.LngLatBounds(route.geometry.coordinates[0], route.geometry.coordinates[0])
     );
     map.fitBounds(bounds, { padding: 80 });
   }

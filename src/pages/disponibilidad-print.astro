@@ -2,64 +2,40 @@
 export const prerender = false;
 import { env } from 'cloudflare:workers';
 
-interface UTRow {
-  id: number;
-  price_usd: number;
-  interior_m2: number;
-  terraza_m2: number | null;
-  total_m2: number;
-  optional_package_label: string | null;
-  optional_package_price: number | null;
-}
-
 interface URow {
-  unit_id: string;
-  status: string;
-  floor: number;
-  unit_type_id: number;
+  numero: string;
+  m2: number;
+  terraza_m2: number | null;
+  patio_m2: number | null;
+  m2_total: number;
+  disponibilidad: string;
+  precio: number;
 }
 
 let units: URow[] = [];
-let unitTypes: UTRow[] = [];
 
 try {
   const db = env.DB;
-  const [utRes, uRes] = await Promise.all([
-    db.prepare(
-      'SELECT id, price_usd, interior_m2, terraza_m2, total_m2, optional_package_label, optional_package_price FROM unit_types ORDER BY id'
-    ).all<UTRow>(),
-    db.prepare(
-      'SELECT unit_id, status, floor, unit_type_id FROM units ORDER BY unit_id'
-    ).all<URow>(),
-  ]);
-  unitTypes = utRes.results ?? [];
-  units = uRes.results ?? [];
+  const res = await db.prepare(
+    'SELECT numero, m2, terraza_m2, patio_m2, m2_total, disponibilidad, precio FROM units ORDER BY numero'
+  ).all<URow>();
+  units = res.results ?? [];
 } catch (e) {
   console.error('disponibilidad-print DB error:', e);
 }
 
-const utMap = new Map(unitTypes.map(ut => [ut.id, ut]));
-
 const now = new Date();
 const dateStr = now.toLocaleDateString('es-DO', { day: 'numeric', month: 'long', year: 'numeric' });
 
-const rows = units.map(u => {
-  const ut = utMap.get(u.unit_type_id);
-  return {
-    id: u.unit_id.toUpperCase(),
-    status: u.status,
-    interiorM2: ut?.interior_m2 ?? 0,
-    terrazaM2: ut?.terraza_m2 ?? null,
-    totalM2: ut?.total_m2 ?? 0,
-    priceUSD: ut?.price_usd ?? 0,
-  };
-});
-
-const optionalPackages = unitTypes.filter(
-  (ut, i, arr) =>
-    ut.optional_package_label &&
-    arr.findIndex(x => x.optional_package_label === ut.optional_package_label) === i
-);
+const rows = units.map(u => ({
+  id:         u.numero,
+  status:     u.disponibilidad,
+  interiorM2: u.m2,
+  terrazaM2:  u.terraza_m2 ?? null,
+  patio_m2:   u.patio_m2 ?? null,
+  totalM2:    u.m2_total,
+  priceUSD:   u.precio,
+}));
 
 const statusLabel: Record<string, string> = {
   available: 'Disponible',
@@ -81,20 +57,12 @@ const statusColor: Record<string, string> = {
   <title>Listado de precios – Costamare</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&display=swap" rel="stylesheet" />
   <style>
-    @font-face {
-      font-family: 'BlackMango';
-      src: url('/fonts/BlackMangoVariableGX.woff2') format('woff2');
-      font-weight: 100 900;
-      font-style: normal;
-      font-display: swap;
-    }
-
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --base:   #073247;
+      --base:   #1D1D1D;
       --green:  #397207;
       --yellow: #B8900D;
       --red:    #C23E3E;
@@ -103,7 +71,7 @@ const statusColor: Record<string, string> = {
     html, body { height: 1056px; }
 
     body {
-      font-family: 'Outfit', sans-serif;
+      font-family: 'Bricolage Grotesque', sans-serif;
       color: var(--base);
       background: #ffffff;
       padding: 0;
@@ -131,13 +99,12 @@ const statusColor: Record<string, string> = {
       margin-bottom: 10px;
     }
     h1 {
-      font-family: 'BlackMango', sans-serif;
+      font-family: 'Bricolage Grotesque', sans-serif;
       font-size: 36px;
       font-weight: 700;
       line-height: 1.1;
     }
     .update-date {
-      font-family: 'Outfit', sans-serif;
       font-size: 16px;
       font-weight: 300;
       white-space: nowrap;
@@ -155,7 +122,7 @@ const statusColor: Record<string, string> = {
     .section-rule {
       width: 100%;
       height: 1px;
-      background: rgba(7,50,71,0.18);
+      background: rgba(29,29,29,0.18);
       margin-bottom: 12px;
     }
 
@@ -166,17 +133,17 @@ const statusColor: Record<string, string> = {
       margin-bottom: 14px;
     }
     thead th {
-      font-family: 'BlackMango', sans-serif;
+      font-family: 'Bricolage Grotesque', sans-serif;
       font-weight: 700;
       font-size: 13px;
       color: var(--base);
       padding: 6px 10px;
-      border-bottom: 1px solid rgba(7,50,71,0.18);
+      border-bottom: 1px solid rgba(29,29,29,0.18);
     }
     thead th.c { text-align: center; }
     thead th.r { text-align: right; }
 
-    tbody tr { border-bottom: 1px solid rgba(7,50,71,0.07); }
+    tbody tr { border-bottom: 1px solid rgba(29,29,29,0.07); }
     tbody td {
       font-size: 14px;
       padding: 7px 10px;
@@ -184,10 +151,10 @@ const statusColor: Record<string, string> = {
     }
     tbody td.c { text-align: center; }
     tbody td.r { text-align: right; }
-    tbody td.dim { color: rgba(7,50,71,0.35); text-align: center; }
+    tbody td.dim { color: rgba(29,29,29,0.35); text-align: center; }
 
     .unit-id {
-      font-family: 'BlackMango', sans-serif;
+      font-family: 'Bricolage Grotesque', sans-serif;
       font-weight: 700;
       font-size: 14px;
     }
@@ -211,7 +178,7 @@ const statusColor: Record<string, string> = {
       padding: 20px 40px 24px;
     }
     .footer-title {
-      font-family: 'BlackMango', sans-serif;
+      font-family: 'Bricolage Grotesque', sans-serif;
       font-size: 24px;
       font-weight: 700;
       text-align: center;
@@ -235,7 +202,7 @@ const statusColor: Record<string, string> = {
     }
     .step:last-child { border-right: none; }
     .step-num {
-      font-family: 'BlackMango', sans-serif;
+      font-family: 'Bricolage Grotesque', sans-serif;
       font-size: 14px;
       font-weight: 700;
       opacity: 0.45;
@@ -244,7 +211,7 @@ const statusColor: Record<string, string> = {
     }
     .step-body { display: flex; flex-direction: column; gap: 3px; }
     .step-amount {
-      font-family: 'BlackMango', sans-serif;
+      font-family: 'Bricolage Grotesque', sans-serif;
       font-size: 14px;
       font-weight: 700;
       line-height: 1.1;
@@ -274,7 +241,7 @@ const statusColor: Record<string, string> = {
   <div class="margin">
     <!-- Header -->
     <div class="header">
-      <img src="/logo_horizontal.svg" alt="Costamare" class="logo" />
+      <img src="/logo.svg" alt="Costamare" class="logo" />
     </div>
     <!-- Title -->
     <div class="title-row">
@@ -322,13 +289,6 @@ const statusColor: Record<string, string> = {
         ))}
       </tbody>
     </table>
-    <!-- Optional packages -->
-    {optionalPackages.map(pkg => (
-      <div class="optional">
-        <p><strong>*Paquete opcional para Penthouse</strong></p>
-        <p>US$ {pkg.optional_package_price?.toLocaleString('en-US')} &nbsp;—&nbsp; {pkg.optional_package_label}</p>
-      </div>
-    ))}
   </div>
 
   <!-- Payment plan footer -->

@@ -5,11 +5,8 @@ import { env } from 'cloudflare:workers';
 
 interface URow {
   id: number;
-  unit_id: string;
-  label: string;
-  status: string;
-  floor: number;
-  unit_type_id: number;
+  numero: string;
+  disponibilidad: string;
 }
 
 let units: URow[] = [];
@@ -18,33 +15,31 @@ let dbError = false;
 try {
   const db = env.DB;
   if (db) {
-    const res = await db.prepare('SELECT * FROM units ORDER BY unit_id').all<URow>();
+    const res = await db.prepare('SELECT id, numero, disponibilidad FROM units ORDER BY numero').all<URow>();
     units = res.results ?? [];
   } else {
     dbError = true;
   }
 } catch (e) {
   dbError = true;
-  console.error('disponibilidad_admin DB error:', e);
+  console.error('admin_disp DB error:', e);
 }
-
-const FLOOR_LABEL: Record<number, string> = { 1: '1er Piso', 2: '2do Piso', 3: 'Penthouse' };
 ---
 
 <Layout title="Disponibilidad" bare={true}>
 
   <!-- ── Auth overlay ─────────────────────────────────────── -->
-  <div id="auth-overlay" class="fixed inset-0 z-50 flex items-center justify-center" style="background:rgba(7,50,71,0.97);backdrop-filter:blur(4px)">
+  <div id="auth-overlay" class="fixed inset-0 z-50 flex items-center justify-center" style="background:rgba(29,29,29,0.97);backdrop-filter:blur(4px)">
     <div style="background:#fff;border-radius:1.25rem;padding:2.5rem;width:100%;max-width:22rem;margin:1rem;box-shadow:0 25px 60px rgba(0,0,0,0.4)">
       <p class="admin-logo">Costamare</p>
-      <h1 style="font-size:1.25rem;font-weight:600;color:#073247;margin:0 0 0.25rem">Disponibilidad</h1>
+      <h1 style="font-size:1.25rem;font-weight:600;color:#1D1D1D;margin:0 0 0.25rem">Disponibilidad</h1>
       <p style="font-size:0.8rem;color:#9ca3af;margin:0 0 1.75rem">Introduce tu API Key para continuar</p>
       <input id="api-key-input" type="password" placeholder="API Key" autocomplete="current-password"
-        style="width:100%;border:1.5px solid #E3E3E3;border-radius:0.6rem;padding:0.7rem 0.9rem;font-size:0.875rem;color:#073247;box-sizing:border-box;font-family:inherit;outline:none;transition:border-color .15s"
-        onfocus="this.style.borderColor='#073247'" onblur="this.style.borderColor='#E3E3E3'"
+        style="width:100%;border:1.5px solid #E3E3E3;border-radius:0.6rem;padding:0.7rem 0.9rem;font-size:0.875rem;color:#1D1D1D;box-sizing:border-box;font-family:inherit;outline:none;transition:border-color .15s"
+        onfocus="this.style.borderColor='#1D1D1D'" onblur="this.style.borderColor='#E3E3E3'"
       />
       <p id="auth-error" style="display:none;color:#C23E3E;font-size:0.8rem;margin:0.5rem 0 0">Clave incorrecta. Inténtalo de nuevo.</p>
-      <button id="auth-submit" style="width:100%;margin-top:1rem;background:#073247;color:#fff;border:none;border-radius:0.6rem;padding:0.8rem;font-size:0.875rem;font-weight:600;cursor:pointer;font-family:inherit;transition:opacity .15s" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+      <button id="auth-submit" style="width:100%;margin-top:1rem;background:#1D1D1D;color:#fff;border:none;border-radius:0.6rem;padding:0.8rem;font-size:0.875rem;font-weight:600;cursor:pointer;font-family:inherit;transition:opacity .15s" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
         Ingresar
       </button>
     </div>
@@ -54,13 +49,13 @@ const FLOOR_LABEL: Record<number, string> = { 1: '1er Piso', 2: '2do Piso', 3: '
   <div id="admin-panel" style="display:none;min-height:100vh;background:#F0F0F0">
 
     <!-- Sticky header -->
-    <header style="position:sticky;top:0;z-index:40;background:#073247;padding:0 1.5rem;height:3.75rem;display:flex;align-items:center;justify-content:space-between">
+    <header style="position:sticky;top:0;z-index:40;background:#1D1D1D;padding:0 1.5rem;height:3.75rem;display:flex;align-items:center;justify-content:space-between">
       <div style="display:flex;align-items:center;gap:0.75rem">
         <span style="font-family:var(--font-display);font-weight:700;color:#fff;font-size:1.1rem;letter-spacing:.04em">Costamare</span>
         <span style="color:rgba(255,255,255,.45);font-size:0.8rem">Disponibilidad</span>
       </div>
       <div style="display:flex;align-items:center;gap:1rem">
-        <a href="/administrar" style="color:rgba(255,255,255,.65);font-size:0.8rem;text-decoration:none;transition:color .15s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,.65)'">Panel completo</a>
+        <a href="/admin" style="color:rgba(255,255,255,.65);font-size:0.8rem;text-decoration:none;transition:color .15s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,.65)'">Panel completo</a>
         <button id="logout-btn" style="background:rgba(255,255,255,.12);color:rgba(255,255,255,.8);border:none;border-radius:0.5rem;padding:0.4rem 0.9rem;font-size:0.8rem;cursor:pointer;font-family:inherit;transition:background .15s" onmouseover="this.style.background='rgba(255,255,255,.2)'" onmouseout="this.style.background='rgba(255,255,255,.12)'">
           Cerrar sesión
         </button>
@@ -81,48 +76,26 @@ const FLOOR_LABEL: Record<number, string> = { 1: '1er Piso', 2: '2do Piso', 3: '
       <!-- Units card -->
       <div style="background:#fff;border-radius:.875rem;border:1px solid #E3E3E3;overflow:hidden">
 
-        <!-- Desktop header -->
+        <!-- Header -->
         <div class="units-header">
-          <span style="width:5.5rem;flex-shrink:0">ID</span>
-          <span style="flex:1">Nombre</span>
-          <span style="width:7rem;flex-shrink:0;text-align:center">Piso</span>
-          <span style="width:12rem;flex-shrink:0">Disponibilidad</span>
+          <span style="width:6rem;flex-shrink:0">Unidad</span>
+          <span style="flex:1">Disponibilidad</span>
         </div>
 
         <!-- Unit rows -->
         {units.map((unit, i) => (
           <div
             class="unit-row"
-            data-unit-id={unit.unit_id}
-            data-unit-type-id={unit.unit_type_id}
+            data-numero={unit.numero}
             style={i < units.length - 1 ? 'border-bottom:1px solid #F0F0F0' : ''}
           >
-            <!-- Mobile header: ID + floor -->
-            <div class="unit-row-mobile-header">
-              <span style="font-family:monospace;font-weight:700;font-size:.95rem;color:#073247">{unit.unit_id}</span>
-              <span class="floor-tag">{FLOOR_LABEL[unit.floor] ?? `Piso ${unit.floor}`}</span>
-            </div>
-
-            <!-- Desktop: ID -->
-            <div class="unit-id-desktop">
-              <span style="font-family:monospace;font-weight:700;font-size:.95rem;color:#073247">{unit.unit_id}</span>
-            </div>
-
-            <!-- Desktop: Name -->
-            <div class="unit-name-desktop" style="flex:1;font-size:.875rem;color:#6b7280;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{unit.label}</div>
-
-            <!-- Desktop: Floor -->
-            <div class="unit-floor-desktop" style="width:7rem;flex-shrink:0;text-align:center">
-              <span class="floor-tag">{FLOOR_LABEL[unit.floor] ?? `Piso ${unit.floor}`}</span>
-            </div>
-
-            <!-- Status dropdown -->
+            <span style="font-family:monospace;font-weight:700;font-size:.95rem;color:#1D1D1D;width:6rem;flex-shrink:0">{unit.numero}</span>
             <div class="status-col">
               <label class="mobile-label">Disponibilidad</label>
-              <select data-field="status" class="status-select field-select">
-                <option value="available" selected={unit.status === 'available'}>Disponible</option>
-                <option value="reserved" selected={unit.status === 'reserved'}>Reservado</option>
-                <option value="sold" selected={unit.status === 'sold'}>Vendido</option>
+              <select data-field="disponibilidad" class="status-select field-select">
+                <option value="available" selected={unit.disponibilidad === 'available'}>Disponible</option>
+                <option value="reserved"  selected={unit.disponibilidad === 'reserved'}>Reservado</option>
+                <option value="sold"      selected={unit.disponibilidad === 'sold'}>Vendido</option>
               </select>
             </div>
           </div>
@@ -135,11 +108,11 @@ const FLOOR_LABEL: Record<number, string> = { 1: '1er Piso', 2: '2do Piso', 3: '
     <div style="position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #E3E3E3;padding:.875rem 1.5rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;z-index:30">
       <span id="save-status" style="font-size:.875rem;color:#6b7280"></span>
       <div style="display:flex;align-items:center;gap:.75rem">
-        <button id="download-btn" style="display:inline-flex;align-items:center;gap:.45rem;background:#F0F0F0;color:#073247;border:1.5px solid rgba(7,50,71,.2);border-radius:.625rem;padding:.7rem 1.25rem;font-size:.875rem;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;transition:background .15s,color .15s" onmouseover="this.style.background='#073247';this.style.color='#fff'" onmouseout="this.style.background='#F0F0F0';this.style.color='#073247'">
+        <button id="download-btn" style="display:inline-flex;align-items:center;gap:.45rem;background:#F0F0F0;color:#1D1D1D;border:1.5px solid rgba(29,29,29,.2);border-radius:.625rem;padding:.7rem 1.25rem;font-size:.875rem;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;transition:background .15s,color .15s" onmouseover="this.style.background='#1D1D1D';this.style.color='#fff'" onmouseout="this.style.background='#F0F0F0';this.style.color='#1D1D1D'">
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
           Descargar listado
         </button>
-        <button id="save-btn" style="background:#073247;color:#fff;border:none;border-radius:.625rem;padding:.7rem 2rem;font-size:.875rem;font-weight:600;cursor:pointer;font-family:inherit;transition:opacity .15s;white-space:nowrap" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+        <button id="save-btn" style="background:#1D1D1D;color:#fff;border:none;border-radius:.625rem;padding:.7rem 2rem;font-size:.875rem;font-weight:600;cursor:pointer;font-family:inherit;transition:opacity .15s;white-space:nowrap" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
           Guardar cambios
         </button>
       </div>
@@ -153,14 +126,14 @@ const FLOOR_LABEL: Record<number, string> = { 1: '1er Piso', 2: '2do Piso', 3: '
     font-family: var(--font-display);
     font-weight: 700;
     font-size: 1.5rem;
-    color: #073247;
+    color: #1D1D1D;
     letter-spacing: .06em;
     margin: 0 0 .75rem;
   }
   .section-title {
     font-size: 1rem;
     font-weight: 700;
-    color: #073247;
+    color: #1D1D1D;
     text-transform: uppercase;
     letter-spacing: .06em;
     margin: 0 0 .5rem;
@@ -171,7 +144,7 @@ const FLOOR_LABEL: Record<number, string> = { 1: '1er Piso', 2: '2do Piso', 3: '
     border-radius: .5rem;
     padding: .5rem .75rem;
     font-size: .875rem;
-    color: #073247;
+    color: #1D1D1D;
     background: #fff;
     box-sizing: border-box;
     font-family: inherit;
@@ -179,9 +152,8 @@ const FLOOR_LABEL: Record<number, string> = { 1: '1er Piso', 2: '2do Piso', 3: '
     cursor: pointer;
     transition: border-color .15s, background-color .15s, color .15s;
   }
-  .field-select:focus { border-color: #073247; }
+  .field-select:focus { border-color: #1D1D1D; }
 
-  /* Units table */
   .units-header {
     display: none;
     padding: .6rem 1.25rem;
@@ -218,33 +190,12 @@ const FLOOR_LABEL: Record<number, string> = { 1: '1er Piso', 2: '2do Piso', 3: '
     }
   }
 
-  .unit-row-mobile-header { display: flex; justify-content: space-between; align-items: center; }
-  .unit-id-desktop { display: none; width: 5.5rem; flex-shrink: 0; }
-  .unit-name-desktop { display: none; }
-  .unit-floor-desktop { display: none; }
-  @media (min-width: 640px) {
-    .unit-row-mobile-header { display: none; }
-    .unit-id-desktop { display: block; }
-    .unit-name-desktop { display: block; }
-    .unit-floor-desktop { display: flex; justify-content: center; }
-  }
-
   .status-col {
     display: flex;
     flex-direction: column;
-  }
-  @media (min-width: 640px) {
-    .status-col { width: 12rem; flex-shrink: 0; }
+    flex: 1;
   }
 
-  .floor-tag {
-    font-size: .72rem;
-    background: #f3f4f6;
-    color: #6b7280;
-    padding: .2rem .6rem;
-    border-radius: 999px;
-    white-space: nowrap;
-  }
   .mobile-label {
     display: block;
     font-size: .72rem;
@@ -282,10 +233,11 @@ const FLOOR_LABEL: Record<number, string> = { 1: '1er Piso', 2: '2do Piso', 3: '
   }
 
   function collectUnits() {
-    return Array.from(document.querySelectorAll<HTMLElement>('.unit-row[data-unit-id]')).map(row => ({
-      unit_id: row.dataset.unitId!,
-      status: (row.querySelector('[data-field="status"]') as HTMLSelectElement).value,
-      unit_type_id: parseInt(row.dataset.unitTypeId!),
+    return Array.from(document.querySelectorAll<HTMLElement>('.unit-row[data-numero]')).map(row => ({
+      numero:        row.dataset.numero!,
+      disponibilidad: (row.querySelector('[data-field="disponibilidad"]') as HTMLSelectElement).value,
+      m2: 0, patio_m2: null, terraza_m2: null, m2_total: 0,
+      tour_url: null, gallery: [], precio: 0,
     }));
   }
 
@@ -306,7 +258,6 @@ const FLOOR_LABEL: Record<number, string> = { 1: '1er Piso', 2: '2do Piso', 3: '
     initStatusColors();
   }
 
-  // Check stored key on load
   const storedKey = sessionStorage.getItem(STORAGE_KEY);
   if (storedKey) {
     verifyKey(storedKey).then(ok => {
@@ -315,21 +266,18 @@ const FLOOR_LABEL: Record<number, string> = { 1: '1er Piso', 2: '2do Piso', 3: '
     });
   }
 
-  // Auth submit
   const authInput = document.getElementById('api-key-input') as HTMLInputElement;
-  const authBtn = document.getElementById('auth-submit') as HTMLButtonElement;
-  const authError = document.getElementById('auth-error') as HTMLElement;
+  const authBtn   = document.getElementById('auth-submit')  as HTMLButtonElement;
+  const authError = document.getElementById('auth-error')   as HTMLElement;
 
   authInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') authBtn.click(); });
 
   authBtn.addEventListener('click', async () => {
     const key = authInput.value.trim();
     if (!key) return;
-
     authBtn.disabled = true;
     authBtn.textContent = 'Verificando...';
     authError.style.display = 'none';
-
     const ok = await verifyKey(key);
     if (ok) {
       sessionStorage.setItem(STORAGE_KEY, key);
@@ -341,23 +289,19 @@ const FLOOR_LABEL: Record<number, string> = { 1: '1er Piso', 2: '2do Piso', 3: '
     }
   });
 
-  // Logout
   document.getElementById('logout-btn')?.addEventListener('click', () => {
     sessionStorage.removeItem(STORAGE_KEY);
     location.reload();
   });
 
-  // Download PDF
   const downloadBtn = document.getElementById('download-btn') as HTMLButtonElement;
   downloadBtn?.addEventListener('click', async () => {
     const originalHTML = downloadBtn.innerHTML;
     downloadBtn.disabled = true;
     downloadBtn.textContent = 'Generando PDF…';
-
     try {
       const res = await fetch('/api/pdf', { method: 'POST' });
-      if (!res.ok) throw new Error('Error del servidor');
-
+      if (!res.ok) throw new Error();
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -375,18 +319,15 @@ const FLOOR_LABEL: Record<number, string> = { 1: '1er Piso', 2: '2do Piso', 3: '
     }
   });
 
-  // Save
-  const saveBtn = document.getElementById('save-btn') as HTMLButtonElement;
+  const saveBtn    = document.getElementById('save-btn')    as HTMLButtonElement;
   const saveStatus = document.getElementById('save-status') as HTMLElement;
 
   saveBtn.addEventListener('click', async () => {
     const key = sessionStorage.getItem(STORAGE_KEY);
     if (!key) return;
-
     saveBtn.disabled = true;
     saveBtn.textContent = 'Guardando...';
     saveStatus.textContent = '';
-
     try {
       const units = collectUnits();
       const res = await fetch('/api/admin/save-units', {
@@ -395,7 +336,6 @@ const FLOOR_LABEL: Record<number, string> = { 1: '1er Piso', 2: '2do Piso', 3: '
         body: JSON.stringify({ key, units }),
       });
       const data = await res.json();
-
       if (data.ok) {
         saveStatus.textContent = '✓ Cambios guardados correctamente';
         saveStatus.style.color = '#166534';

@@ -1,46 +1,33 @@
 ---
-interface UTRow {
-  id: number;
-  price_usd: number;
-  interior_m2: number;
-  total_m2: number;
-  spaces: { name: string; m2: number }[];
-  tour_url: string;
-}
-
 interface URow {
   id: number;
-  unit_id: string;
-  label: string;
-  status: string;
-  floor: number;
-  unit_type_id: number;
+  numero: string;
+  m2: number;
+  patio_m2: number | null;
+  terraza_m2: number | null;
+  m2_total: number;
+  disponibilidad: string;
+  tour_url: string | null;
+  gallery: string;
+  precio: number;
 }
 
 interface Props {
   units: URow[];
-  unitTypes: UTRow[];
   hideHeader?: boolean;
 }
 
-const { units: rawUnits, unitTypes, hideHeader = false } = Astro.props;
+const { units: rawUnits, hideHeader = false } = Astro.props;
 
-const utMap = new Map(unitTypes.map(ut => [ut.id, ut]));
-
-const units = rawUnits.map(u => {
-  const ut = utMap.get(u.unit_type_id);
-  return {
-    id:         u.unit_id.toLowerCase(),
-    label:      u.label,
-    status:     u.status,
-    floor:      u.floor,
-    priceUSD:   ut?.price_usd   ?? 0,
-    interiorM2: ut?.interior_m2 ?? 0,
-    totalM2:    ut?.total_m2    ?? 0,
-    spaces:     ut?.spaces      ?? [],
-    tourUrl:    ut?.tour_url    ?? '#',
-  };
-});
+const units = rawUnits.map(u => ({
+  id:             ('s' + u.numero).toLowerCase(),
+  numero:         u.numero,
+  disponibilidad: u.disponibilidad,
+  m2:             u.m2,
+  m2_total:       u.m2_total,
+  tourUrl:        u.tour_url ?? '#',
+  precio:         u.precio,
+}));
 
 type Unit = typeof units[0];
 
@@ -64,20 +51,6 @@ const statusLabel: Record<string, string> = {
   reserved:  'Reservado',
   sold:      'Vendido',
 };
-const floorLabel: Record<number, string> = {
-  1: 'Piso 1',
-  2: 'Piso 2',
-  3: 'Penthouse',
-};
-
-function getBeds(unit: Unit) {
-  return Math.max(1, unit.spaces.filter(s => s.name.toLowerCase().includes('dormitorio')).length);
-}
-function getBaths(unit: Unit) {
-  return Math.max(1, unit.spaces.filter(s =>
-    s.name.toLowerCase().includes('baño') || s.name.toLowerCase().includes('visitas')
-  ).length);
-}
 
 const sg = 'opacity-0 hover:opacity-50 transition-opacity duration-200 cursor-pointer';
 ---
@@ -106,87 +79,70 @@ const sg = 'opacity-0 hover:opacity-50 transition-opacity duration-200 cursor-po
 
       <!-- Left on desktop / bottom on tablet+mobile: unit cards list -->
       <div class="w-full lg:w-[35%] grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-3">
-        {units.map(unit => {
-          const beds  = getBeds(unit);
-          const baths = getBaths(unit);
-          return (
-            <div
-              class="d-unit-card border border-base/20 rounded-xl overflow-hidden cursor-pointer select-none"
-              data-unit={unit.id}
-            >
-              <!-- Collapsed header -->
-              <div class="flex items-center justify-between px-4 py-3 gap-3">
-                <div class="flex items-center gap-2.5 min-w-0">
-                  <span class="font-display font-bold text-lg shrink-0">{unit.id}</span>
-                  <span class:list={['flex items-center gap-1.5 text-sm shrink-0 px-2 py-0.5 rounded-full', statusText[unit.status], statusBg[unit.status]]}>
-                    <span class:list={['w-2 h-2 rounded-full shrink-0', statusDot[unit.status]]}></span>
-                    {statusLabel[unit.status]}
-                  </span>
-                </div>
-                <div class="flex items-center gap-3 shrink-0">
-                  <span class="text-sm text-[rgba(7,50,71,0.5)]">{unit.totalM2} m²</span>
-                  {!['reserved', 'sold'].includes(unit.status) && (
-                    <span class="font-bold text-sm">US$ {unit.priceUSD.toLocaleString('en-US')}</span>
-                  )}
-                  <svg
-                    class="d-chevron shrink-0 transition-transform duration-200"
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="14" height="14" viewBox="0 0 24 24"
-                    fill="none" stroke="currentColor" stroke-width="2.5"
-                    stroke-linecap="round" stroke-linejoin="round"
-                  >
-                    <polyline points="6 9 12 15 18 9"/>
-                  </svg>
-                </div>
+        {units.map(unit => (
+          <div
+            class="d-unit-card border border-base/20 rounded-xl overflow-hidden cursor-pointer select-none"
+            data-unit={unit.id}
+          >
+            <!-- Collapsed header -->
+            <div class="flex items-center justify-between px-4 py-3 gap-3">
+              <div class="flex items-center gap-2.5 min-w-0">
+                <span class="font-display font-bold text-lg shrink-0">{unit.numero}</span>
+                <span class:list={['flex items-center gap-1.5 text-sm shrink-0 px-2 py-0.5 rounded-full', statusText[unit.disponibilidad], statusBg[unit.disponibilidad]]}>
+                  <span class:list={['w-2 h-2 rounded-full shrink-0', statusDot[unit.disponibilidad]]}></span>
+                  {statusLabel[unit.disponibilidad]}
+                </span>
               </div>
-
-              <!-- Expanded detail -->
-              <div class="d-unit-detail hidden px-4 pb-4">
-                <div class="flex flex-col gap-3 pt-3 border-t border-base/10">
-
-                  <!-- Info row -->
-                  <div class="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-[rgba(7,50,71,0.75)]">
-                    <span class="font-semibold">{floorLabel[unit.floor]}</span>
-                    <span class="flex items-center gap-1.5">
-                      <img src="/assets/icons/size.svg" alt="" class="h-4 w-auto" aria-hidden="true" />
-                      <span class="opacity-40">{unit.interiorM2} m²</span>
-                      <span class="opacity-30 select-none mx-0.5">|</span>
-                      {unit.totalM2} m²
-                    </span>
-                    <span class="flex items-center gap-1.5">
-                      <img src="/assets/icons/room.svg" alt="" class="h-4 w-auto" aria-hidden="true" />
-                      {beds}
-                    </span>
-                    <span class="flex items-center gap-1.5">
-                      <img src="/assets/icons/bath.svg" alt="" class="h-4 w-auto" aria-hidden="true" />
-                      {baths}
-                    </span>
-                    <span class="flex items-center gap-1.5">
-                      <img src="/assets/icons/parking.svg" alt="" class="h-4 w-auto" aria-hidden="true" />
-                      1
-                    </span>
-                  </div>
-
-                  <!-- Buttons -->
-                  <a
-                    href={unit.tourUrl}
-                    class="block text-center px-4 py-3 rounded-lg bg-base text-white font-bold text-sm leading-none hover:bg-base/80 transition-colors duration-200 no-underline"
-                  >
-                    Explorar Tour virtual
-                  </a>
-                  <a
-                    href={`/assets/units_info/${unit.id.toUpperCase()}.pdf`}
-                    download
-                    class="block text-center px-4 py-3 rounded-lg border border-base/25 text-[rgba(7,50,71,0.7)] text-sm font-medium hover:bg-base/5 transition-colors duration-200 no-underline"
-                  >
-                    Descargar ficha técnica
-                  </a>
-
-                </div>
+              <div class="flex items-center gap-3 shrink-0">
+                <span class="text-sm text-base/50">{unit.m2_total} m²</span>
+                {!['reserved', 'sold'].includes(unit.disponibilidad) && (
+                  <span class="font-bold text-sm">US$ {unit.precio.toLocaleString('en-US')}</span>
+                )}
+                <svg
+                  class="d-chevron shrink-0 transition-transform duration-200"
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="14" height="14" viewBox="0 0 24 24"
+                  fill="none" stroke="currentColor" stroke-width="2.5"
+                  stroke-linecap="round" stroke-linejoin="round"
+                >
+                  <polyline points="6 9 12 15 18 9"/>
+                </svg>
               </div>
             </div>
-          );
-        })}
+
+            <!-- Expanded detail -->
+            <div class="d-unit-detail hidden px-4 pb-4">
+              <div class="flex flex-col gap-3 pt-3 border-t border-base/10">
+
+                <!-- Info row -->
+                <div class="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-base/75">
+                  <span class="flex items-center gap-1.5">
+                    <img src="/assets/icons/size.svg" alt="" class="h-4 w-auto" aria-hidden="true" />
+                    <span class="opacity-40">{unit.m2} m²</span>
+                    <span class="opacity-30 select-none mx-0.5">|</span>
+                    {unit.m2_total} m²
+                  </span>
+                </div>
+
+                <!-- Buttons -->
+                <a
+                  href={unit.tourUrl}
+                  class="block text-center px-4 py-3 rounded-lg bg-base text-white font-bold text-sm leading-none hover:bg-base/80 transition-colors duration-200 no-underline"
+                >
+                  Explorar Tour 360°
+                </a>
+                <a
+                  href={`/assets/units_info/${unit.id.toUpperCase()}.pdf`}
+                  download
+                  class="block text-center px-4 py-3 rounded-lg border border-base/25 text-base/70 text-sm font-medium hover:bg-base/5 transition-colors duration-200 no-underline"
+                >
+                  Descargar ficha técnica
+                </a>
+
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
 
       <!-- Right on desktop / top on tablet+mobile: building elevation -->
@@ -199,31 +155,31 @@ const sg = 'opacity-0 hover:opacity-50 transition-opacity duration-200 cursor-po
           aria-hidden="true"
         >
           <!-- Floor 1 -->
-          <g data-unit="s101" class={`d-unit-shape ${sg}`}><rect x="1426" y="612" width="374" height="171" fill="#073247"/></g>
-          <g data-unit="s102" class={`d-unit-shape ${sg}`}><rect x="960"  y="612" width="369" height="171" fill="#073247"/></g>
-          <g data-unit="s103" class={`d-unit-shape ${sg}`}><rect x="591"  y="612" width="369" height="171" fill="#073247"/></g>
-          <g data-unit="s104" class={`d-unit-shape ${sg}`}><rect x="120"  y="612" width="371" height="171" fill="#073247"/></g>
+          <g data-unit="s101" class={`d-unit-shape ${sg}`}><rect x="1426" y="612" width="374" height="171" fill="#1D1D1D"/></g>
+          <g data-unit="s102" class={`d-unit-shape ${sg}`}><rect x="960"  y="612" width="369" height="171" fill="#1D1D1D"/></g>
+          <g data-unit="s103" class={`d-unit-shape ${sg}`}><rect x="591"  y="612" width="369" height="171" fill="#1D1D1D"/></g>
+          <g data-unit="s104" class={`d-unit-shape ${sg}`}><rect x="120"  y="612" width="371" height="171" fill="#1D1D1D"/></g>
           <!-- Floor 2 -->
-          <g data-unit="s201" class={`d-unit-shape ${sg}`}><rect x="1426" y="447" width="374" height="165" fill="#073247"/></g>
-          <g data-unit="s202" class={`d-unit-shape ${sg}`}><rect x="960"  y="447" width="369" height="165" fill="#073247"/></g>
-          <g data-unit="s203" class={`d-unit-shape ${sg}`}><rect x="591"  y="447" width="369" height="165" fill="#073247"/></g>
-          <g data-unit="s204" class={`d-unit-shape ${sg}`}><rect x="120"  y="447" width="371" height="165" fill="#073247"/></g>
+          <g data-unit="s201" class={`d-unit-shape ${sg}`}><rect x="1426" y="447" width="374" height="165" fill="#1D1D1D"/></g>
+          <g data-unit="s202" class={`d-unit-shape ${sg}`}><rect x="960"  y="447" width="369" height="165" fill="#1D1D1D"/></g>
+          <g data-unit="s203" class={`d-unit-shape ${sg}`}><rect x="591"  y="447" width="369" height="165" fill="#1D1D1D"/></g>
+          <g data-unit="s204" class={`d-unit-shape ${sg}`}><rect x="120"  y="447" width="371" height="165" fill="#1D1D1D"/></g>
           <!-- Penthouse -->
           <g data-unit="s301" class={`d-unit-shape ${sg}`}>
-            <path d="M1429 111H1800V447H1429V111Z" fill="#073247"/>
-            <path d="M1539 97H1798V111H1539V97Z"   fill="#073247"/>
+            <path d="M1429 111H1800V447H1429V111Z" fill="#1D1D1D"/>
+            <path d="M1539 97H1798V111H1539V97Z"   fill="#1D1D1D"/>
           </g>
           <g data-unit="s302" class={`d-unit-shape ${sg}`}>
-            <path d="M960 111H1329V447H960V111Z"  fill="#073247"/>
-            <path d="M960 97H1215V111H960V97Z"    fill="#073247"/>
+            <path d="M960 111H1329V447H960V111Z"  fill="#1D1D1D"/>
+            <path d="M960 97H1215V111H960V97Z"    fill="#1D1D1D"/>
           </g>
           <g data-unit="s303" class={`d-unit-shape ${sg}`}>
-            <path d="M591 111H960V447H591V111Z"  fill="#073247"/>
-            <path d="M704 97H960V111H704V97Z"    fill="#073247"/>
+            <path d="M591 111H960V447H591V111Z"  fill="#1D1D1D"/>
+            <path d="M704 97H960V111H704V97Z"    fill="#1D1D1D"/>
           </g>
           <g data-unit="s304" class={`d-unit-shape ${sg}`}>
-            <path d="M120 111H499V447H120V111Z"  fill="#073247"/>
-            <path d="M120 97H381V111H120V97Z"    fill="#073247"/>
+            <path d="M120 111H499V447H120V111Z"  fill="#1D1D1D"/>
+            <path d="M120 97H381V111H120V97Z"    fill="#1D1D1D"/>
           </g>
         </svg>
 

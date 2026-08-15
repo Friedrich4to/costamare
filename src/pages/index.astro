@@ -4,61 +4,32 @@ import Layout from '../layouts/Layout.astro';
 import Amenidades from '../components/Amenidades.astro';
 import Galeria from '../components/Galeria.astro';
 import Lightbox from '../components/Lightbox.astro';
-import Unidades from '../components/Unidades.astro';
 import Disponibilidad_Section from '../components/Disponibilidad_Section.astro';
 import MapaBavaro from '../components/MapaBavaro.astro';
 import Pagos from '../components/Pagos.astro';
 import '@photo-sphere-viewer/core/index.css';
 import { env } from 'cloudflare:workers';
 
-interface UTRow {
-  id: number;
-  type_key: string;
-  name: string;
-  price_usd: number;
-  interior_m2: number;
-  terraza_m2: number | null;
-  total_m2: number;
-  spaces: string;
-  features: string;
-  tour_url: string;
-  optional_package_label: string | null;
-  optional_package_price: number | null;
-  gallery: string;
-}
-
 interface URow {
   id: number;
-  unit_id: string;
-  label: string;
-  status: string;
-  floor: number;
-  unit_type_id: number;
+  numero: string;
+  m2: number;
+  patio_m2: number | null;
+  terraza_m2: number | null;
+  m2_total: number;
+  disponibilidad: string;
+  tour_url: string | null;
+  gallery: string;
+  precio: number;
 }
 
-type ParsedUT = Omit<UTRow, 'spaces' | 'features' | 'gallery'> & {
-  spaces: { name: string; m2: number }[];
-  features: string[];
-  gallery: string[];
-};
-
-let unitTypes: ParsedUT[] = [];
 let units: URow[] = [];
 
 try {
   const db = env.DB;
   if (db) {
-    const [utRes, uRes] = await Promise.all([
-      db.prepare('SELECT * FROM unit_types ORDER BY id').all<UTRow>(),
-      db.prepare('SELECT * FROM units ORDER BY unit_id').all<URow>(),
-    ]);
-    unitTypes = (utRes.results ?? []).map(ut => ({
-      ...ut,
-      spaces: JSON.parse(ut.spaces || '[]'),
-      features: JSON.parse(ut.features || '[]'),
-      gallery: JSON.parse(ut.gallery || '[]'),
-    }));
-    units = uRes.results ?? [];
+    const res = await db.prepare('SELECT * FROM units ORDER BY numero').all<URow>();
+    units = res.results ?? [];
   }
 } catch (e) {
   console.error('index DB error:', e);
@@ -67,62 +38,69 @@ try {
 
 <Layout title="Inicio">
   <main>
-    <section class="relative h-svh flex flex-col items-center">
-      <img
-        src="/assets/pool_nobg.avif"
-        alt=""
-        class="sm:hidden absolute bottom-0 w-full h-[70svh] object-cover object-bottom pointer-events-none"
-      />
-      <img
-        src="/assets/front.avif"
-        alt=""
-        class="hidden sm:block absolute bottom-0 w-full h-[90svh] object-cover object-center pointer-events-none"
-      />
-      <div class="relative z-10 flex flex-col items-center gap-6 p-8 mt-[10svh]">
+    <section class="h-svh flex flex-col items-center pt-16">
+      <img src="/logo.svg" alt="Costamare" class="h-24 w-auto mb-8" />
 
-        <img src="/logo_horizontal.svg" alt="Costamare" style="width: 720px; h-auto" />
+      <div class="flex flex-col sm:flex-row gap-3 mb-10">
+        <a
+          href="/tour/exterior"
+          class="px-7 py-3 rounded-full bg-base text-white font-medium hover:bg-base/80 transition-colors duration-300 no-underline text-center"
+        >
+          Tour 360°
+        </a>
+        <a
+          href="/dossier.pdf"
+          download="dossier-costamare.pdf"
+          class="px-7 py-3 text-base rounded-full border border-base font-medium hover:bg-base hover:text-white transition-colors duration-300 no-underline text-center"
+        >
+          Descargar Dossier
+        </a>
+      </div>
 
-        <div class="flex flex-col sm:flex-row gap-4">
-          <a
-            href="/dossier.pdf"
-            download="dossier-costamare.pdf"
-            class="px-6 py-3 text-[18px] rounded-full bg-gray-100 border border-base/20 hover:bg-base hover:text-white transition-colors duration-500 cursor-pointer no-underline"
-          >
-            Descargar Dossier
-          </a>
-        </div>
-
+      <div class="w-full flex-1 min-h-0">
+        <img
+          src="/2.png"
+          alt="Costamare"
+          class="w-full h-full object-cover object-center block"
+        />
       </div>
     </section>
-    <section id="descripcion" class="px-[4vw] py-16 flex items-center justify-center">
-      <div class="w-full max-w-7xl flex flex-col md:flex-row gap-12 items-center">
 
-        <div class="w-full md:w-1/2">
-          <img src="/assets/pool_2.avif" alt="Costamare" class="md:hidden w-full h-full object-cover rounded-2xl" />
-          <img src="/assets/pool_1.avif" alt="Costamare" class="hidden md:block w-full h-full object-cover rounded-2xl" />
-        </div>
+    <section id="descripcion" class="px-[4vw] py-20">
+      <div class="w-full max-w-7xl mx-auto flex flex-col gap-10">
 
-        <div class="w-full md:w-1/2 flex flex-col gap-8">
-          <img src="/logo_horizontal.svg" alt="Costamare" class="h-10 w-auto" />
+        <p class="leading-tight text-[2.75rem]">
+          <strong>Costamare</strong> es un desarrollo de baja densidad diseñado para
+          combinar arquitectura contemporánea con alta rentabilidad.
+        </p>
 
-          <div class="flex flex-col gap-4 text-base leading-relaxed">
-            <p>Es un desarrollo de baja densidad ubicado en Costa Cana, Bávaro, diseñado para combinar arquitectura contemporánea con alta rentabilidad.</p>
-            <p class="hidden md:block">Su posicionamiento estratégico en Punta Cana lo convierte en una opción sólida para inversores que buscan ingresos pasivos a través del mercado de alquileres a corto-largo plazo, con potencial de valorización garantizado por su diseño, calidad y ubicación.</p>
+        <div class="flex flex-col md:flex-row gap-16 items-start">
+          <div id="info-watermark-container" class="w-full md:w-1/2 flex items-center justify-center">
+            <span
+              id="info-watermark"
+              class="font-display font-bold uppercase leading-none select-none pointer-events-none whitespace-nowrap"
+              style="color: rgba(29,29,29,0.06);"
+              aria-hidden="true"
+            >
+              INFORMACIONES
+            </span>
           </div>
 
-          <ul class="flex flex-col divide-y divide-base/20">
-            <li class="py-4 text-lg"><span class="font-display font-bold">12</span> Apartamentos</li>
-            <li class="py-4 text-lg">Residencial <span class="font-display font-bold">Costa Cana</span></li>
-            <li class="py-4 text-lg">Entrega en Diciembre <span class="font-display font-bold">2027</span></li>
-            <li class="py-4 text-lg">Apartamentos de <span class="font-display font-bold">55m² y 60m²</span></li>
+          <ul class="w-full md:w-1/2 flex flex-col gap-4">
+            <li style="font-size: 2.5rem;"><strong class="font-bold">12</strong> Apartamentos</li>
+            <li style="font-size: 2.5rem;">Entrega en <strong class="font-bold">Diciembre 2027</strong></li>
+            <li style="font-size: 2.5rem;">Residencial <strong class="font-bold">Costa Cana</strong></li>
           </ul>
         </div>
 
       </div>
     </section>
+
     <Amenidades />
     <Galeria />
     <Lightbox />
+    <!-- <Unidades unitTypes={unitTypes} /> -->
+    <Disponibilidad_Section units={units} />
     <section id="maqueta" class="relative w-full h-[70svh] flex items-center justify-center overflow-hidden">
       <div id="maqueta-psv" class="absolute inset-0 w-full h-full" style="pointer-events:none;"></div>
       <div class="absolute inset-0 bg-base/50"></div>
@@ -130,16 +108,26 @@ try {
         href="/tour/exterior"
         class="relative z-10 px-8 py-4 text-[18px] rounded-full bg-white text-base hover:bg-base hover:text-white transition-colors duration-300"
       >
-        Explorar <strong class="font-display font-bold">Tour virtual</strong>
+        Explorar Tour 360°
       </a>
     </section>
-    <Unidades unitTypes={unitTypes} />
-    <div class="w-[80vw] mx-auto h-0.5 bg-base/20"></div>
-    <Disponibilidad_Section units={units} unitTypes={unitTypes} />
     <MapaBavaro />
     <Pagos />
   </main>
 </Layout>
+
+<script>
+  function fitWatermark() {
+    const el = document.getElementById('info-watermark') as HTMLElement | null;
+    const container = document.getElementById('info-watermark-container') as HTMLElement | null;
+    if (!el || !container) return;
+    el.style.fontSize = '100px';
+    const scale = container.clientWidth / el.scrollWidth;
+    el.style.fontSize = Math.floor(100 * scale) + 'px';
+  }
+  fitWatermark();
+  window.addEventListener('resize', fitWatermark);
+</script>
 
 <script>
   import { Viewer } from '@photo-sphere-viewer/core';

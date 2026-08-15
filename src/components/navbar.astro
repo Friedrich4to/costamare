@@ -1,22 +1,19 @@
 ---
 const links = [
-  { label: 'Amenidades',     href: '#amenidades',    icon: false },
-  { label: 'Galería',        href: '#galeria',        icon: false },
-  { label: 'Unidades',       href: '#unidades',       icon: false },
-  { label: 'Disponibilidad', href: '#disponibilidad', icon: false },
-  { label: 'Tour 360°',      href: '/tour/exterior',  icon: true  },
-  { label: 'Maqueta',        href: '/maqueta',        icon: true  },
-  { label: 'Ubicación',      href: '#map',            icon: false },
-  { label: 'Pagos',          href: '#pagos',          icon: false },
+  { label: 'Características', href: '#descripcion',    icon: false },
+  { label: 'Disponibilidad',  href: '#disponibilidad', icon: false },
+  { label: 'Tour 360°',       href: '/tour/exterior',  icon: true  },
+  { label: 'Ubicación',       href: '#map',            icon: false },
 ]
 ---
 
 <nav
+  id="main-nav"
   style="height: 10svh"
-  class="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-8 bg-white/80 backdrop-blur-sm"
+  class="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-8 bg-white backdrop-blur-sm -translate-y-full transition-transform duration-500 ease-in-out"
 >
   <a href="#" aria-label="Costamare inicio">
-    <img src="/logo_horizontal.svg" alt="Costamare" class="h-8 w-auto" />
+    <img src="/logo.svg" alt="Costamare" class="h-8 w-auto" />
   </a>
 
   <ul class="hidden lg:flex items-center gap-6">
@@ -114,16 +111,33 @@ const links = [
     scroll-behavior: smooth;
   }
 
-  :global(#amenidades, #galeria, #disponibilidad, #unidades, #map, #pagos) {
+  :global(#descripcion, #disponibilidad, #map) {
     scroll-margin-top: 6rem;
   }
 </style>
 
 <script>
-  const burgerBtn  = document.getElementById('burger-btn')  as HTMLButtonElement
-  const mobileMenu = document.getElementById('mobile-menu') as HTMLDivElement
+  const nav       = document.getElementById('main-nav')       as HTMLElement
+  const burgerBtn = document.getElementById('burger-btn')     as HTMLButtonElement
+  const mobileMenu = document.getElementById('mobile-menu')   as HTMLDivElement
   const mobileLinks = mobileMenu.querySelectorAll<HTMLAnchorElement>('.mobile-nav-link')
 
+  // Show/hide nav on scroll past 50svh
+  const threshold = window.innerHeight * 0.5
+
+  function onScroll(): void {
+    if (window.scrollY > threshold) {
+      nav.classList.remove('-translate-y-full')
+      nav.classList.add('translate-y-0')
+    } else {
+      nav.classList.add('-translate-y-full')
+      nav.classList.remove('translate-y-0')
+    }
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true })
+
+  // Mobile menu
   function openMenu(): void {
     mobileMenu.classList.remove('-translate-x-full')
     mobileMenu.classList.add('translate-x-0')

@@ -10,8 +10,6 @@ const slides = [
 ---
 
 <section id="galeria" class="py-16 flex flex-col gap-8">
-  <h2 class="px-[4vw] font-display text-4xl md:text-5xl font-bold">Galería</h2>
-
   <div class="embla relative">
     <div class="embla__viewport" data-lightbox-trigger>
       <div class="embla__container">
@@ -29,10 +27,10 @@ const slides = [
     </div>
 
     <button class="embla__btn embla__prev" aria-label="Anterior">
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
     </button>
     <button class="embla__btn embla__next" aria-label="Siguiente">
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
     </button>
   </div>
 
@@ -60,7 +58,11 @@ const slides = [
     flex: 0 0 auto;
     height: 55vh;
     overflow: hidden;
-    border-radius: 16px;
+    border-radius: 2px;
+  }
+
+  .embla__slide:last-child {
+    margin-right: 12px;
   }
 
   @media (max-width: 640px) {
@@ -89,12 +91,12 @@ const slides = [
     top: 50%;
     transform: translateY(-50%);
     z-index: 10;
-    background: rgba(7, 50, 71, 0.85);
+    background: rgba(29, 29, 29, 0.85);
     color: #F4F4F4;
     border: none;
     border-radius: 50%;
-    width: 44px;
-    height: 44px;
+    width: 66px;
+    height: 66px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -104,7 +106,7 @@ const slides = [
   }
 
   .embla__btn:hover {
-    background: rgba(7, 50, 71, 1);
+    background: rgba(29, 29, 29, 1);
   }
 
   .embla__btn:disabled {
@@ -125,7 +127,7 @@ const slides = [
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: rgba(7, 50, 71, 0.25);
+    background: rgba(29, 29, 29, 0.25);
     border: none;
     padding: 0;
     cursor: pointer;
@@ -133,7 +135,7 @@ const slides = [
   }
 
   .embla__dot.is-selected {
-    background: #073247;
+    background: #1D1D1D;
     transform: scale(1.3);
   }
 </style>
@@ -147,7 +149,7 @@ const slides = [
   const nextBtn = document.querySelector<HTMLButtonElement>('.embla__next')!
   const emblaEl = document.querySelector<HTMLElement>('.embla')!
 
-  const embla = EmblaCarousel(viewport, { loop: true, align: 'start', padding: { left: '4vw', right: '4vw' } })
+  const embla = EmblaCarousel(viewport, { loop: true, align: 'center', duration: 40 })
 
   // Build dots
   const slideCount = embla.scrollSnapList().length
