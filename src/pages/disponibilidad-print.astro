@@ -256,6 +256,7 @@ const statusColor: Record<string, string> = {
           <th>Apto.</th>
           <th class="c">M² Const.</th>
           <th class="c">M² Terraza</th>
+          <th class="c">M² Patio</th>
           <th class="c">Total M²</th>
           <th class="c">Estatus</th>
           <th class="r">Precio</th>
@@ -268,6 +269,10 @@ const statusColor: Record<string, string> = {
             <td class="c">{row.interiorM2}m2</td>
             {row.terrazaM2
               ? <td class="c">{row.terrazaM2}m2</td>
+              : <td class="dim">n/a</td>
+            }
+            {row.patio_m2
+              ? <td class="c">{row.patio_m2}m2</td>
               : <td class="dim">n/a</td>
             }
             <td class="c">{row.totalM2}m2</td>
