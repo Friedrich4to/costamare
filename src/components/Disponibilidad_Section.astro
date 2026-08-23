@@ -20,7 +20,7 @@ interface Props {
 const { units: rawUnits, hideHeader = false } = Astro.props;
 
 const units = rawUnits.map(u => ({
-  id:             ('s' + u.numero).toLowerCase(),
+  id:             u.numero,
   numero:         u.numero,
   disponibilidad: u.disponibilidad,
   m2:             u.m2,
@@ -54,7 +54,6 @@ const statusLabel: Record<string, string> = {
   sold:      'Vendido',
 };
 
-const sg = 'opacity-0 hover:opacity-50 transition-opacity duration-200 cursor-pointer';
 ---
 
 <section id="disponibilidad" class:list={["px-[4vw]", hideHeader ? "pt-4 pb-16" : "py-16"]}>
@@ -168,9 +167,9 @@ const sg = 'opacity-0 hover:opacity-50 transition-opacity duration-200 cursor-po
                   Explorar Tour 360°
                 </a>
                 <a
-                  href={`/assets/units_info/${unit.id.toUpperCase()}.pdf`}
+                  href={`/assets/units_info/${unit.id}.pdf`}
                   download
-                  class="block text-center px-4 py-3 rounded-lg border border-base/25 text-base/70 text-sm font-medium hover:bg-base/5 transition-colors duration-200 no-underline pointer-events-none opacity-40"
+                  class="block text-center px-4 py-3 rounded-lg border border-base/25 text-base/70 text-sm font-medium hover:bg-base/5 transition-colors duration-200 no-underline"
                 >
                   Descargar ficha técnica
                 </a>
@@ -184,46 +183,36 @@ const sg = 'opacity-0 hover:opacity-50 transition-opacity duration-200 cursor-po
       <!-- Right on desktop / top on tablet+mobile: building elevation -->
       <div class="w-full lg:flex-1 lg:min-w-0 lg:sticky lg:top-[10svh] pt-0 lg:pt-24">
         <div class="relative">
-        <svg
-          class="absolute inset-0 w-full h-full"
-          viewBox="0 0 1920 879"
-          xmlns="http://www.w3.org/2000/svg"
-          aria-hidden="true"
-        >
-          <!-- Floor 1 -->
-          <g data-unit="s101" class={`d-unit-shape ${sg}`}><rect x="1426" y="612" width="374" height="171" fill="#1D1D1D"/></g>
-          <g data-unit="s102" class={`d-unit-shape ${sg}`}><rect x="960"  y="612" width="369" height="171" fill="#1D1D1D"/></g>
-          <g data-unit="s103" class={`d-unit-shape ${sg}`}><rect x="591"  y="612" width="369" height="171" fill="#1D1D1D"/></g>
-          <g data-unit="s104" class={`d-unit-shape ${sg}`}><rect x="120"  y="612" width="371" height="171" fill="#1D1D1D"/></g>
-          <!-- Floor 2 -->
-          <g data-unit="s201" class={`d-unit-shape ${sg}`}><rect x="1426" y="447" width="374" height="165" fill="#1D1D1D"/></g>
-          <g data-unit="s202" class={`d-unit-shape ${sg}`}><rect x="960"  y="447" width="369" height="165" fill="#1D1D1D"/></g>
-          <g data-unit="s203" class={`d-unit-shape ${sg}`}><rect x="591"  y="447" width="369" height="165" fill="#1D1D1D"/></g>
-          <g data-unit="s204" class={`d-unit-shape ${sg}`}><rect x="120"  y="447" width="371" height="165" fill="#1D1D1D"/></g>
-          <!-- Penthouse -->
-          <g data-unit="s301" class={`d-unit-shape ${sg}`}>
-            <path d="M1429 111H1800V447H1429V111Z" fill="#1D1D1D"/>
-            <path d="M1539 97H1798V111H1539V97Z"   fill="#1D1D1D"/>
-          </g>
-          <g data-unit="s302" class={`d-unit-shape ${sg}`}>
-            <path d="M960 111H1329V447H960V111Z"  fill="#1D1D1D"/>
-            <path d="M960 97H1215V111H960V97Z"    fill="#1D1D1D"/>
-          </g>
-          <g data-unit="s303" class={`d-unit-shape ${sg}`}>
-            <path d="M591 111H960V447H591V111Z"  fill="#1D1D1D"/>
-            <path d="M704 97H960V111H704V97Z"    fill="#1D1D1D"/>
-          </g>
-          <g data-unit="s304" class={`d-unit-shape ${sg}`}>
-            <path d="M120 111H499V447H120V111Z"  fill="#1D1D1D"/>
-            <path d="M120 97H381V111H120V97Z"    fill="#1D1D1D"/>
-          </g>
-        </svg>
 
-        <img
-          src="/assets/unidades/units-base-building.svg"
-          alt="Plano del edificio"
-          class="relative w-full pointer-events-none"
-        />
+          <svg
+            class="absolute inset-0 w-full h-full"
+            viewBox="0 0 2107 645"
+            xmlns="http://www.w3.org/2000/svg"
+            aria-hidden="true"
+          >
+            <!-- Floor 1 -->
+            <rect data-unit="101" class="d-unit-shape" style="opacity:0;cursor:pointer;transition:opacity 0.2s" x="35"   y="488" width="426" height="157" fill="#002E6B"/>
+            <rect data-unit="102" class="d-unit-shape" style="opacity:0;cursor:pointer;transition:opacity 0.2s" x="602"  y="488" width="451" height="157" fill="#002E6B"/>
+            <rect data-unit="103" class="d-unit-shape" style="opacity:0;cursor:pointer;transition:opacity 0.2s" x="1053" y="488" width="451" height="157" fill="#002E6B"/>
+            <rect data-unit="104" class="d-unit-shape" style="opacity:0;cursor:pointer;transition:opacity 0.2s" x="1646" y="488" width="426" height="157" fill="#002E6B"/>
+            <!-- Floor 2 -->
+            <rect data-unit="201" class="d-unit-shape" style="opacity:0;cursor:pointer;transition:opacity 0.2s" x="35"   y="331" width="426" height="157" fill="#002E6B"/>
+            <rect data-unit="202" class="d-unit-shape" style="opacity:0;cursor:pointer;transition:opacity 0.2s" x="602"  y="331" width="451" height="157" fill="#002E6B"/>
+            <rect data-unit="203" class="d-unit-shape" style="opacity:0;cursor:pointer;transition:opacity 0.2s" x="1053" y="331" width="451" height="157" fill="#002E6B"/>
+            <rect data-unit="204" class="d-unit-shape" style="opacity:0;cursor:pointer;transition:opacity 0.2s" x="1646" y="331" width="426" height="157" fill="#002E6B"/>
+            <!-- Penthouse -->
+            <rect data-unit="301" class="d-unit-shape" style="opacity:0;cursor:pointer;transition:opacity 0.2s" x="35"   y="29"  width="426" height="302" fill="#002E6B"/>
+            <rect data-unit="302" class="d-unit-shape" style="opacity:0;cursor:pointer;transition:opacity 0.2s" x="602"  y="29"  width="451" height="302" fill="#002E6B"/>
+            <rect data-unit="303" class="d-unit-shape" style="opacity:0;cursor:pointer;transition:opacity 0.2s" x="1053" y="29"  width="451" height="302" fill="#002E6B"/>
+            <rect data-unit="304" class="d-unit-shape" style="opacity:0;cursor:pointer;transition:opacity 0.2s" x="1646" y="29"  width="426" height="302" fill="#002E6B"/>
+          </svg>
+
+          <img
+            src="/assets/unidades/units-base-building.svg"
+            alt="Plano del edificio"
+            class="relative w-full block pointer-events-none"
+          />
+
         </div>
       </div>
 
@@ -233,7 +222,7 @@ const sg = 'opacity-0 hover:opacity-50 transition-opacity duration-200 cursor-po
 
 <script>
   function getShape(unitId: string) {
-    return document.querySelector<SVGGElement>(`.d-unit-shape[data-unit="${unitId}"]`);
+    return document.querySelector<SVGRectElement>(`.d-unit-shape[data-unit="${unitId}"]`);
   }
 
   function openUnit(unitId: string) {
@@ -245,12 +234,12 @@ const sg = 'opacity-0 hover:opacity-50 transition-opacity duration-200 cursor-po
         const opening = detail!.classList.contains('hidden');
         detail!.classList.toggle('hidden', !opening);
         chevron!.style.transform  = opening ? 'rotate(180deg)' : '';
-        if (shape) shape.style.opacity = opening ? '0.5' : '';
+        if (shape) shape.style.opacity = opening ? '0.5' : '0';
         if (opening) card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       } else {
         detail!.classList.add('hidden');
         chevron!.style.transform = '';
-        if (shape) shape.style.opacity = '';
+        if (shape) shape.style.opacity = '0';
       }
     });
   }
@@ -259,8 +248,14 @@ const sg = 'opacity-0 hover:opacity-50 transition-opacity duration-200 cursor-po
     card.addEventListener('click', () => openUnit(card.dataset.unit!));
   });
 
-  document.querySelectorAll<SVGGElement>('.d-unit-shape').forEach(shape => {
+  document.querySelectorAll<SVGRectElement>('.d-unit-shape').forEach(shape => {
     shape.addEventListener('click', () => openUnit(shape.dataset.unit!));
+    shape.addEventListener('mouseenter', () => {
+      if (shape.style.opacity === '0') shape.style.opacity = '0.25';
+    });
+    shape.addEventListener('mouseleave', () => {
+      if (shape.style.opacity === '0.25') shape.style.opacity = '0';
+    });
   });
 
   const pdfBtn = document.getElementById('d-pdf-btn') as HTMLButtonElement | null;

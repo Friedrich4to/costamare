@@ -32,55 +32,25 @@ import '@photo-sphere-viewer/map-plugin/index.css';
   import { Viewer } from '@photo-sphere-viewer/core';
   import { VirtualTourPlugin } from '@photo-sphere-viewer/virtual-tour-plugin';
   import { MapPlugin } from '@photo-sphere-viewer/map-plugin';
-  
 
   const nodes = [
     {
       id: 'piscina',
-      panorama: '/tour/ext/piscina.avif',
+      panorama: '/tour/ext/piscina.jpg',
       name: 'Piscina',
       map: { x: 650, y: 580 },
       links: [
-        { nodeId: 'gazebo', position: { yaw: '90deg', pitch: '0deg' } },
-        { nodeId: 'parqueo',     position: { yaw: '70deg',   pitch: '0deg' } },
-        { nodeId: 'bbq',     position: { yaw: '270deg',   pitch: '0deg' } },
-        { nodeId: 'gym',     position: { yaw: '275deg',   pitch: '6deg' } },
-      ],
-    },
-    {
-      id: 'parqueo',
-      panorama: '/tour/ext/parqueo.avif',
-      name: 'Parqueo',
-      map: { x: 1125, y: 470 },
-      links: [{ nodeId: 'gazebo', position: { yaw: '270deg', pitch: '-15deg' } }],
-    },
-    {
-      id: 'bbq',
-      panorama: '/tour/ext/bbq.avif',
-      name: 'BBQ',
-      map: { x: 390, y: 580 },
-      links: [
-        { nodeId: 'piscina', position: { yaw: '90deg', pitch: '-8deg' } },
-        { nodeId: 'gym',  position: { yaw: '270deg',   pitch: '0deg' } },
+        { nodeId: 'gazebo', position: { yaw: '0deg', pitch: '0deg' } },
       ],
     },
     {
       id: 'gazebo',
-      panorama: '/tour/ext/gazebo.avif',
+      panorama: '/tour/ext/gazebo.jpg',
       name: 'Gazebo',
       map: { x: 990, y: 580 },
       links: [
-        { nodeId: 'piscina', position: { yaw: '270deg', pitch: '-7deg' } },
-        { nodeId: 'bbq', position: { yaw: '270deg', pitch: '-2deg' } },
-        { nodeId: 'parqueo', position: { yaw: '20deg',   pitch: '-15deg' } },
+        { nodeId: 'piscina', position: { yaw: '180deg', pitch: '-6deg' } },
       ],
-    },
-    {
-      id: 'gym',
-      panorama: '/tour/ext/gym.avif',
-      name: 'Gimnasio',
-      map: { x: 150, y: 570 },
-      links: [{ nodeId: 'bbq', position: { yaw: '90deg', pitch: '-15deg' } }],
     },
   ];
 

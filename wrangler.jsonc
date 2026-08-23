@@ -21,7 +21,8 @@
     {
       "binding": "DB",
       "database_name": "costamare-db",
-      "database_id": "8a804132-1f37-441b-b6d0-068d4d5e0734"
+      "database_id": "8a804132-1f37-441b-b6d0-068d4d5e0734",
+      "remote": true
     }
   ],
   "browser": {

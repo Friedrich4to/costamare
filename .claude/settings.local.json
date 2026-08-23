@@ -75,7 +75,8 @@
       "Bash(Get-ChildItem -Path . -Recurse -Depth 2)",
       "Bash(Select-Object FullName)",
       "Bash(xargs wc -l)",
-      "Bash(xargs grep -l \"database\\\\|migration\\\\|schema\")"
+      "Bash(xargs grep -l \"database\\\\|migration\\\\|schema\")",
+      "Bash(xargs grep -l \"exterior\\\\|piso1\\\\|piso2\\\\|penthouse\\\\|tour\")"
     ]
   }
 }

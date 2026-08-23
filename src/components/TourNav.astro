@@ -2,10 +2,10 @@
 const pathname = Astro.url.pathname.replace(/\/$/, '') || '/';
 
 const tours = [
-  { label: 'Exterior',    href: '/tour/exterior'   },
-  { label: 'Penthouse',   href: '/tour/penthouse'  },
-  { label: 'Piso 2',      href: '/tour/2do-piso'   },
-  { label: 'Piso 1',      href: '/tour/1er-piso'   },
+  { label: 'Exterior',    href: '/tour/exterior',  disabled: false },
+  { label: 'Penthouse',   href: '/tour/penthouse', disabled: true  },
+  { label: 'Piso 2',      href: '/tour/2do-piso',  disabled: true  },
+  { label: 'Piso 1',      href: '/tour/1er-piso',  disabled: true  },
 ];
 ---
 
@@ -19,15 +19,19 @@ const tours = [
   <span class="tour-nav__sep" aria-hidden="true">|</span>
 
   <ul class="tour-nav__links" role="list">
-    {tours.map(({ label, href }) => (
+    {tours.map(({ label, href, disabled }) => (
       <li>
-        <a
-          href={href}
-          class:list={['tour-nav__link', { 'tour-nav__link--active': pathname === href }]}
-          aria-current={pathname === href ? 'page' : undefined}
-        >
-          {label}
-        </a>
+        {disabled ? (
+          <span class="tour-nav__link tour-nav__link--disabled" aria-disabled="true">{label}</span>
+        ) : (
+          <a
+            href={href}
+            class:list={['tour-nav__link', { 'tour-nav__link--active': pathname === href }]}
+            aria-current={pathname === href ? 'page' : undefined}
+          >
+            {label}
+          </a>
+        )}
       </li>
     ))}
   </ul>
@@ -54,13 +58,17 @@ const tours = [
   <a href="/" class="tour-mobile__back">Website</a>
 
   <ul class="tour-mobile__links" role="list">
-    {tours.map(({ label, href }) => (
+    {tours.map(({ label, href, disabled }) => (
       <li>
-        <a
-          href={href}
-          class:list={['tour-mobile__link', { 'tour-mobile__link--active': pathname === href }]}
-          aria-current={pathname === href ? 'page' : undefined}
-        >{label}</a>
+        {disabled ? (
+          <span class="tour-mobile__link tour-mobile__link--disabled" aria-disabled="true">{label}</span>
+        ) : (
+          <a
+            href={href}
+            class:list={['tour-mobile__link', { 'tour-mobile__link--active': pathname === href }]}
+            aria-current={pathname === href ? 'page' : undefined}
+          >{label}</a>
+        )}
       </li>
     ))}
   </ul>
@@ -142,6 +150,11 @@ const tours = [
   .tour-nav__link--active {
     background: #0d2535;
     color: #fff;
+  }
+
+  .tour-nav__link--disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
   }
 
   /* ── Mobile + tablet: ocultar pill ── */
@@ -240,6 +253,11 @@ const tours = [
   .tour-mobile__link--active {
     background: #0d2535;
     color: #fff;
+  }
+
+  .tour-mobile__link--disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
   }
 </style>
 

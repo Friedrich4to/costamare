@@ -1,7 +1,6 @@
 ---
 export const prerender = false;
 import Layout from '../layouts/Layout.astro';
-import Amenidades from '../components/Amenidades.astro';
 import Galeria from '../components/Galeria.astro';
 import Lightbox from '../components/Lightbox.astro';
 import Disponibilidad_Section from '../components/Disponibilidad_Section.astro';
@@ -39,64 +38,37 @@ try {
 <Layout title="Inicio">
   <main>
     <section class="h-svh flex flex-col items-center pt-16">
-      <img src="/logo.svg" alt="Costamare" class="h-24 w-auto mb-8" />
-
-      <div class="flex flex-col sm:flex-row gap-3 mb-10">
-        <a
-          href="/tour/exterior"
-          class="px-7 py-3 rounded-full bg-base text-white font-medium hover:bg-base/80 transition-colors duration-300 no-underline text-center pointer-events-none opacity-40"
-        >
-          Tour 360°
-        </a>
-        <a
-          href="/dossier.pdf"
-          download="dossier-costamare.pdf"
-          class="px-7 py-3 text-base rounded-full border border-base font-medium hover:bg-base hover:text-white transition-colors duration-300 no-underline text-center pointer-events-none opacity-40"
-        >
-          Descargar Dossier
-        </a>
-      </div>
+      <img src="/logo.svg" alt="Costamare" class="h-36 w-auto mb-8" />
 
       <div class="w-full flex-1 min-h-0">
         <img
-          src="assets/hero.png"
+          src="assets/front_noBG.png"
           alt="Costamare"
-          class="w-full h-full object-cover object-center block"
+          class="w-full h-full object-cover object-bottom block"
         />
       </div>
     </section>
 
-    <section id="descripcion" class="px-[4vw] py-20">
-      <div class="w-full max-w-7xl mx-auto flex flex-col gap-10">
-
-        <p class="leading-tight text-[2rem] lg:text-[2.75rem]">
+    <section id="descripcion" class="px-[4vw] py-24">
+      <div class="w-full max-w-4xl mx-auto flex flex-col items-center gap-10 text-center">
+        <p id="desc-paragraph" class="leading-snug text-[1.75rem] lg:text-[2rem]">
           <strong>Costamare</strong> es un desarrollo de baja densidad diseñado para
-          combinar arquitectura contemporánea con alta rentabilidad.
+          combinar arquitectura contemporánea con alta rentabilidad, ubicado en
+          <strong>Residencial Costa Cana.</strong> Está conformado por
+          <strong>12 apartamentos</strong> de <strong>83m² a 163m²,</strong>
+          con entrega prevista para <strong>Diciembre 2027</strong>
         </p>
-
-        <div class="flex flex-col lg:flex-row gap-16">
-          <div id="info-watermark-container" class="w-full lg:w-1/2 flex items-center justify-center self-center">
-            <span
-              id="info-watermark"
-              class="font-black-mango font-bold uppercase leading-none select-none pointer-events-none whitespace-nowrap"
-              style="color: rgba(29,29,29,0.06);"
-              aria-hidden="true"
-            >
-              INFORMACIONES
-            </span>
-          </div>
-
-          <ul class="w-full lg:w-1/2 flex flex-col gap-4">
-            <li class="text-[2rem] lg:text-[2.5rem]"><strong class="font-bold">12</strong> Apartamentos</li>
-            <li class="text-[2rem] lg:text-[2.5rem]">Entrega en <strong class="font-bold">Diciembre 2027</strong></li>
-            <li class="text-[2rem] lg:text-[2.5rem]">Residencial <strong class="font-bold">Costa Cana</strong></li>
-          </ul>
-        </div>
-
+        <a
+          id="desc-cta"
+          href="/dossier.pdf"
+          download="dossier-costamare.pdf"
+          class="px-8 py-4 rounded-full bg-base text-white font-medium hover:bg-base/80 transition-colors duration-300 no-underline"
+        >
+          Descarga nuestro <strong>Dossier</strong>
+        </a>
       </div>
     </section>
 
-    <Amenidades />
     <Galeria />
     <Lightbox />
     <!-- <Unidades unitTypes={unitTypes} /> -->
@@ -117,16 +89,7 @@ try {
 </Layout>
 
 <script>
-  function fitWatermark() {
-    const el = document.getElementById('info-watermark') as HTMLElement | null;
-    const container = document.getElementById('info-watermark-container') as HTMLElement | null;
-    if (!el || !container) return;
-    el.style.fontSize = '100px';
-    const scale = container.clientWidth / el.scrollWidth;
-    el.style.fontSize = Math.floor(100 * scale) + 'px';
-  }
-  fitWatermark();
-  window.addEventListener('resize', fitWatermark);
+  import '../scripts/descripcion.js';
 </script>
 
 <script>
