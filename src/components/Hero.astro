@@ -1,0 +1,149 @@
+---
+---
+
+<section id="hero" class="relative h-[75svh] lg:h-[90svh] overflow-hidden bg-white">
+
+  <!-- Text content: z-10, slides under the building image on scroll -->
+  <div id="hero-content" class="absolute inset-x-0 top-0 z-10 flex flex-col items-center pt-[8svh]">
+    <img src="/logo.svg" alt="Costamare" class="h-9 w-auto" />
+    <div class="mt-5 flex flex-col items-center">
+      <h1 class="font-black-mango font-bold text-second text-center leading-[1.05] text-[clamp(2rem,4.5vw,3rem)]">
+        Vive cerca de todo.
+      </h1>
+      <h1 class="font-black-mango font-bold italic text-second text-center leading-[1.05] text-[clamp(2rem,4.5vw,3rem)]">
+        Siente que estás lejos de todo.
+      </h1>
+    </div>
+    <a href="#descripcion" class="mt-7 flex flex-col items-center gap-1.5 text-sm text-base tracking-[0.12em] font-medium no-underline">
+      Explora el proyecto
+      <!-- ChevronDown — Lucide -->
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+           stroke="#63613B" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="m6 9 6 6 6-6"/>
+      </svg>
+    </a>
+  </div>
+
+  <!-- Building image: z-20, sits on top of text layer -->
+  <div id="hero-img" class="absolute bottom-0 inset-x-0 z-20 h-[63%]">
+    <picture>
+      <source media="(max-width: 639px)" srcset="/assets/front_noBG_mobile.png" />
+      <img
+        src="/assets/front_noBG.png"
+        alt="Costamare"
+        class="w-full h-full object-cover object-top block"
+      />
+    </picture>
+  </div>
+
+</section>
+
+<!-- Stats bar: outside hero, negative margin-top creates overlap -->
+<div class="relative z-30 -mt-14 mx-[5vw]">
+  <div class="bg-white rounded-2xl shadow-lg flex flex-wrap lg:flex-nowrap items-stretch divide-y lg:divide-y-0 lg:divide-x divide-gray-200">
+
+    <!-- 12 aptos — Building2 -->
+    <div class="basis-1/2 lg:basis-auto lg:flex-1 flex items-center gap-3 px-5 py-5 min-w-0">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+           stroke="#63613B" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="shrink-0">
+        <path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/>
+        <path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/>
+        <path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/>
+        <path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/>
+      </svg>
+      <div>
+        <span class="font-black-mango font-bold text-second text-[2rem] leading-none block">12</span>
+        <span class="text-[11px] text-base leading-none">aptos.</span>
+      </div>
+    </div>
+
+    <!-- 3 niveles — Layers -->
+    <div class="basis-1/2 lg:basis-auto lg:flex-1 flex items-center gap-3 px-5 py-5 min-w-0 border-l border-gray-200 lg:border-l-0">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+           stroke="#63613B" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="shrink-0">
+        <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+        <polyline points="2 17 12 22 22 17"/>
+        <polyline points="2 12 12 17 22 12"/>
+      </svg>
+      <div>
+        <span class="font-black-mango font-bold text-second text-[2rem] leading-none block">3</span>
+        <span class="text-[11px] text-base leading-none">niveles</span>
+      </div>
+    </div>
+
+    <!-- 12 parqueos — Car -->
+    <div class="basis-1/2 lg:basis-auto lg:flex-1 flex items-center gap-3 px-5 py-5 min-w-0">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+           stroke="#63613B" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="shrink-0">
+        <path d="M19 17H5a2 2 0 0 1-2-2V9.5L5.5 5h13L21 9.5V15a2 2 0 0 1-2 2Z"/>
+        <circle cx="7.5" cy="17.5" r="2.5"/>
+        <circle cx="16.5" cy="17.5" r="2.5"/>
+        <path d="M3 10h18"/>
+      </svg>
+      <div>
+        <span class="font-black-mango font-bold text-second text-[2rem] leading-none block">12</span>
+        <span class="text-[11px] text-base leading-none">parqueos</span>
+      </div>
+    </div>
+
+    <!-- Inicio — Calendar -->
+    <div class="basis-1/2 lg:basis-auto lg:flex-1 flex items-center gap-3 px-5 py-5 min-w-0 border-l border-gray-200 lg:border-l-0">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+           stroke="#63613B" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="shrink-0">
+        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+        <line x1="16" y1="2" x2="16" y2="6"/>
+        <line x1="8" y1="2" x2="8" y2="6"/>
+        <line x1="3" y1="10" x2="21" y2="10"/>
+      </svg>
+      <div>
+        <span class="text-[11px] text-base leading-none block">Inicio:</span>
+        <span class="font-semibold text-[13px] text-second leading-snug block">dic. 2026</span>
+      </div>
+    </div>
+
+    <!-- Entrega — KeyRound -->
+    <div class="basis-full lg:basis-auto lg:flex-1 flex items-center gap-3 px-5 py-5 min-w-0">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+           stroke="#63613B" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="shrink-0">
+        <circle cx="7.5" cy="15.5" r="5.5"/>
+        <path d="m21 2-9.6 9.6"/>
+        <path d="m15.5 7.5 3 3L22 7l-3-3"/>
+      </svg>
+      <div>
+        <span class="text-[11px] text-base leading-none block">Entrega:</span>
+        <span class="font-semibold text-[13px] text-second leading-snug block">dic. 2027</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  import gsap from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  gsap.to('#hero-content', {
+    yPercent: 25,
+    opacity: 0,
+    ease: 'none',
+    scrollTrigger: {
+      trigger: '#hero',
+      start: 'top top',
+      end: '60% top',
+      scrub: 1,
+    },
+  });
+
+  gsap.to('#hero-img', {
+    yPercent: -10,
+    ease: 'none',
+    scrollTrigger: {
+      trigger: '#hero',
+      start: 'top top',
+      end: 'bottom top',
+      scrub: 1,
+    },
+  });
+</script>

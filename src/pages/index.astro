@@ -1,10 +1,11 @@
 ---
 export const prerender = false;
 import Layout from '../layouts/Layout.astro';
+import Hero from '../components/Hero.astro';
 import Galeria from '../components/Galeria.astro';
 import Lightbox from '../components/Lightbox.astro';
 import Amenidades from '../components/Amenidades.astro';
-import Disponibilidad_Section from '../components/Disponibilidad_Section.astro';
+import Disponibilidad_Update from '../components/Disponibilidad_Update.astro';
 import MapaBavaro from '../components/MapaBavaro.astro';
 import Pagos from '../components/Pagos.astro';
 import '@photo-sphere-viewer/core/index.css';
@@ -38,60 +39,34 @@ try {
 
 <Layout title="Inicio">
   <main>
-    <section id="hero" class="relative h-svh overflow-hidden">
-      <div id="hero-logo" class="absolute inset-0 flex justify-center items-start pt-[calc(1rem+14svh)] z-10">
-        <img src="/logo.svg" alt="Costamare" class="h-20 max-w-[80svw] w-auto sm:h-28 lg:h-36" />
-      </div>
-      <div id="hero-img" class="absolute inset-0 z-20">
-        <img
-          src="assets/front_noBG.png"
-          alt="Costamare"
-          class="w-full h-full object-cover object-bottom block"
-        />
-      </div>
-    </section>
+    <Hero />
 
-    <section id="descripcion" class="px-[4vw] py-24">
-      <div class="w-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center">
-        <div class="rounded-xl overflow-hidden aspect-4/3">
-          <img
-            src="assets/gallery/social_2.jpg"
-            alt="Costamare"
-            class="w-full h-full object-cover"
-          />
+    <section id="descripcion" class="px-[4vw] py-24 text-center">
+      <div class="w-full max-w-3xl mx-auto flex flex-col items-center gap-8">
+        <div class="flex flex-col items-center gap-3">
+          <p id="desc-label" class="font-display font-black text-sm uppercase tracking-[0.25em] text-second">Acerca de</p>
+          <img id="desc-title" src="/logo.svg" alt="Costamare" class="w-[clamp(14rem,50vw,36rem)] h-auto" />
         </div>
 
-        <div class="flex flex-col gap-6 max-w-xl">
-          <p id="desc-paragraph" class="text-xl leading-relaxed">
-            <strong>Costamare</strong> es un desarrollo de baja densidad ubicado en Costa Cana, Bávaro, diseñado para combinar arquitectura contemporánea con alta rentabilidad.
-          </p>
+        <p id="desc-paragraph" class="text-3xl leading-relaxed max-w-3xl text-second">
+          Se trata de un desarrollo de baja densidad ubicado en Brisas de Punta Cana, Bávaro, diseñado para combinar arquitectura contemporánea con alta rentabilidad.
+        </p>
 
-          <div id="desc-divider" class="w-8 border-t-2 border-base"></div>
-
-          <ul id="desc-list" class="flex flex-col gap-2 text-xl list-none p-0 m-0">
-            <li><strong>12</strong> Apartamentos</li>
-            <li>Residencial <strong>Costa Cana</strong></li>
-            <li>Entrega en Diciembre <strong>2027</strong></li>
-            <li>De <strong>83m²</strong> y <strong>163m²</strong></li>
-          </ul>
-
-          <a
-            id="desc-cta"
-            href="/dossier.pdf"
-            download="dossier-costamare.pdf"
-            class="self-start text-xl px-8 py-4 rounded-full bg-base text-white font-medium hover:bg-base/80 transition-colors duration-300 no-underline"
-          >
-            Descargar <strong>Folleto</strong>
-          </a>
-        </div>
+        <a
+          id="desc-cta"
+          href="/dossier.pdf"
+          download="dossier-costamare.pdf"
+          class="text-xl px-10 py-4 rounded-md border-2 border-base text-base font-medium hover:bg-base hover:text-white transition-colors duration-300 no-underline"
+        >
+          Descarga nuestro <strong>Dossier</strong>
+        </a>
       </div>
     </section>
 
     <Galeria />
     <Lightbox />
-    <Amenidades />
     <!-- <Unidades unitTypes={unitTypes} /> -->
-    <Disponibilidad_Section units={units} />
+    <Disponibilidad_Update units={units} />
     <section id="maqueta" class="relative w-full h-[70svh] flex items-center justify-center overflow-hidden">
       <div id="maqueta-psv" class="absolute inset-0 w-full h-full" style="pointer-events:none;"></div>
       <div class="absolute inset-0 bg-base/50"></div>
@@ -102,14 +77,11 @@ try {
         Explorar Tour 360°
       </a>
     </section>
+        <Amenidades />
     <MapaBavaro />
     <Pagos />
   </main>
 </Layout>
-
-<script>
-  import '../scripts/hero.js';
-</script>
 
 <script>
   import '../scripts/descripcion.js';

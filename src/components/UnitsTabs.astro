@@ -1,0 +1,158 @@
+---
+interface URow {
+  id: number;
+  numero: string;
+  m2: number;
+  patio_m2: number | null;
+  terraza_m2: number | null;
+  m2_total: number;
+  disponibilidad: string;
+  tour_url: string | null;
+  gallery: string;
+  precio: number;
+}
+
+interface Props {
+  units: URow[];
+}
+
+const { units } = Astro.props;
+
+const floors = [
+  { label: 'Nivel 1', units: units.filter(u => u.numero.startsWith('1')) },
+  { label: 'Nivel 2', units: units.filter(u => u.numero.startsWith('2')) },
+  { label: 'Nivel 3', units: units.filter(u => u.numero.startsWith('3')) },
+];
+
+const statusLabel: Record<string, string> = {
+  available: 'Disponible',
+  reserved: 'Reservado',
+  sold: 'Vendido',
+};
+
+const statusColor: Record<string, string> = {
+  available: '#5B7A49',
+  reserved: '#92400e',
+  sold: '#dc2626',
+};
+
+function featureLabel(u: URow): string {
+  if (u.patio_m2) return 'Patio privado';
+  if (u.terraza_m2 && u.numero.startsWith('2')) return 'Balcón';
+  if (u.terraza_m2) return 'Terraza amplia';
+  return '';
+}
+---
+
+<section class="px-[4vw] py-12">
+  <div class="max-w-7xl mx-auto">
+
+    <!-- Tab buttons -->
+    <div class="ut-tab-bar flex gap-8 mb-8">
+      {floors.map((floor, i) => (
+        <button
+          class="ut-tab"
+          data-tab={i}
+          data-active={i === 0 ? '' : undefined}
+        >
+          {floor.label}
+        </button>
+      ))}
+    </div>
+
+    <!-- Tab panels -->
+    {floors.map((floor, i) => (
+      <div
+        class="ut-panel grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+        data-panel={i}
+        style={i !== 0 ? 'display:none' : undefined}
+      >
+        {floor.units.map(unit => (
+          <div class="ut-card flex flex-col rounded-xl overflow-hidden" style="background:#ffffff; border:1px solid rgba(28,28,28,0.10)">
+
+            <!-- Number + status -->
+            <div class="flex items-start justify-between px-5 pt-5 pb-2">
+              <span class="font-display font-bold" style="font-size:2.5rem; line-height:1; color:#1C1C1C">{unit.numero}</span>
+              <span class="text-sm pt-1.5" style={`color:${statusColor[unit.disponibilidad] ?? '#1C1C1C'}`}>
+                {statusLabel[unit.disponibilidad] ?? unit.disponibilidad}
+              </span>
+            </div>
+
+            <!-- m² totales -->
+            <p class="px-5 text-base font-medium m-0" style="color:#1C1C1C">{unit.m2_total} m² totales</p>
+
+            <!-- Features -->
+            <div class="px-5 pt-2 pb-5 flex items-center gap-5 text-sm" style="color:rgba(28,28,28,0.50)">
+              <span>2 hab.</span>
+              {featureLabel(unit) && <span>{featureLabel(unit)}</span>}
+            </div>
+
+            <!-- Price -->
+            {!['reserved', 'sold'].includes(unit.disponibilidad) && (
+              <p class="px-5 pb-5 font-bold text-xl m-0" style="color:#1C1C1C">
+                US${unit.precio.toLocaleString('en-US')}
+              </p>
+            )}
+
+            <!-- Floor plan -->
+            <div class="mt-auto">
+              <img
+                src="/assets/units/master-plan.avif"
+                alt={`Plano unidad ${unit.numero}`}
+                class="w-full block"
+                loading="lazy"
+              />
+            </div>
+
+          </div>
+        ))}
+      </div>
+    ))}
+
+  </div>
+</section>
+
+<style>
+  .ut-tab-bar {
+    border-bottom: 1px solid rgba(28, 28, 28, 0.10);
+  }
+
+  .ut-tab {
+    padding-bottom: 0.75rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    font-weight: 400;
+    color: rgba(28, 28, 28, 0.40);
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    margin-bottom: -1px;
+    transition: color 150ms, border-color 150ms;
+  }
+
+  .ut-tab[data-active] {
+    font-weight: 700;
+    color: #1C1C1C;
+    border-bottom-color: #1C1C1C;
+  }
+</style>
+
+<script>
+  const tabs = document.querySelectorAll<HTMLButtonElement>('.ut-tab');
+  const panels = document.querySelectorAll<HTMLElement>('.ut-panel');
+
+  tabs.forEach((tab, i) => {
+    tab.addEventListener('click', () => {
+      tabs.forEach((t, j) => {
+        if (i === j) {
+          t.setAttribute('data-active', '');
+          panels[j].style.display = 'grid';
+        } else {
+          t.removeAttribute('data-active');
+          panels[j].style.display = 'none';
+        }
+      });
+    });
+  });
+</script>

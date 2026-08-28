@@ -11,15 +11,16 @@
 }
 
 @theme {
-  --color-base: #002E6B;
-  --color-white: #F4F4F4;
+  --color-base: #63613B;
+  --color-second: #1C1C1C;
+  --color-white: #FAF6F3;
   --color-red: #C23E3E;
   --color-green: #397207;
   --color-yellow: #B8900D;
-  --color-gray-100: #F0F0F0;
+  --color-gray-100: #F5F0ED;
   --color-gray-200: #E3E3E3;
   --font-sans: 'Bricolage Grotesque', sans-serif;
-  --font-display: 'Bricolage Grotesque', sans-serif;
+  --font-display: 'BlackMango', sans-serif;
   --font-black-mango: 'BlackMango', sans-serif;
 }
 

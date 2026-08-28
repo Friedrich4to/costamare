@@ -1,0 +1,375 @@
+---
+export const prerender = false;
+import Layout from '../layouts/Layout.astro';
+import HeroAlt from '../components/hero_alt.astro';
+import Pagos from '../components/Pagos.astro';
+import UnitsTabs from '../components/UnitsTabs.astro';
+import Footer from '../components/footer.astro';
+import { env } from 'cloudflare:workers';
+
+interface URow {
+  id: number;
+  numero: string;
+  m2: number;
+  patio_m2: number | null;
+  terraza_m2: number | null;
+  m2_total: number;
+  disponibilidad: string;
+  tour_url: string | null;
+  gallery: string;
+  precio: number;
+}
+
+let units: URow[] = [];
+
+try {
+  const db = env.DB;
+  if (db) {
+    const res = await db.prepare('SELECT * FROM units ORDER BY numero').all<URow>();
+    units = res.results ?? [];
+  }
+} catch (e) {
+  console.error('wip DB error:', e);
+}
+
+const now = new Date();
+const dateStr = now.toLocaleDateString('es-DO', { day: 'numeric', month: 'long', year: 'numeric' });
+
+const rows = units.map(u => ({
+  id:         u.numero,
+  status:     u.disponibilidad,
+  interiorM2: u.m2,
+  terrazaM2:  u.terraza_m2 ?? null,
+  patio_m2:   u.patio_m2 ?? null,
+  totalM2:    u.m2_total,
+  priceUSD:   u.precio,
+}));
+
+const statusLabel: Record<string, string> = {
+  available: 'Disponible',
+  reserved:  'Reservado',
+  sold:      'Vendido',
+};
+const statusColor: Record<string, string> = {
+  available: '#397207',
+  reserved:  '#B8900D',
+  sold:      '#C23E3E',
+};
+---
+
+<Layout title="Inicio" bare={true}>
+
+<nav
+  id="main-nav"
+  style="height: 10svh"
+  class="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-8 bg-white backdrop-blur-sm translate-y-0 transition-transform duration-500 ease-in-out"
+>
+  <a href="#" aria-label="Costamare inicio">
+    <img src="/logo.svg" alt="Costamare" class="h-8 w-auto" />
+  </a>
+
+  <ul class="hidden lg:flex items-center gap-6">
+    {[
+      { label: 'Características', href: '#descripcion',    icon: false },
+      { label: 'Disponibilidad',  href: '#disponibilidad', icon: false },
+      { label: 'Tour 360°',       href: '/tour/exterior',  icon: true  },
+      { label: 'Ubicación',       href: '#map',            icon: false },
+    ].map(({ label, href, icon }) => (
+      <li>
+        <a
+          href={href}
+          class="inline-flex items-center gap-1 text-[16px] font-medium text-gray-700 hover:text-black transition-colors duration-200"
+        >
+          {label}
+          {icon && (
+            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+              <polyline points="15 3 21 3 21 9"/>
+              <line x1="10" y1="14" x2="21" y2="3"/>
+            </svg>
+          )}
+        </a>
+      </li>
+    ))}
+  </ul>
+
+  <a
+    href="/dossier.pdf"
+    download="dossier-costamare.pdf"
+    class="hidden lg:flex items-center gap-1.5 px-4 py-2 text-[16px] rounded-full bg-base text-white hover:bg-base/80 transition-colors duration-200 no-underline font-medium"
+  >
+    Descargar Dossier
+  </a>
+
+  <button
+    id="burger-btn"
+    type="button"
+    aria-label="Abrir menú"
+    aria-expanded="false"
+    aria-controls="mobile-menu"
+    class="lg:hidden flex flex-col justify-center items-center w-10 h-10 gap-1.5 rounded focus-visible:outline-2 focus-visible:outline-offset-2"
+  >
+    <span class="burger-line block w-6 h-0.5 bg-base rounded-full origin-center transition-transform duration-300"></span>
+    <span class="burger-line block w-6 h-0.5 bg-base rounded-full origin-center transition-opacity  duration-300"></span>
+    <span class="burger-line block w-6 h-0.5 bg-base rounded-full origin-center transition-transform duration-300"></span>
+  </button>
+</nav>
+
+<div
+  id="mobile-menu"
+  role="dialog"
+  aria-modal="true"
+  aria-label="Menú de navegación"
+  style="top: 10svh; height: 90svh"
+  class="fixed left-0 right-0 z-40 bg-white -translate-x-full transition-transform duration-300 ease-in-out lg:hidden"
+>
+  <ul class="flex flex-col items-start justify-center h-full gap-8 px-8">
+    {[
+      { label: 'Características', href: '#descripcion',    icon: false },
+      { label: 'Disponibilidad',  href: '#disponibilidad', icon: false },
+      { label: 'Tour 360°',       href: '/tour/exterior',  icon: true  },
+      { label: 'Ubicación',       href: '#map',            icon: false },
+    ].map(({ label, href, icon }) => (
+      <li>
+        <a
+          href={href}
+          class="mobile-nav-link inline-flex items-center gap-1.5 text-2xl font-medium text-gray-700 hover:text-black transition-colors duration-200"
+        >
+          {label}
+          {icon && (
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+              <polyline points="15 3 21 3 21 9"/>
+              <line x1="10" y1="14" x2="21" y2="3"/>
+            </svg>
+          )}
+        </a>
+      </li>
+    ))}
+    <li>
+      <a
+        href="/dossier.pdf"
+        download="dossier-costamare.pdf"
+        class="mobile-nav-link text-2xl font-medium text-gray-700 hover:text-black transition-colors duration-200 no-underline"
+      >
+        Descargar Dossier
+      </a>
+    </li>
+  </ul>
+</div>
+
+<style>
+  #burger-btn[aria-expanded="true"] .burger-line:nth-child(1) {
+    transform: translateY(8px) rotate(45deg);
+  }
+  #burger-btn[aria-expanded="true"] .burger-line:nth-child(2) {
+    opacity: 0;
+  }
+  #burger-btn[aria-expanded="true"] .burger-line:nth-child(3) {
+    transform: translateY(-8px) rotate(-45deg);
+  }
+</style>
+
+<script>
+  const burgerBtn  = document.getElementById('burger-btn')   as HTMLButtonElement
+  const mobileMenu = document.getElementById('mobile-menu')  as HTMLDivElement
+  const mobileLinks = mobileMenu.querySelectorAll<HTMLAnchorElement>('.mobile-nav-link')
+
+  function openMenu(): void {
+    mobileMenu.classList.remove('-translate-x-full')
+    mobileMenu.classList.add('translate-x-0')
+    burgerBtn.setAttribute('aria-expanded', 'true')
+    burgerBtn.setAttribute('aria-label', 'Cerrar menú')
+    document.body.classList.add('overflow-hidden')
+  }
+
+  function closeMenu(): void {
+    mobileMenu.classList.remove('translate-x-0')
+    mobileMenu.classList.add('-translate-x-full')
+    burgerBtn.setAttribute('aria-expanded', 'false')
+    burgerBtn.setAttribute('aria-label', 'Abrir menú')
+    document.body.classList.remove('overflow-hidden')
+  }
+
+  burgerBtn.addEventListener('click', () => {
+    burgerBtn.getAttribute('aria-expanded') === 'true' ? closeMenu() : openMenu()
+  })
+
+  mobileLinks.forEach(link => link.addEventListener('click', closeMenu))
+
+  document.addEventListener('keydown', (e: KeyboardEvent) => {
+    if (e.key === 'Escape' && burgerBtn.getAttribute('aria-expanded') === 'true') {
+      closeMenu()
+      burgerBtn.focus()
+    }
+  })
+</script>
+
+  <main style="padding-top: 10svh">
+    <HeroAlt />
+
+    <div class="two-col-wrapper">
+      <UnitsTabs units={units} />
+
+      <!-- Listado de disponibilidad -->
+      <section class="disp-section">
+      <div class="disp-inner">
+        <div class="disp-title-row">
+          <h2 class="disp-h2">Listado de precios</h2>
+          <span class="disp-date">Actualizado en {dateStr}</span>
+        </div>
+        <div class="disp-rule-thick"></div>
+
+        <div class="table-scroll">
+        <table class="disp-table">
+          <thead>
+            <tr>
+              <th>Apto.</th>
+              <th class="c">M² Const.</th>
+              <th class="c">M² Terraza</th>
+              <th class="c">M² Patio</th>
+              <th class="c">Total M²</th>
+              <th class="c">Estatus</th>
+              <th class="r">Precio</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map(row => (
+              <tr>
+                <td><span class="unit-id">{row.id}</span></td>
+                <td class="c">{row.interiorM2}m²</td>
+                {row.terrazaM2
+                  ? <td class="c">{row.terrazaM2}m²</td>
+                  : <td class="dim">n/a</td>
+                }
+                {row.patio_m2
+                  ? <td class="c">{row.patio_m2}m²</td>
+                  : <td class="dim">n/a</td>
+                }
+                <td class="c">{row.totalM2}m²</td>
+                <td class="c">
+                  <span class="status" style={`color:${statusColor[row.status] ?? 'inherit'}`}>
+                    {statusLabel[row.status] ?? row.status}
+                  </span>
+                </td>
+                <td class="r">
+                  {!['reserved', 'sold'].includes(row.status) && (
+                    <span class="price">US$ {row.priceUSD.toLocaleString('en-US')}</span>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        </div>
+      </div>
+    </section>
+    </div>
+
+    <Pagos />
+  </main>
+  <Footer />
+</Layout>
+
+<style>
+  /* ── Two-column layout ───────────────────────── */
+  .two-col-wrapper {
+    display: grid;
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+  .two-col-wrapper > * {
+    min-width: 0;
+  }
+  @media (min-width: 1024px) {
+    .two-col-wrapper {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .disp-section {
+    padding: 48px 24px;
+    background: var(--color-white);
+  }
+  .disp-inner {
+    max-width: 100%;
+  }
+  .disp-title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 10px;
+  }
+  .disp-h2 {
+    font-size: clamp(28px, 5vw, 36px);
+    font-weight: 700;
+    line-height: 1.1;
+    color: #1D1D1D;
+  }
+  .disp-date {
+    font-size: 15px;
+    font-weight: 300;
+    white-space: nowrap;
+    color: #1D1D1D;
+  }
+  .disp-rule-thick {
+    width: 200px;
+    height: 2px;
+    background: #1D1D1D;
+    margin-bottom: 12px;
+  }
+  .disp-meta {
+    font-size: 14px;
+    margin-bottom: 4px;
+    color: #1D1D1D;
+  }
+  .disp-meta strong { font-weight: 700; }
+  .disp-rule-thin {
+    width: 100%;
+    height: 1px;
+    background: rgba(29,29,29,0.18);
+    margin-bottom: 16px;
+  }
+
+  .disp-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 520px;
+  }
+  .disp-table thead th {
+    font-weight: 700;
+    font-size: 13px;
+    color: #1D1D1D;
+    padding: 6px 10px;
+    border-bottom: 1px solid rgba(29,29,29,0.18);
+    text-align: left;
+  }
+  .disp-table thead th.c { text-align: center; }
+  .disp-table thead th.r { text-align: right; }
+
+  .disp-table tbody tr { border-bottom: 1px solid rgba(29,29,29,0.07); }
+  .disp-table tbody td {
+    font-size: 14px;
+    padding: 8px 10px;
+    vertical-align: middle;
+    color: #1D1D1D;
+  }
+  .disp-table tbody td.c { text-align: center; }
+  .disp-table tbody td.r { text-align: right; }
+  .disp-table tbody td.dim { color: rgba(29,29,29,0.35); text-align: center; }
+
+  .unit-id { font-weight: 700; font-size: 14px; }
+  .status  { font-weight: 600; }
+  .price   { font-weight: 700; }
+
+  /* ── Horizontal scroll wrapper for mobile ───── */
+  .table-scroll {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+</style>
+
+<script>
+  import '../scripts/descripcion.js';
+</script>

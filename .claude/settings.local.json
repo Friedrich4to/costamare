@@ -76,7 +76,11 @@
       "Bash(Select-Object FullName)",
       "Bash(xargs wc -l)",
       "Bash(xargs grep -l \"database\\\\|migration\\\\|schema\")",
-      "Bash(xargs grep -l \"exterior\\\\|piso1\\\\|piso2\\\\|penthouse\\\\|tour\")"
+      "Bash(xargs grep -l \"exterior\\\\|piso1\\\\|piso2\\\\|penthouse\\\\|tour\")",
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\frede\\\\Documents\\\\Clientes\\\\0_Inmobiliarias\\\\Costamare\\\\costamare_web\" -Force)",
+      "Bash(Select-Object Name, Mode)",
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\frede\\\\Documents\\\\Clientes\\\\0_Inmobiliarias\\\\Costamare\\\\costamare_web\\\\src\\\\components\" -Force)",
+      "Bash(Select-Object Name, FullName)"
     ]
   }
 }
