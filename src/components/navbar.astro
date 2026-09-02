@@ -1,9 +1,9 @@
 ---
 const links = [
-  { label: 'Características', href: '#descripcion',    icon: false },
-  { label: 'Disponibilidad',  href: '#disponibilidad', icon: false },
-  { label: 'Tour 360°',       href: '/tour/exterior',  icon: true  },
-  { label: 'Ubicación',       href: '#map',            icon: false },
+  { label: 'Características', href: '#descripcion',    icon: false, disabled: false },
+  { label: 'Disponibilidad',  href: '#disponibilidad', icon: false, disabled: false },
+  { label: 'Tour 360°',       href: '/tour/exterior',  icon: true,  disabled: true  },
+  { label: 'Ubicación',       href: '#map',            icon: false, disabled: false },
 ]
 ---
 
@@ -17,11 +17,17 @@ const links = [
   </a>
 
   <ul class="hidden lg:flex items-center gap-6">
-    {links.map(({ label, href, icon }) => (
+    {links.map(({ label, href, icon, disabled }) => (
       <li>
         <a
-          href={href}
-          class="inline-flex items-center gap-1 text-[16px] font-medium text-gray-700 hover:text-black transition-colors duration-200"
+          href={disabled ? undefined : href}
+          aria-disabled={disabled ? 'true' : undefined}
+          class:list={[
+            "inline-flex items-center gap-1 text-[16px] font-medium transition-colors duration-200",
+            disabled
+              ? "text-gray-400 opacity-40 pointer-events-none cursor-default"
+              : "text-gray-700 hover:text-black"
+          ]}
         >
           {label}
           {icon && (
@@ -67,11 +73,17 @@ const links = [
   class="fixed left-0 right-0 z-40 bg-white -translate-x-full transition-transform duration-300 ease-in-out lg:hidden"
 >
   <ul class="flex flex-col items-start justify-center h-full gap-8 px-8">
-    {links.map(({ label, href, icon }) => (
+    {links.map(({ label, href, icon, disabled }) => (
       <li>
         <a
-          href={href}
-          class="mobile-nav-link inline-flex items-center gap-1.5 text-2xl font-medium text-gray-700 hover:text-black transition-colors duration-200"
+          href={disabled ? undefined : href}
+          aria-disabled={disabled ? 'true' : undefined}
+          class:list={[
+            "mobile-nav-link inline-flex items-center gap-1.5 text-2xl font-medium transition-colors duration-200",
+            disabled
+              ? "text-gray-400 opacity-40 pointer-events-none cursor-default"
+              : "text-gray-700 hover:text-black"
+          ]}
         >
           {label}
           {icon && (

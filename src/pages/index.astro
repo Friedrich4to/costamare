@@ -48,7 +48,7 @@ try {
           <img id="desc-title" src="/logo.svg" alt="Costamare" class="w-[clamp(14rem,50vw,36rem)] h-auto" />
         </div>
 
-        <p id="desc-paragraph" class="text-3xl leading-relaxed max-w-3xl text-second">
+        <p id="desc-paragraph" class="text-[20px] md:text-3xl leading-relaxed max-w-3xl text-second">
           Se trata de un desarrollo de baja densidad ubicado en Brisas de Punta Cana, Bávaro, diseñado para combinar arquitectura contemporánea con alta rentabilidad.
         </p>
 
@@ -67,7 +67,7 @@ try {
     <Lightbox />
     <!-- <Unidades unitTypes={unitTypes} /> -->
     <Disponibilidad_Update units={units} />
-    <section id="maqueta" class="relative w-full h-[70svh] flex items-center justify-center overflow-hidden">
+    <section id="maqueta" class="hidden relative w-full h-[70svh] items-center justify-center overflow-hidden">
       <div id="maqueta-psv" class="absolute inset-0 w-full h-full" style="pointer-events:none;"></div>
       <div class="absolute inset-0 bg-base/50"></div>
       <a
@@ -77,7 +77,7 @@ try {
         Explorar Tour 360°
       </a>
     </section>
-        <Amenidades />
+        <div class="hidden"><Amenidades /></div>
     <MapaBavaro />
     <Pagos />
   </main>
