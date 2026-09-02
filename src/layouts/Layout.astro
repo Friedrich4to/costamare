@@ -6,11 +6,11 @@ interface Props { title?: string; bare?: boolean }
 const { title = 'Costamare', bare = false } = Astro.props
 const pageTitle = `Costamare - ${title}`
 const description = 'Ubicado en Bávaro, Punta Cana, Costamare es un desarrollo residencial diseñado para combinar arquitectura contemporánea con alta rentabilidad.'
-const ogImage = '/bg.avif'
+const ogImage = '/assets/gallery/frente.jpg'
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="es">
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width" />
@@ -24,6 +24,8 @@ const ogImage = '/bg.avif'
 		<meta property="og:description" content={description} />
 		<meta property="og:image" content={ogImage} />
 		<meta property="og:type" content="website" />
+		<meta property="og:locale" content="es_DO" />
+		<meta property="og:site_name" content="Costamare" />
 		<!-- Twitter Card -->
 		<meta name="twitter:card" content="summary_large_image" />
 		<meta name="twitter:title" content={pageTitle} />
