@@ -2,10 +2,9 @@
 const pathname = Astro.url.pathname.replace(/\/$/, '') || '/';
 
 const tours = [
-  { label: 'Exterior',    href: '/tour/exterior',  disabled: false },
-  { label: 'Penthouse',   href: '/tour/penthouse', disabled: true  },
-  { label: 'Piso 2',      href: '/tour/2do-piso',  disabled: true  },
-  { label: 'Piso 1',      href: '/tour/1er-piso',  disabled: true  },
+  { label: 'Exterior',   href: '/tour/exterior',   disabled: false },
+  { label: 'Piso 1',    href: '/tour/interior',   disabled: false },
+  { label: 'Piso 2 y 3', href: '/tour/piso-2-3',  disabled: false },
 ];
 ---
 
@@ -39,7 +38,7 @@ const tours = [
 
 <!-- Burger button (solo mobile) -->
 <button
-  class="tour-burger hidden max-lg:flex fixed bottom-6 right-6 z-9999 items-center justify-center px-4 py-2 rounded-lg bg-[#0d2535] border-0 cursor-pointer shadow-[0_4px_16px_rgba(0,0,0,0.25)] text-white text-sm font-medium"
+  class="tour-burger hidden max-lg:flex fixed bottom-6 right-6 z-9999 items-center justify-center px-4 py-2 rounded-lg bg-base border-0 cursor-pointer shadow-[0_4px_16px_rgba(0,0,0,0.25)] text-white text-sm font-medium"
   aria-label="Abrir menú"
   aria-expanded="false"
   aria-controls="tour-mobile-menu"
@@ -85,8 +84,8 @@ const tours = [
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    background: #fff;
-    border-radius: 999px;
+    background: #FAF6F3;
+    border-radius: 12px;
     padding: 1rem 2rem;
     box-shadow: 0 4px 24px rgba(0, 0, 0, 0.14);
     white-space: nowrap;
@@ -107,10 +106,10 @@ const tours = [
   .tour-nav__back {
     font-size: 0.875rem;
     font-weight: 500;
-    color: #1a2e3b;
+    color: #1C1C1C;
     text-decoration: none;
     padding: 0.4rem 0.875rem;
-    border-radius: 999px;
+    border-radius: 8px;
     transition: background 0.15s;
   }
 
@@ -136,20 +135,20 @@ const tours = [
     display: block;
     font-size: 0.875rem;
     font-weight: 500;
-    color: #1a2e3b;
+    color: #1C1C1C;
     text-decoration: none;
     padding: 0.4rem 1rem;
-    border-radius: 999px;
+    border-radius: 8px;
     transition: background 0.15s, color 0.15s;
   }
 
   .tour-nav__link:hover:not(.tour-nav__link--active) {
-    background: rgba(0, 0, 0, 0.06);
+    background: rgba(99, 97, 59, 0.1);
   }
 
   .tour-nav__link--active {
-    background: #0d2535;
-    color: #fff;
+    background: #63613B;
+    color: #FAF6F3;
   }
 
   .tour-nav__link--disabled {
@@ -170,8 +169,8 @@ const tours = [
     right: 0;
     z-index: 9998;
     height: 70svh;
-    background: #fff;
-    border-radius: 1.5rem 1.5rem 0 0;
+    background: #FAF6F3;
+    border-radius: 12px 12px 0 0;
     box-shadow: 0 -4px 32px rgba(0, 0, 0, 0.18);
     padding: 1rem 2rem 2rem;
     display: none;
@@ -212,10 +211,10 @@ const tours = [
   .tour-mobile__back {
     font-size: 1rem;
     font-weight: 500;
-    color: #1a2e3b;
+    color: #1C1C1C;
     text-decoration: none;
     padding: 0.5rem 1rem;
-    border-radius: 999px;
+    border-radius: 8px;
     transition: background 0.15s;
   }
 
@@ -238,21 +237,21 @@ const tours = [
     width: 100%;
     font-size: 1.25rem;
     font-weight: 500;
-    color: #1a2e3b;
+    color: #1C1C1C;
     text-decoration: none;
     padding: 0.75rem 1rem;
-    border-radius: 0.75rem;
+    border-radius: 8px;
     transition: background 0.15s, color 0.15s;
     box-sizing: border-box;
   }
 
   .tour-mobile__link:hover:not(.tour-mobile__link--active) {
-    background: rgba(0, 0, 0, 0.06);
+    background: rgba(99, 97, 59, 0.1);
   }
 
   .tour-mobile__link--active {
-    background: #0d2535;
-    color: #fff;
+    background: #63613B;
+    color: #FAF6F3;
   }
 
   .tour-mobile__link--disabled {

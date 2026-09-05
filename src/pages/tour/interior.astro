@@ -1,0 +1,149 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import TourNav from '../../components/TourNav.astro';
+import '@photo-sphere-viewer/core/index.css';
+import '@photo-sphere-viewer/virtual-tour-plugin/index.css';
+---
+
+<Layout title="Tour Interior" bare={true}>
+  <TourNav />
+  <div class="viewer-wrap">
+    <div id="psv-container"></div>
+  </div>
+</Layout>
+
+<style>
+  .viewer-wrap {
+    position: relative;
+    width: 100vw;
+    height: 100svh;
+    overflow: hidden;
+  }
+
+  #psv-container {
+    width: 100%;
+    height: 100%;
+  }
+</style>
+
+<script>
+  import { Viewer } from '@photo-sphere-viewer/core';
+  import { VirtualTourPlugin } from '@photo-sphere-viewer/virtual-tour-plugin';
+
+  const nodes = [
+    {
+      id: 'entrada',
+      panorama: '/tour/entrada.png',
+      name: 'Entrada',
+      links: [
+        { nodeId: 'sala',     position: { yaw: '-40deg',  pitch: '-25deg' } },
+        { nodeId: 'pasillo',  position: { yaw: '0deg', pitch: '-20deg' } },
+        { nodeId: 'comedor',  position: { yaw: '30deg', pitch: '-25deg' } },
+      ],
+    },
+    {
+      id: 'sala',
+      panorama: '/tour/sala.png',
+      name: 'Sala',
+      links: [
+        { nodeId: 'entrada',  position: { yaw: '40deg', pitch: '-25deg' } },
+        { nodeId: 'comedor',  position: { yaw: '0deg', pitch: '-20deg' } },
+        { nodeId: 'pasillo',  position: { yaw: '-40deg',  pitch: '-25deg' } },
+      ],
+    },
+    {
+      id: 'comedor',
+      panorama: '/tour/comedor.png',
+      name: 'Comedor',
+      links: [
+        { nodeId: 'pasillo',  position: { yaw: '-120deg', pitch: '-40deg' } },
+        { nodeId: 'sala',     position: { yaw: '185deg',   pitch: '-25deg' } },
+        { nodeId: 'cocina',   position: { yaw: '10deg',  pitch: '-25deg' } },
+      ],
+    },
+    {
+      id: 'cocina',
+      panorama: '/tour/cocina.png',
+      name: 'Cocina',
+      links: [
+        { nodeId: 'comedor',  position: { yaw: '170deg', pitch: '-25deg' } },
+      ],
+    },
+    {
+      id: 'pasillo',
+      panorama: '/tour/pasillo.png',
+      defaultYaw: '270deg',
+      name: 'Pasillo',
+      links: [
+        { nodeId: 'sala',        position: { yaw: '140deg',   pitch: '-15deg' } },
+        { nodeId: 'entrada',     position: { yaw: '90deg',  pitch: '-15deg' } },
+        { nodeId: 'comedor',     position: { yaw: '40deg', pitch: '-35deg' } },
+        { nodeId: 'baño_sec',    position: { yaw: '-90deg', pitch: '-30deg' } },
+        { nodeId: 'hab_sec',     position: { yaw: '210deg', pitch: '-15deg' } },
+        { nodeId: 'pasillo_hab', position: { yaw: '-8deg', pitch: '-35deg' } },
+      ],
+    },
+    {
+      id: 'hab_sec',
+      panorama: '/tour/hab_sec.png',
+      name: 'Hab. sec',
+      links: [
+        { nodeId: 'pasillo',  position: { yaw: '16deg', pitch: '-35deg' } },
+      ],
+    },
+    {
+      id: 'baño_sec',
+      panorama: '/tour/ba%C3%B1o_sec.png',
+      name: 'Baño',
+      links: [
+        { nodeId: 'pasillo',  position: { yaw: '90deg', pitch: '-50deg' } },
+      ],
+    },
+    {
+      id: 'pasillo_hab',
+      panorama: '/tour/pasillo_hab.png',
+      name: 'Pasillo hab.',
+      links: [
+        { nodeId: 'pasillo',  position: { yaw: '180deg', pitch: '-35deg' } },
+        { nodeId: 'hab_p',    position: { yaw: '0deg',   pitch: '-35deg' } },
+        { nodeId: 'baño_hab', position: { yaw: '-100deg',  pitch: '-35deg' } },
+      ],
+    },
+    {
+      id: 'baño_hab',
+      panorama: '/tour/ba%C3%B1o_hab.png',
+      name: 'Baño hab.',
+      links: [
+        { nodeId: 'pasillo_hab', position: { yaw: '90deg', pitch: '-50deg' } },
+      ],
+    },
+    {
+      id: 'hab_p',
+      panorama: '/tour/hab_p.png',
+      name: 'Hab. p',
+      links: [
+        { nodeId: 'pasillo_hab', position: { yaw: '170deg', pitch: '-30deg' } },
+      ],
+    },
+  ];
+
+  new Viewer({
+    container: document.getElementById('psv-container') as HTMLElement,
+    navbar: false,
+    defaultZoomLvl: 0,
+    plugins: [
+      [VirtualTourPlugin, {
+        positionMode: 'manual',
+        renderMode: '2d',
+        arrowStyle: { size: { width: 40, height: 40 } },
+        nodes,
+        transitionOptions: {
+          showLoader: false,
+          speed: '20rpm',
+          effect: 'fade',
+          rotation: true,
+        },
+      }],
+    ],
+  });
+</script>

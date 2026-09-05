@@ -3,7 +3,6 @@ import Layout from '../../layouts/Layout.astro';
 import TourNav from '../../components/TourNav.astro';
 import '@photo-sphere-viewer/core/index.css';
 import '@photo-sphere-viewer/virtual-tour-plugin/index.css';
-import '@photo-sphere-viewer/map-plugin/index.css';
 ---
 
 <Layout title="Tour Exterior" bare={true}>
@@ -25,31 +24,31 @@ import '@photo-sphere-viewer/map-plugin/index.css';
     width: 100%;
     height: 100%;
   }
+</style>
 
+<style is:global>
+  #psv-container .psv-loader { display: none; }
 </style>
 
 <script>
   import { Viewer } from '@photo-sphere-viewer/core';
   import { VirtualTourPlugin } from '@photo-sphere-viewer/virtual-tour-plugin';
-  import { MapPlugin } from '@photo-sphere-viewer/map-plugin';
 
   const nodes = [
     {
       id: 'piscina',
-      panorama: '/tour/ext/piscina.jpg',
+      panorama: '/tour/piscina.png',
       name: 'Piscina',
-      map: { x: 650, y: 580 },
       links: [
         { nodeId: 'gazebo', position: { yaw: '0deg', pitch: '0deg' } },
       ],
     },
     {
       id: 'gazebo',
-      panorama: '/tour/ext/gazebo.jpg',
+      panorama: '/tour/gazebo.png',
       name: 'Gazebo',
-      map: { x: 990, y: 580 },
       links: [
-        { nodeId: 'piscina', position: { yaw: '180deg', pitch: '-6deg' } },
+        { nodeId: 'piscina', position: { yaw: '-126deg', pitch: '-6deg' } },
       ],
     },
   ];
@@ -57,24 +56,14 @@ import '@photo-sphere-viewer/map-plugin/index.css';
   new Viewer({
     container: document.getElementById('psv-container') as HTMLElement,
     navbar: false,
+    loadingTxt: '',
     defaultZoomLvl: 0,
     plugins: [
-      [MapPlugin, {
-        size: '300px',
-        defaultZoom: 20,
-        minZoom: 10,
-        maxZoom: 100,
-        shape: 'square'
-      }],
       [VirtualTourPlugin, {
         positionMode: 'manual',
         renderMode: '2d',
         arrowStyle: { size: { width: 40, height: 40 } },
         nodes,
-        map: {
-          imageUrl: '/assets/units/exterior_plan.png',
-          center: { x: 240, y: 420 },
-        }
       }],
     ],
   });
