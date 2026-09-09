@@ -31,8 +31,6 @@ const units = rawUnits.map(u => ({
   precio:         u.precio,
 }));
 
-type Unit = typeof units[0];
-
 const statusDot: Record<string, string> = {
   available: 'bg-green-500',
   reserved:  'bg-yellow-500',
@@ -189,7 +187,7 @@ const statusLabel: Record<string, string> = {
         <div class="relative">
 
           <svg
-            class="absolute inset-0 w-full h-full"
+            class="absolute inset-0 w-full h-full z-10"
             viewBox="0 0 2107 645"
             xmlns="http://www.w3.org/2000/svg"
             aria-hidden="true"
@@ -212,9 +210,9 @@ const statusLabel: Record<string, string> = {
           </svg>
 
           <img
-            src="/assets/unidades/units-base-building.svg"
+            src="/assets/unidades/base.png"
             alt="Plano del edificio"
-            class="relative w-full block pointer-events-none"
+            class="relative w-full block pointer-events-none z-0 opacity-50"
           />
 
         </div>

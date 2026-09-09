@@ -104,7 +104,7 @@ const iconFilter = 'brightness(0) saturate(100%) invert(22%) sepia(52%) saturate
     <!-- Floor plan map — full width, not sticky -->
     <div class="relative mb-10">
       <svg
-        class="absolute inset-0 w-full h-full"
+        class="absolute inset-0 w-full h-full z-10"
         viewBox="0 0 2107 645"
         xmlns="http://www.w3.org/2000/svg"
         aria-hidden="true"
@@ -157,9 +157,9 @@ const iconFilter = 'brightness(0) saturate(100%) invert(22%) sepia(52%) saturate
       </svg>
 
       <img
-        src="/assets/unidades/units-base-building.svg"
+        src="/assets/unidades/base.png"
         alt="Plano del edificio"
-        class="relative w-full block pointer-events-none"
+        class="relative w-full block pointer-events-none z-0 opacity-80"
       />
     </div>
 
@@ -318,7 +318,7 @@ const iconFilter = 'brightness(0) saturate(100%) invert(22%) sepia(52%) saturate
         const opening = detail.classList.contains('hidden');
         detail.classList.toggle('hidden', !opening);
         chevron.style.transform = opening ? 'rotate(180deg)' : '';
-        if (shape) shape.style.opacity = opening ? '0.5' : baseOp;
+        if (shape) shape.style.opacity = opening ? '0.8' : baseOp;
         if (opening) card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       } else {
         detail.classList.add('hidden');
@@ -337,7 +337,7 @@ const iconFilter = 'brightness(0) saturate(100%) invert(22%) sepia(52%) saturate
     card.addEventListener('mouseenter', () => {
       if (isOpen(card)) return;
       const shape = getShape(card.dataset.unit!);
-      if (shape) shape.style.opacity = '0.4';
+      if (shape) shape.style.opacity = '0.6';
     });
     card.addEventListener('mouseleave', () => {
       if (isOpen(card)) return;
