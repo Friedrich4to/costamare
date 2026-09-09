@@ -95,7 +95,11 @@ const statusLabel: Record<string, string> = {
                 </span>
               </div>
               <div class="flex items-center gap-3 shrink-0">
-                <span class="text-sm text-base/50">{unit.m2_total} m²</span>
+                <span class="text-sm text-base/50">
+                    Apto: {unit.m2} m²
+                    {unit.patio_m2 && <> &mdash; Patio: {unit.patio_m2} m²</>}
+                    {unit.terraza_m2 && <> &mdash; Terraza: {unit.terraza_m2} m²</>}
+                  </span>
                 {!['reserved', 'sold'].includes(unit.disponibilidad) && (
                   <span class="font-bold text-sm">US$ {unit.precio.toLocaleString('en-US')}</span>
                 )}

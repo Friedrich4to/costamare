@@ -37,8 +37,8 @@ import '@photo-sphere-viewer/virtual-tour-plugin/index.css';
       name: 'Entrada',
       links: [
         { nodeId: 'sala',     position: { yaw: '-40deg',  pitch: '-25deg' } },
-        { nodeId: 'pasillo',  position: { yaw: '0deg', pitch: '-20deg' } },
-        { nodeId: 'comedor',  position: { yaw: '30deg', pitch: '-25deg' } },
+        { nodeId: 'pasillo',  position: { yaw: '0deg',    pitch: '-20deg' } },
+        { nodeId: 'comedor',  position: { yaw: '30deg',   pitch: '-25deg' } },
       ],
     },
     {
@@ -46,9 +46,18 @@ import '@photo-sphere-viewer/virtual-tour-plugin/index.css';
       panorama: '/tour/sala-p2.avif',
       name: 'Sala',
       links: [
-        { nodeId: 'entrada',  position: { yaw: '40deg', pitch: '-25deg' } },
-        { nodeId: 'comedor',  position: { yaw: '0deg', pitch: '-20deg' } },
+        { nodeId: 'entrada',  position: { yaw: '40deg',   pitch: '-25deg' } },
+        { nodeId: 'comedor',  position: { yaw: '0deg',    pitch: '-20deg' } },
         { nodeId: 'pasillo',  position: { yaw: '-40deg',  pitch: '-25deg' } },
+        { nodeId: 'balcon',   position: { yaw: '173deg',  pitch: '-30deg' } },
+      ],
+    },
+    {
+      id: 'balcon',
+      panorama: '/tour/balcon-p2.avif',
+      name: 'Balcón',
+      links: [
+        { nodeId: 'sala',     position: { yaw: '195deg',    pitch: '-30deg' } },
       ],
     },
     {
@@ -57,8 +66,8 @@ import '@photo-sphere-viewer/virtual-tour-plugin/index.css';
       name: 'Comedor',
       links: [
         { nodeId: 'pasillo',  position: { yaw: '-120deg', pitch: '-40deg' } },
-        { nodeId: 'sala',     position: { yaw: '185deg',   pitch: '-25deg' } },
-        { nodeId: 'cocina',   position: { yaw: '10deg',  pitch: '-25deg' } },
+        { nodeId: 'sala',     position: { yaw: '185deg',  pitch: '-25deg' } },
+        { nodeId: 'cocina',   position: { yaw: '10deg',   pitch: '-25deg' } },
       ],
     },
     {
@@ -66,7 +75,7 @@ import '@photo-sphere-viewer/virtual-tour-plugin/index.css';
       panorama: '/tour/cocina-p2.avif',
       name: 'Cocina',
       links: [
-        { nodeId: 'comedor',  position: { yaw: '170deg', pitch: '-25deg' } },
+        { nodeId: 'comedor',  position: { yaw: '170deg',  pitch: '-25deg' } },
       ],
     },
     {
@@ -75,43 +84,43 @@ import '@photo-sphere-viewer/virtual-tour-plugin/index.css';
       defaultYaw: '270deg',
       name: 'Pasillo',
       links: [
-        { nodeId: 'sala',        position: { yaw: '140deg',   pitch: '-25deg' } },
-        { nodeId: 'entrada',     position: { yaw: '90deg',  pitch: '-25deg' } },
-        { nodeId: 'comedor',     position: { yaw: '40deg', pitch: '-35deg' } },
-        { nodeId: 'baño_sec',    position: { yaw: '-90deg', pitch: '-30deg' } },
-        { nodeId: 'hab_sec',     position: { yaw: '210deg', pitch: '-15deg' } },
-        { nodeId: 'pasillo_hab', position: { yaw: '-8deg', pitch: '-35deg' } },
+        { nodeId: 'sala',        position: { yaw: '140deg',  pitch: '-25deg' } },
+        { nodeId: 'entrada',     position: { yaw: '90deg',   pitch: '-25deg' } },
+        { nodeId: 'comedor',     position: { yaw: '40deg',   pitch: '-35deg' } },
+        { nodeId: 'bano_sec',    position: { yaw: '-90deg',  pitch: '-30deg' } },
+        { nodeId: 'hab_sec',     position: { yaw: '210deg',  pitch: '-15deg' } },
+        { nodeId: 'pasillo_hab', position: { yaw: '-8deg',   pitch: '-35deg' } },
       ],
     },
     {
       id: 'hab_sec',
-      panorama: '/tour/habsecundaria-p2.avif',
+      panorama: '/tour/hab_sec-p2.avif',
       name: 'Hab. sec',
       links: [
-        { nodeId: 'pasillo',  position: { yaw: '16deg', pitch: '-35deg' } },
+        { nodeId: 'pasillo',  position: { yaw: '16deg',  pitch: '-35deg' } },
       ],
     },
     {
-      id: 'baño_sec',
-      panorama: '/tour/ba%C3%B1osecundario-p2.avif',
+      id: 'bano_sec',
+      panorama: '/tour/ba%C3%B1o_sec-p2.avif',
       name: 'Baño',
       links: [
-        { nodeId: 'pasillo',  position: { yaw: '90deg', pitch: '-50deg' } },
+        { nodeId: 'pasillo',  position: { yaw: '90deg',  pitch: '-50deg' } },
       ],
     },
     {
       id: 'pasillo_hab',
-      panorama: '/tour/pasillohabitacion-p2.avif',
+      panorama: '/tour/pasillo_hab-p2.avif',
       name: 'Pasillo hab.',
       links: [
         { nodeId: 'pasillo',  position: { yaw: '180deg', pitch: '-35deg' } },
         { nodeId: 'hab_p',    position: { yaw: '0deg',   pitch: '-35deg' } },
-        { nodeId: 'baño_hab', position: { yaw: '-100deg',  pitch: '-35deg' } },
+        { nodeId: 'bano_hab', position: { yaw: '-100deg', pitch: '-35deg' } },
       ],
     },
     {
-      id: 'baño_hab',
-      panorama: '/tour/ba%C3%B1ohabitacion-p2.avif',
+      id: 'bano_hab',
+      panorama: '/tour/ba%C3%B1o-p2.avif',
       name: 'Baño hab.',
       links: [
         { nodeId: 'pasillo_hab', position: { yaw: '90deg', pitch: '-50deg' } },
@@ -119,7 +128,7 @@ import '@photo-sphere-viewer/virtual-tour-plugin/index.css';
     },
     {
       id: 'hab_p',
-      panorama: '/tour/habitacionprincipal-p2.avif',
+      panorama: '/tour/hab_p-p2.avif',
       name: 'Hab. p',
       links: [
         { nodeId: 'pasillo_hab', position: { yaw: '170deg', pitch: '-30deg' } },

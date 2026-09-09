@@ -28,6 +28,7 @@ const units = rawUnits.map(u => ({
   terraza_m2:     u.terraza_m2,
   m2_total:       u.m2_total,
   tourUrl:        u.tour_url ?? '#',
+  tourHref:       u.numero.startsWith('1') ? '/tour/interior' : '/tour/piso-2-3',
   precio:         u.precio,
 }));
 
@@ -56,9 +57,9 @@ function getFeature(numero: string): string {
   return 'c/ Terraza & Balcón';
 }
 
-// SVG shape fill colors — available units use base (#63613B)
+// SVG shape fill colors — available units use base (#205469)
 const svgFill: Record<string, string> = {
-  available: '#63613B',
+  available: '#205469',
   reserved:  '#B8900D',
   sold:      '#C23E3E',
 };
@@ -76,8 +77,8 @@ const cardBorderColor: Record<string, string> = {
 const unitStatusMap = Object.fromEntries(units.map(u => [u.id, u.disponibilidad]));
 const allUnitIds = ['101','102','103','104','201','202','203','204','301','302','303','304'];
 
-// CSS filter to colorize black SVG icons to base color (#63613B)
-const iconFilter = 'brightness(0) saturate(100%) invert(36%) sepia(14%) saturate(831%) hue-rotate(22deg) brightness(95%) contrast(87%)';
+// CSS filter to colorize black SVG icons to base color (#205469)
+const iconFilter = 'brightness(0) saturate(100%) invert(22%) sepia(52%) saturate(650%) hue-rotate(168deg) brightness(100%) contrast(90%)';
 ---
 
 <section id="disponibilidad" class:list={["px-[4vw]", hideHeader ? "pt-4 pb-16" : "py-16"]}>
@@ -205,27 +206,29 @@ const iconFilter = 'brightness(0) saturate(100%) invert(36%) sepia(14%) saturate
                     </span>
                   </div>
 
-                  <!-- Row 2: m² | price -->
-                  <div class="flex items-center gap-1.5 mb-1.5">
-                    <span class="text-[18px] text-second">{unit.m2_total} m²</span>
-                    {!['reserved','sold'].includes(unit.disponibilidad) && (
-                      <Fragment>
-                        <span class="text-[18px] text-base/25">|</span>
-                        <span class="text-[18px] font-bold text-second">US${unit.precio.toLocaleString('en-US')}</span>
-                      </Fragment>
-                    )}
+                  <!-- Row 2: m² -->
+                  <div class="mb-1.5">
+                    <span class="text-[15px] text-second">
+                      Apto: {unit.m2} m²
+                      {unit.patio_m2 && <> &mdash; Patio: {unit.patio_m2} m²</>}
+                      {unit.terraza_m2 && <> &mdash; Terraza: {unit.terraza_m2} m²</>}
+                    </span>
                   </div>
 
-                  <!-- Row 3: feature text + chevron (same line) -->
+                  <!-- Row 3: price + feature text + chevron -->
                   <div class="flex items-center justify-between gap-2 pb-2">
-                    <p class="text-sm text-base m-0 leading-none">{getFeature(unit.numero)}</p>
+                    <div class="flex items-center gap-2 min-w-0">
+                      {!['reserved','sold'].includes(unit.disponibilidad) && (
+                        <span class="text-[18px] font-bold text-second shrink-0">US${unit.precio.toLocaleString('en-US')}</span>
+                      )}
+                    </div>
                     <svg
                       class="du-chevron shrink-0 transition-transform duration-200"
                       xmlns="http://www.w3.org/2000/svg"
                       width="13" height="13" viewBox="0 0 24 24"
                       fill="none" stroke="currentColor" stroke-width="2.5"
                       stroke-linecap="round" stroke-linejoin="round"
-                      style="color: rgba(99,97,59,0.35)"
+                      style="color: rgba(32,84,105,0.35)"
                     >
                       <polyline points="6 9 12 15 18 9"/>
                     </svg>
@@ -267,8 +270,8 @@ const iconFilter = 'brightness(0) saturate(100%) invert(36%) sepia(14%) saturate
 
                     <!-- Tour 360° button -->
                     <a
-                      href="/tour/exterior"
-                      class="hidden text-center px-4 py-2.5 rounded-lg bg-[#252515] text-white font-bold text-sm no-underline hover:opacity-80 transition-opacity duration-200"
+                      href={unit.tourHref}
+                      class="text-center px-4 py-2.5 rounded-lg bg-base text-white font-bold text-sm no-underline hover:opacity-80 transition-opacity duration-200"
                     >
                       Tour 360°
                     </a>

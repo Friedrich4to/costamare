@@ -1,0 +1,100 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import TourNav from '../../components/TourNav.astro';
+import '@photo-sphere-viewer/core/index.css';
+import '@photo-sphere-viewer/virtual-tour-plugin/index.css';
+---
+
+<Layout title="Tour Azotea" bare={true}>
+  <TourNav />
+  <div class="viewer-wrap">
+    <div id="psv-container"></div>
+  </div>
+</Layout>
+
+<style>
+  .viewer-wrap {
+    position: relative;
+    width: 100vw;
+    height: 100svh;
+    overflow: hidden;
+  }
+
+  #psv-container {
+    width: 100%;
+    height: 100%;
+  }
+</style>
+
+<style is:global>
+  #psv-container .psv-loader { display: none; }
+</style>
+
+<script>
+  import { Viewer } from '@photo-sphere-viewer/core';
+  import { VirtualTourPlugin } from '@photo-sphere-viewer/virtual-tour-plugin';
+
+  const nodes = [
+    {
+      id: 'bbq',
+      panorama: '/tour/azotea-bbq.avif',
+      name: 'BBQ',
+      links: [
+        { nodeId: 'daybed',  position: { yaw: '-30deg',    pitch: '-15deg' } },
+        { nodeId: 'esquina', position: { yaw: '15deg',   pitch: '-3deg' } },
+        { nodeId: 'sofa',    position: { yaw: '60deg',  pitch: '-15deg' } },
+      ],
+    },
+    {
+      id: 'daybed',
+      panorama: '/tour/azotea-daybed.avif',
+      name: 'Daybed',
+      links: [
+        { nodeId: 'bbq',     position: { yaw: '160deg',  pitch: '-15deg' } },
+        { nodeId: 'esquina', position: { yaw: '40deg',  pitch: '-3deg' } },
+        { nodeId: 'sofa',    position: { yaw: '120deg',   pitch: '-7deg' } },
+      ],
+    },
+    {
+      id: 'esquina',
+      panorama: '/tour/azotea-esquina.avif',
+      name: 'Esquina',
+      links: [
+        { nodeId: 'bbq',     position: { yaw: '-160deg',  pitch: '-5deg' } },
+        { nodeId: 'daybed',  position: { yaw: '-140deg',   pitch: '-5deg' } },
+        { nodeId: 'sofa',    position: { yaw: '175deg',    pitch: '-8deg' } },
+      ],
+    },
+    {
+      id: 'sofa',
+      panorama: '/tour/azotea-sofa.avif',
+      name: 'Sofá',
+      links: [
+        { nodeId: 'bbq',     position: { yaw: '240deg',    pitch: '-15deg' } },
+        { nodeId: 'daybed',  position: { yaw: '-70deg',  pitch: '-10deg' } },
+        { nodeId: 'esquina', position: { yaw: '-10deg',   pitch: '-5deg' } },
+      ],
+    },
+  ];
+
+  new Viewer({
+    container: document.getElementById('psv-container') as HTMLElement,
+    navbar: false,
+    loadingTxt: '',
+    defaultZoomLvl: 0,
+    plugins: [
+      [VirtualTourPlugin, {
+        positionMode: 'manual',
+        renderMode: '2d',
+        arrowStyle: { size: { width: 40, height: 40 } },
+        nodes,
+        transitionOptions: {
+          showLoader: false,
+          speed: '20rpm',
+          effect: 'fade',
+          rotation: true,
+        },
+      }],
+    ],
+  });
+</script>

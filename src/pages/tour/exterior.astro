@@ -40,7 +40,9 @@ import '@photo-sphere-viewer/virtual-tour-plugin/index.css';
       panorama: '/tour/piscina.avif',
       name: 'Piscina',
       links: [
-        { nodeId: 'gazebo', position: { yaw: '0deg', pitch: '0deg' } },
+        { nodeId: 'gazebo',              position: { yaw: '0deg',    pitch: '0deg' } },
+        { nodeId: 'piscina_costado_der', position: { yaw: '15deg',   pitch: '-10deg' } },
+        { nodeId: 'piscina_costado_iz',  position: { yaw: '-50deg',  pitch: '-5deg' } },
       ],
     },
     {
@@ -48,7 +50,29 @@ import '@photo-sphere-viewer/virtual-tour-plugin/index.css';
       panorama: '/tour/gazebo.avif',
       name: 'Gazebo',
       links: [
-        { nodeId: 'piscina', position: { yaw: '-126deg', pitch: '-6deg' } },
+        { nodeId: 'piscina',             position: { yaw: '-126deg', pitch: '-6deg'  } },
+        { nodeId: 'piscina_costado_der', position: { yaw: '220deg',  pitch: '-5deg' } },
+        { nodeId: 'piscina_costado_iz',  position: { yaw: '-80deg', pitch: '-5deg' } },
+      ],
+    },
+    {
+      id: 'piscina_costado_der',
+      panorama: '/tour/piscina_costado_der.avif',
+      name: 'Piscina costado der.',
+      links: [
+        { nodeId: 'piscina',            position: { yaw: '210deg',  pitch: '-8deg' } },
+        { nodeId: 'gazebo',             position: { yaw: '-20deg',   pitch: '-5deg' } },
+        { nodeId: 'piscina_costado_iz', position: { yaw: '-90deg',    pitch: '-50deg' } },
+      ],
+    },
+    {
+      id: 'piscina_costado_iz',
+      panorama: '/tour/piscina_costado_iz.avif',
+      name: 'Piscina costado iz.',
+      links: [
+        { nodeId: 'piscina',             position: { yaw: '140deg',    pitch: '-5deg' } },
+        { nodeId: 'gazebo',              position: { yaw: '30deg',   pitch: '-5deg' } },
+        { nodeId: 'piscina_costado_der', position: { yaw: '90deg',  pitch: '-5deg' } },
       ],
     },
   ];
