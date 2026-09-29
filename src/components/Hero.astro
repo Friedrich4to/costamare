@@ -1,45 +1,42 @@
 ---
 ---
 
-<section id="hero" class="relative h-[75svh] lg:h-[90svh] overflow-hidden bg-white">
+<section id="hero" class="relative h-[75svh] lg:h-[90svh] overflow-hidden">
 
-  <!-- Text content: z-10, slides under the building image on scroll -->
-  <div id="hero-content" class="absolute inset-x-0 top-0 z-10 flex flex-col items-center pt-[8svh]">
-    <img src="/logo.svg" alt="Costamare" class="h-9 w-auto" />
+  <!-- Building image: z-10, full-cover background -->
+  <div id="hero-img" class="absolute inset-0 z-10">
+    <img
+      src="/assets/gallery/frente.avif"
+      alt="Costamare"
+      class="w-full h-full object-cover object-center block"
+    />
+  </div>
+
+  <!-- Text content: z-20, overlaid on top of image -->
+  <div id="hero-content" class="absolute inset-x-0 top-0 z-20 flex flex-col items-center pt-[8svh]">
+    <img src="/logo.svg" alt="Costamare" class="h-8 w-auto" />
     <div class="mt-5 flex flex-col items-center">
-      <h1 class="font-black-mango font-bold text-second text-center leading-[1.05] text-[clamp(1.5rem,4.5vw,3rem)]">
+      <h1 class="font-black-mango font-bold text-second text-center leading-[1.05] text-[clamp(1.2rem,3.5vw,2.4rem)]">
         La ubicación que conecta.
       </h1>
-      <h1 class="font-black-mango font-bold italic text-second text-center leading-[1.05] text-[clamp(1.5rem,4.5vw,3rem)]">
+      <h1 class="font-black-mango font-bold italic text-second text-center leading-[1.05] text-[clamp(1.2rem,3.5vw,2.4rem)]">
         La tranquilidad que desconecta.
       </h1>
     </div>
-    <a href="#descripcion" class="mt-7 flex flex-col items-center gap-1.5 text-sm text-base tracking-[0.12em] font-medium no-underline">
+    <a href="#descripcion" class="mt-7 flex flex-col items-center gap-1.5 text-xs text-base tracking-[0.12em] font-medium no-underline">
       Explora el proyecto
       <!-- ChevronDown — Lucide -->
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
            stroke="#205469" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
         <path d="m6 9 6 6 6-6"/>
       </svg>
     </a>
   </div>
 
-  <!-- Building image: z-20, sits on top of text layer -->
-  <div id="hero-img" class="absolute bottom-0 inset-x-0 z-20 h-[63%]">
-    <picture>
-      <source media="(max-width: 639px)" srcset="/assets/front_noBG_mobile.avif" />
-      <img
-        src="/assets/front_noBG.avif"
-        alt="Costamare"
-        class="w-full h-full object-cover object-top block"
-      />
-    </picture>
-  </div>
-
 </section>
 
 <!-- Stats bar: outside hero, negative margin-top creates overlap -->
-<div class="relative z-30 -mt-14 mx-[5vw]">
+<div class="relative z-30 -mt-14 w-full max-w-7xl mx-auto px-[4vw]">
   <div class="bg-white rounded-2xl shadow-lg flex flex-wrap lg:flex-nowrap items-stretch divide-y lg:divide-y-0 lg:divide-x divide-gray-200">
 
     <!-- 12 aptos — Building2 -->

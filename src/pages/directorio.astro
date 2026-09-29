@@ -5,7 +5,7 @@ import Layout from '../layouts/Layout.astro'
 <Layout title="Directorio" bare>
   <!-- Fixed background (visible on tablet/desktop behind the card) -->
   <div
-    class="fixed inset-0 -z-10 bg-[url('/bg.avif')] bg-cover bg-center"
+    class="fixed inset-0 -z-10 bg-[url('/assets/gallery/costado.avif')] bg-cover bg-center"
     aria-hidden="true"
   ></div>
 
@@ -15,7 +15,7 @@ import Layout from '../layouts/Layout.astro'
 
       <!-- Hero image — mobile only -->
       <img
-        src="/bg.avif"
+        src="/assets/gallery/costado.avif"
         alt=""
         class="block md:hidden w-full h-[50svh] object-cover"
       />
@@ -90,20 +90,18 @@ import Layout from '../layouts/Layout.astro'
           </li>
           <li>
             <a
-              href="https://drive.google.com/drive/folders/1wqQcjW-FOY9WJNz8fN_ijt1938W8z_S1?usp=sharing"
+              href="/#unidades"
               class="block w-full text-[24px] text-center py-6 bg-gray-100 border-b border-base/20 hover:bg-base hover:text-white transition-colors duration-500 cursor-pointer"
-              target="_blank"
             >
               Unidades
             </a>
           </li>
           <li>
             <a
-              href="https://drive.google.com/drive/folders/1-k2HQfQS-hM2qfpU7B4Cu8d7WmeTllmR?usp=sharing"
+              href="/disponibilidad"
               class="block w-full text-[24px] text-center py-6 bg-gray-100 border-b border-base/20 hover:bg-base hover:text-white transition-colors duration-500 cursor-pointer"
-              target="_blank"
             >
-              Lista de precios
+              Disponibilidad
             </a>
           </li>
         </ul>

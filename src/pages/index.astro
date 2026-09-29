@@ -6,6 +6,7 @@ import Galeria from '../components/Galeria.astro';
 import Lightbox from '../components/Lightbox.astro';
 import Amenidades from '../components/Amenidades.astro';
 import Disponibilidad_Update from '../components/Disponibilidad_Update.astro';
+import Unidades from '../components/Unidades.astro';
 import MapaBavaro from '../components/MapaBavaro.astro';
 import Pagos from '../components/Pagos.astro';
 import '@photo-sphere-viewer/core/index.css';
@@ -35,6 +36,94 @@ try {
 } catch (e) {
   console.error('index DB error:', e);
 }
+
+const unitTypes = [
+  {
+    id: 1,
+    type_key: 'c101',
+    name: 'C101',
+    price_usd: 129800,
+    interior_m2: 83.6,
+    total_m2: 83.6,
+    extra_area: { label: 'Patio', m2: 47.70 },
+    features: [
+      '2 Habitaciones',
+      'Habitación principal con baño',
+      'Sala-Comedor-Cocina',
+      'Área de lavado',
+      'Baño Visitas',
+      'Patio',
+    ],
+    tour_url: '/tour/interior',
+    gallery: [
+      '/assets/units/101.avif',
+    ],
+  },
+  {
+    id: 2,
+    type_key: '1er-piso',
+    name: '1er Piso',
+    price_usd: 129800,
+    interior_m2: 83.6,
+    total_m2: 83.6,
+    extra_area: { label: 'Patio', m2: 18.4 },
+    features: [
+      '2 Habitaciones',
+      'Habitación principal con baño',
+      'Sala-Comedor-Cocina',
+      'Área de lavado',
+      'Baño Visitas',
+      'Patio',
+    ],
+    tour_url: '/tour/interior',
+    gallery: [
+      '/assets/units/piso1.avif',
+    ],
+  },
+  {
+    id: 3,
+    type_key: '2do-piso',
+    name: '2do Piso',
+    price_usd: 129800,
+    interior_m2: 83.6,
+    total_m2: 83.6,
+    extra_area: null,
+    features: [
+      '2 Habitaciones',
+      'Habitación principal con baño',
+      'Sala-Comedor-Cocina',
+      'Área de lavado',
+      'Baño Visitas',
+      'Balcón',
+    ],
+    tour_url: '/tour/piso-2-3',
+    gallery: [
+      '/assets/units/piso2-3.avif',
+    ],
+  },
+  {
+    id: 4,
+    type_key: 'penthouse',
+    name: 'Penthouse',
+    price_usd: 129800,
+    interior_m2: 83.6,
+    total_m2: 83.6,
+    extra_area: { label: 'Terraza', m2: 79.75 },
+    features: [
+      '2 Habitaciones',
+      'Habitación principal con baño',
+      'Sala-Comedor-Cocina',
+      'Área de lavado',
+      'Baño Visitas',
+      'Terraza',
+    ],
+    tour_url: '/tour/piso-2-3',
+    gallery: [
+      '/assets/units/piso2-3.avif',
+      '/assets/units/terraza.avif',
+    ],
+  },
+];
 ---
 
 <Layout title="Inicio">
@@ -42,14 +131,14 @@ try {
     <Hero />
 
     <section id="descripcion" class="px-[4vw] py-24 text-center">
-      <div class="w-full max-w-3xl mx-auto flex flex-col items-center gap-8">
+      <div class="w-full max-w-4xl mx-auto flex flex-col items-center gap-8">
         <div class="flex flex-col items-center gap-3">
           <p id="desc-label" class="font-display font-black text-sm uppercase tracking-[0.25em] text-second">Acerca de</p>
-          <img id="desc-title" src="/logo.svg" alt="Costamare" class="w-[clamp(14rem,50vw,36rem)] h-auto" />
+          <img id="desc-title" src="/logo.svg" alt="Costamare" class="w-[clamp(12rem,40vw,28rem)] h-auto" />
         </div>
 
-        <p id="desc-paragraph" class="text-[20px] md:text-3xl leading-relaxed max-w-3xl text-second">
-          Se trata de un desarrollo de baja densidad ubicado en Costa Cana, Bávaro, diseñado para combinar arquitectura contemporánea con alta rentabilidad.
+        <p id="desc-paragraph" class="text-lg md:text-2xl leading-relaxed max-w-4xl text-second">
+          Costamare es un desarrollo residencial de baja densidad en Costa Cana, Bávaro, Punta Cana, que combina arquitectura contemporánea con alta rentabilidad. Su propuesta reúne una ubicación estratégica con la tranquilidad de un entorno privado y exclusivo.
         </p>
 
         <a
@@ -65,7 +154,7 @@ try {
 
     <Galeria />
     <Lightbox />
-    <!-- <Unidades unitTypes={unitTypes} /> -->
+    <Unidades unitTypes={unitTypes} />
     <Disponibilidad_Update units={units} />
     <section id="maqueta" class="relative flex w-full h-[70svh] items-center justify-center overflow-hidden">
       <div id="maqueta-psv" class="absolute inset-0 w-full h-full" style="pointer-events:none;"></div>

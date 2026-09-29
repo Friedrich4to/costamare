@@ -1,52 +1,71 @@
 ---
 ---
 
-<section id="pagos" class="bg-second text-white px-[4vw] py-24 lg:flex lg:items-center">
-  <div class="max-w-7xl mx-auto flex flex-col gap-10">
+<section id="pagos" class="bg-base px-[4vw] py-16 md:py-20">
+  <div class="max-w-6xl mx-auto flex flex-col gap-10 md:gap-14">
 
-    <h2 class="text-3xl md:text-4xl lg:text-5xl text-center">
-      <span class="font-display font-bold italic">Plan flexible</span>
+    <h2 class="font-display font-bold text-white text-center text-3xl md:text-4xl lg:text-[3rem] uppercase">
+      Plan Flexible
     </h2>
 
-    <ul class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
+    <div class="flex flex-col lg:flex-row lg:items-center">
 
-      <li class="flex items-start gap-4 px-6 py-6 lg:pl-0 border-b border-white/20 md:border-b md:border-r lg:border-b-0 lg:border-r">
-        <span class="font-display font-bold text-6xl text-base/40 leading-none select-none">1</span>
-        <div class="flex flex-col gap-1">
-          <p class="font-display font-bold text-2xl md:text-3xl">US$ 1,000</p>
-          <p class="text-sm text-white/70 leading-snug">Reservación</p>
+      <div class="flex-1 flex items-center gap-4 px-6 py-8 lg:pl-2 border-b border-white/25 lg:border-b-0">
+        <span class="font-display font-bold text-[5rem] md:text-[6rem] text-white/35 leading-none select-none shrink-0">1</span>
+        <div class="flex flex-col gap-0.5">
+          <p class="font-bold text-xl md:text-2xl text-white">US$ 1,000</p>
+          <p class="text-sm text-white/65 leading-snug">Reservación</p>
         </div>
-      </li>
+      </div>
 
-      <li class="flex items-start gap-4 px-6 py-6 border-b border-white/20 md:border-b md:border-r-0 lg:border-b-0 lg:border-r">
-        <span class="font-display font-bold text-6xl text-base/40 leading-none select-none">2</span>
-        <div class="flex flex-col gap-1">
-          <p class="font-display font-bold text-2xl md:text-3xl">10%</p>
-          <p class="text-sm text-white/70 leading-snug">Separación a la firma del contrato.</p>
+      <span class="hidden lg:block w-px h-9 bg-white/25 shrink-0"></span>
+
+      <div class="flex-1 flex items-center gap-4 px-6 py-8 border-b border-white/25 lg:border-b-0">
+        <span class="font-display font-bold text-[5rem] md:text-[6rem] text-white/35 leading-none select-none shrink-0">2</span>
+        <div class="flex flex-col gap-0.5">
+          <p class="font-bold text-xl md:text-2xl text-white">10%</p>
+          <p class="text-sm text-white/65 leading-snug">Separación a la firma del contrato.</p>
         </div>
-      </li>
+      </div>
 
-      <li class="flex items-start gap-4 px-6 py-6 border-b border-white/20 md:border-b-0 md:border-r lg:border-b-0 lg:border-r">
-        <span class="font-display font-bold text-6xl text-base/40 leading-none select-none">3</span>
-        <div class="flex flex-col gap-1">
-          <p class="font-display font-bold text-2xl md:text-3xl">30%</p>
-          <p class="text-sm text-white/70 leading-snug">Durante la construcción.</p>
+      <span class="hidden lg:block w-px h-9 bg-white/25 shrink-0"></span>
+
+      <div class="flex-1 flex items-center gap-4 px-6 py-8 border-b border-white/25 lg:border-b-0">
+        <span class="font-display font-bold text-[5rem] md:text-[6rem] text-white/35 leading-none select-none shrink-0">3</span>
+        <div class="flex flex-col gap-0.5">
+          <p class="font-bold text-xl md:text-2xl text-white">30%</p>
+          <p class="text-sm text-white/65 leading-snug">Durante la construcción.</p>
         </div>
-      </li>
+      </div>
 
-      <li class="flex items-start gap-4 px-6 py-6 border-b-0 md:border-r-0 lg:border-r-0">
-        <span class="font-display font-bold text-6xl text-base/40 leading-none select-none">4</span>
-        <div class="flex flex-col gap-1">
-          <p class="font-display font-bold text-2xl md:text-3xl">60%</p>
-          <p class="text-sm text-white/70 leading-snug">Contra entrega.</p>
+      <span class="hidden lg:block w-px h-9 bg-white/25 shrink-0"></span>
+
+      <div class="flex-1 flex items-center gap-4 px-6 py-8 lg:pr-2">
+        <span class="font-display font-bold text-[5rem] md:text-[6rem] text-white/35 leading-none select-none shrink-0">4</span>
+        <div class="flex flex-col gap-0.5">
+          <p class="font-bold text-xl md:text-2xl text-white">60%</p>
+          <p class="text-sm text-white/65 leading-snug">Contra entrega.</p>
         </div>
-      </li>
+      </div>
 
-    </ul>
-
-    <div class="flex justify-center pt-6">
-      <img src="/logo.svg" alt="Costamare" class="h-25 w-auto brightness-0 invert opacity-80" />
     </div>
-
   </div>
+</section>
+
+<!-- Footer logo con fondo frente.avif -->
+<section class="relative flex flex-col items-center justify-center gap-6 h-[38svh] min-h-65 overflow-hidden bg-base">
+  <img
+    src="/assets/gallery/frente.avif"
+    alt=""
+    aria-hidden="true"
+    class="absolute inset-0 w-full h-full object-cover opacity-20"
+  />
+  <img
+    src="/logo.svg"
+    alt="Costamare"
+    class="relative z-10 w-[clamp(14rem,40vw,32rem)] h-auto brightness-0 invert"
+  />
+  <p class="relative z-10 text-xs text-white/40 tracking-wide">
+    &copy; 2026 Costamare, SRL. Todos los derechos reservados.
+  </p>
 </section>
