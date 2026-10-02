@@ -4,7 +4,7 @@ interface ParsedUT {
   type_key: string;
   name: string;
   price_usd: number;
-  interior_m2: number;
+  interior_m2: number | string;
   total_m2: number;
   extra_area: { label: string; m2: number } | null;
   features: string[];
@@ -34,7 +34,7 @@ const unitsJson = JSON.stringify(
 );
 
 const orbitalImagesP1 = Array.from({ length: 24 }, (_, i) => `/assets/units/plano3d-p1/piso1-${i + 1}.avif`);
-const orbitalImagesP2 = Array.from({ length: 24 }, (_, i) => `/assets/units/plano3d-p2/Interior___p2___3D__PLANO_-Camera_${String(i + 1).padStart(4, '0')}.avif`);
+const orbitalImagesP2 = Array.from({ length: 24 }, (_, i) => `/assets/units/plano3d-p2/piso2-${i + 1}.avif`);
 ---
 
 <section id="unidades" class="px-[4vw] py-16">
@@ -497,7 +497,7 @@ const orbitalImagesP2 = Array.from({ length: 24 }, (_, i) => `/assets/units/plan
   import EmblaCarousel from 'embla-carousel';
 
   type UnitData = {
-    interiorM2: number;
+    interiorM2: number | string;
     extraArea: { label: string; m2: number } | null;
     features: string[];
     tourUrl: string;
@@ -723,7 +723,7 @@ const orbitalImagesP2 = Array.from({ length: 24 }, (_, i) => `/assets/units/plan
 
   function getLbSrc(index: number) {
     return activeOrbitalSet === 'p2'
-      ? `/assets/units/plano3d-p2/Interior___p2___3D__PLANO_-Camera_${String(index + 1).padStart(4, '0')}.avif`
+      ? `/assets/units/plano3d-p2/piso2-${index + 1}.avif`
       : `/assets/units/plano3d-p1/piso1-${index + 1}.avif`;
   }
 
