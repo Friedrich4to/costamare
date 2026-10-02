@@ -7,6 +7,7 @@ import Lightbox from '../components/Lightbox.astro';
 import Amenidades from '../components/Amenidades.astro';
 import Disponibilidad_Update from '../components/Disponibilidad_Update.astro';
 import Unidades from '../components/Unidades.astro';
+import OrbitalViewer from '../components/OrbitalViewer.astro';
 import MapaBavaro from '../components/MapaBavaro.astro';
 import Pagos from '../components/Pagos.astro';
 import '@photo-sphere-viewer/core/index.css';
@@ -155,6 +156,7 @@ const unitTypes = [
     <Galeria />
     <Lightbox />
     <Unidades unitTypes={unitTypes} />
+    <OrbitalViewer class="hidden" />
     <Disponibilidad_Update units={units} />
     <section id="maqueta" class="relative flex w-full h-[70svh] items-center justify-center overflow-hidden">
       <div id="maqueta-psv" class="absolute inset-0 w-full h-full" style="pointer-events:none;"></div>

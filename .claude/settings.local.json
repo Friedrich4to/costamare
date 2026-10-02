@@ -88,7 +88,8 @@
       "Bash(\\\\.jsx)",
       "Bash(\\\\.js\")",
       "Bash(find \"/mnt/c/Users/frede/Documents/Clientes/0_Inmobiliarias/Costamare/costamare_web/src/components\" -type f -name \"*.astro\" | sort)",
-      "Read(//mnt/c/Users/frede/Documents/Clientes/0_Inmobiliarias/Costamare/costamare_web/src/**)"
+      "Read(//mnt/c/Users/frede/Documents/Clientes/0_Inmobiliarias/Costamare/costamare_web/src/**)",
+      "PowerShell($files = Get-ChildItem \"c:\\\\Users\\\\frede\\\\Documents\\\\Clientes\\\\0_Inmobiliarias\\\\Costamare\\\\costamare_web\\\\public\\\\assets\\\\units\"; $files.Name)"
     ]
   }
 }

@@ -32,17 +32,20 @@ const unitsJson = JSON.stringify(
     gallery:    ut.gallery,
   }]))
 );
+
+const orbitalImagesP1 = Array.from({ length: 24 }, (_, i) => `/assets/units/plano3d-p1/piso1-${i + 1}.avif`);
+const orbitalImagesP2 = Array.from({ length: 24 }, (_, i) => `/assets/units/plano3d-p2/Interior___p2___3D__PLANO_-Camera_${String(i + 1).padStart(4, '0')}.avif`);
 ---
 
 <section id="unidades" class="px-[4vw] py-16">
-  <script type="application/json" id="u-data" set:html={unitsJson}></script>
+  <script type="application/json" id="u-data" is:inline set:html={unitsJson}></script>
 
   <div class="max-w-7xl mx-auto flex flex-col md:flex-row gap-12">
 
     <!-- Left column -->
-    <div class="w-full md:w-1/2 flex flex-col justify-start gap-6">
+    <div class="w-full md:w-1/2 flex flex-col justify-start md:justify-center gap-6">
 
-      <!-- Tab selector -->
+      <!-- Unit type tab selector -->
       <nav class="flex items-center" aria-label="Tipo de unidad">
         {typeKeys.map((key, i) => (
           <>
@@ -97,54 +100,167 @@ const unitsJson = JSON.stringify(
 
     </div>
 
-    <!-- Right column: carousel -->
+    <!-- Right column -->
     <div class="w-full md:w-1/2 flex flex-col gap-4 order-first md:order-0">
-      <div class="u-embla relative">
-        <div class="u-embla__viewport" data-lightbox-trigger>
-          <div class="u-embla__container" id="u-slides">
-            {(defaultUT?.gallery ?? []).map((src: string, i: number) => (
-              <div class="u-embla__slide">
-                <img src={src} data-full={src} alt={`Vista ${i + 1}`} loading="lazy" />
+
+      <!-- 2D / 3D tab selector -->
+      <nav class="flex items-center" aria-label="Tipo de plano">
+        <button
+          id="u-tab-2d"
+          class="u-view-tab font-display cursor-pointer pb-1 border-b-2 transition-all duration-200 font-extrabold border-base"
+        >
+          Plano 2D
+        </button>
+        <span class="mx-3 opacity-30 select-none pointer-events-none">|</span>
+        <button
+          id="u-tab-3d"
+          class="u-view-tab font-display cursor-pointer pb-1 border-b-2 transition-all duration-200 font-bold border-transparent opacity-40 hover:opacity-70"
+        >
+          Plano 3D
+        </button>
+      </nav>
+
+      <!-- Fixed-height view area — both panels fill this, column height stays constant -->
+      <div class="u-view-area">
+
+        <!-- 2D view: carousel -->
+        <div id="u-2d-view">
+          <div class="u-embla relative">
+            <div class="u-embla__viewport" data-lightbox-trigger>
+              <div class="u-embla__container" id="u-slides">
+                {(defaultUT?.gallery ?? []).map((src: string, i: number) => (
+                  <div class="u-embla__slide">
+                    <img src={src} data-full={src} alt={`Vista ${i + 1}`} loading="lazy" />
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
+
+            <button class="u-embla__btn u-embla__prev" aria-label="Anterior">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <button class="u-embla__btn u-embla__next" aria-label="Siguiente">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+          </div>
+
+          <div class="u-embla__dots" aria-hidden="true"></div>
+        </div>
+
+        <!-- 3D view: inline orbital -->
+        <div id="u-3d-view" style="display:none">
+          <div id="u-orbitalFrame" class="u-orbital-frame">
+            <div id="u-orbital-p1">
+              {orbitalImagesP1.map((src, i) => (
+                <img
+                  src={src}
+                  alt={`Vista orbital ${i + 1}`}
+                  class:list={['u-orbital-img', { 'u-orbital-active': i === 0 }]}
+                  draggable="false"
+                  loading="eager"
+                />
+              ))}
+            </div>
+            <div id="u-orbital-p2" style="display:none">
+              {orbitalImagesP2.map((src, i) => (
+                <img
+                  src={src}
+                  alt={`Vista orbital ${i + 1}`}
+                  class="u-orbital-img"
+                  draggable="false"
+                  loading="eager"
+                />
+              ))}
+            </div>
+            <!-- Expand to lightbox -->
+            <button id="u-orbital-expand" class="u-orbital-expand" aria-label="Ampliar plano 3D">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polyline points="15 3 21 3 21 9"/>
+                <polyline points="9 21 3 21 3 15"/>
+                <line x1="21" y1="3" x2="14" y2="10"/>
+                <line x1="3" y1="21" x2="10" y2="14"/>
+              </svg>
+            </button>
+            <!-- Rotation nav — overlaid at the bottom of the frame -->
+            <div class="u-orbital-nav">
+              <button id="u-orbitalPrev" aria-label="Rotar izquierda" class="u-orbital-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18" aria-hidden="true">
+                  <polyline points="1 4 1 10 7 10"/>
+                  <path d="M3.51 15a9 9 0 1 0 .49-3.11"/>
+                </svg>
+              </button>
+              <button id="u-orbitalNext" aria-label="Rotar derecha" class="u-orbital-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18" aria-hidden="true">
+                  <polyline points="23 4 23 10 17 10"/>
+                  <path d="M20.49 15a9 9 0 1 1-.49-3.11"/>
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
 
-        <button class="u-embla__btn u-embla__prev" aria-label="Anterior">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-        </button>
-        <button class="u-embla__btn u-embla__next" aria-label="Siguiente">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-        </button>
-      </div>
+      </div><!-- /.u-view-area -->
 
-      <div class="u-embla__dots" aria-hidden="true"></div>
     </div>
 
   </div>
 </section>
 
+<!-- Orbital lightbox -->
+<div id="u-orbital-lb" role="dialog" aria-modal="true" aria-label="Plano 3D ampliado">
+  <div id="u-orbital-lb-bd"></div>
+  <button id="u-orbital-lb-close" aria-label="Cerrar">&#x2715;</button>
+  <div id="u-orbital-lb-viewer" class="u-orbital-lb-viewer">
+    <img id="u-orbital-lb-img" src="/assets/units/plano3d-p1/piso1-1.avif" alt="Vista orbital" draggable="false" />
+  </div>
+  <div class="u-orbital-lb-nav">
+    <button id="u-orbital-lb-prev" aria-label="Rotar izquierda" class="u-orbital-lb-btn">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22" aria-hidden="true">
+        <polyline points="1 4 1 10 7 10"/>
+        <path d="M3.51 15a9 9 0 1 0 .49-3.11"/>
+      </svg>
+    </button>
+    <button id="u-orbital-lb-next" aria-label="Rotar derecha" class="u-orbital-lb-btn">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22" aria-hidden="true">
+        <polyline points="23 4 23 10 17 10"/>
+        <path d="M20.49 15a9 9 0 1 1-.49-3.11"/>
+      </svg>
+    </button>
+  </div>
+</div>
+
 <style is:global>
+  /* ── Fixed-height view area ─────────────────── */
+  .u-view-area {
+    height: 60svh;
+  }
+
+  /* ── 2D panel ───────────────────────────────── */
+  #u-2d-view {
+    flex-direction: column;
+    height: 100%;
+    gap: 0.5rem;
+  }
+
+  /* ── 3D panel ───────────────────────────────── */
+  #u-3d-view {
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+  }
+
   /* ── Carousel ───────────────────────────────── */
   .u-embla {
     position: relative;
     width: 100%;
+    flex: 1;
+    min-height: 0;
   }
   .u-embla__viewport {
     overflow: hidden;
     width: 100%;
-    height: 50svh;
+    height: 100%;
     border-radius: 16px;
-  }
-
-  @media (min-width: 768px) {
-    .u-embla {
-      flex: 1 1 0;
-      min-height: 0;
-    }
-    .u-embla__viewport {
-      height: 100%;
-    }
   }
   .u-embla__container {
     display: flex;
@@ -195,6 +311,7 @@ const unitsJson = JSON.stringify(
     justify-content: center;
     gap: 8px;
     min-height: 8px;
+    flex-shrink: 0;
   }
   .u-embla__dot {
     width: 8px;
@@ -209,6 +326,170 @@ const unitsJson = JSON.stringify(
   .u-embla__dot.is-selected {
     background: #1D1D1D;
     transform: scale(1.3);
+  }
+
+  /* ── Inline orbital viewer ──────────────────── */
+  .u-orbital-frame {
+    width: min(60svh, 100%);
+    aspect-ratio: 1;
+    position: relative;
+    overflow: hidden;
+    cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: none;
+    border-radius: 16px;
+  }
+  .u-orbital-frame.dragging {
+    cursor: grabbing;
+  }
+  .u-orbital-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    pointer-events: none;
+    opacity: 0;
+  }
+  .u-orbital-img.u-orbital-active {
+    opacity: 1;
+  }
+
+  /* ── Orbital rotation nav (overlay) ────────── */
+  .u-orbital-nav {
+    position: absolute;
+    bottom: 0.875rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 0.625rem;
+    z-index: 2;
+  }
+  .u-orbital-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 9999px;
+    border: none;
+    background: rgba(248, 248, 248, 0.9);
+    color: #2a2a2a;
+    cursor: pointer;
+    transition: background 0.15s;
+    backdrop-filter: blur(6px);
+  }
+  .u-orbital-btn:hover {
+    background: rgba(218, 218, 218, 0.98);
+  }
+
+  /* ── Expand button ──────────────────────────── */
+  .u-orbital-expand {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 2;
+    background: rgba(0, 0, 0, 0.5);
+    border: none;
+    color: #f4f4f4;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.15s;
+    backdrop-filter: blur(4px);
+  }
+  .u-orbital-expand:hover {
+    background: rgba(0, 0, 0, 0.8);
+  }
+
+  /* ── Orbital lightbox ───────────────────────── */
+  #u-orbital-lb {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    opacity: 0;
+    transition: opacity 220ms ease;
+  }
+  #u-orbital-lb.is-open {
+    opacity: 1;
+  }
+  #u-orbital-lb-bd {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.9);
+  }
+  #u-orbital-lb-close {
+    position: absolute;
+    top: 16px;
+    right: 20px;
+    z-index: 2;
+    background: none;
+    border: none;
+    color: #f4f4f4;
+    font-size: 2.5rem;
+    line-height: 1;
+    cursor: pointer;
+    opacity: 0.8;
+    transition: opacity 0.15s;
+    padding: 4px 8px;
+  }
+  #u-orbital-lb-close:hover {
+    opacity: 1;
+  }
+  .u-orbital-lb-viewer {
+    position: relative;
+    z-index: 1;
+    width: min(90svh, 90vw);
+    aspect-ratio: 1;
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: none;
+  }
+  .u-orbital-lb-viewer.dragging {
+    cursor: grabbing;
+  }
+  .u-orbital-lb-viewer img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    pointer-events: none;
+  }
+  .u-orbital-lb-nav {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    gap: 1rem;
+  }
+  .u-orbital-lb-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 9999px;
+    border: none;
+    background: rgba(248, 248, 248, 0.9);
+    color: #2a2a2a;
+    cursor: pointer;
+    transition: background 0.15s;
+    backdrop-filter: blur(6px);
+  }
+  .u-orbital-lb-btn:hover {
+    background: rgba(218, 218, 218, 0.98);
   }
 </style>
 
@@ -226,6 +507,10 @@ const unitsJson = JSON.stringify(
   const allUnits: Record<string, UnitData> = JSON.parse(
     document.getElementById('u-data')!.textContent!
   );
+
+  const ORBITAL_SET: Record<string, string> = {
+    c101: 'p1', '1er-piso': 'p1', '2do-piso': 'p2', penthouse: 'p2',
+  };
 
   const viewport      = document.querySelector<HTMLElement>('.u-embla__viewport')!;
   const slidesEl      = document.getElementById('u-slides')!;
@@ -313,6 +598,7 @@ const unitsJson = JSON.stringify(
       .join('');
 
     initEmbla();
+    document.dispatchEvent(new CustomEvent('u:orbital-switch', { detail: { set: ORBITAL_SET[type] ?? 'p1' } }));
   }
 
   tabs.forEach(btn => {
@@ -320,4 +606,180 @@ const unitsJson = JSON.stringify(
   });
 
   initEmbla();
+</script>
+
+<script>
+  // ── 2D / 3D view tabs ────────────────────────────────────────────────
+  const tab2d  = document.getElementById('u-tab-2d')  as HTMLButtonElement;
+  const tab3d  = document.getElementById('u-tab-3d')  as HTMLButtonElement;
+  const view2d = document.getElementById('u-2d-view') as HTMLElement;
+  const view3d = document.getElementById('u-3d-view') as HTMLElement;
+
+  // Set initial display via JS so the CSS flex properties apply correctly
+  view2d.style.display = 'flex';
+
+  function switchView(show3d: boolean) {
+    [
+      { el: tab2d, active: !show3d },
+      { el: tab3d, active: show3d  },
+    ].forEach(({ el, active }) => {
+      el.classList.toggle('font-extrabold', active);
+      el.classList.toggle('border-base',    active);
+      el.classList.toggle('font-bold',      !active);
+      el.classList.toggle('border-transparent', !active);
+      el.classList.toggle('opacity-40',     !active);
+    });
+    // Use style.display so ID-based CSS (flex-direction, align-items) always applies
+    view2d.style.display = show3d ? 'none' : 'flex';
+    view3d.style.display = show3d ? 'flex' : 'none';
+  }
+
+  tab2d.addEventListener('click', () => switchView(false));
+  tab3d.addEventListener('click', () => switchView(true));
+
+  // ── Inline orbital viewer ────────────────────────────────────────────
+  const uFrame = document.getElementById('u-orbitalFrame') as HTMLElement;
+  const uPrev  = document.getElementById('u-orbitalPrev')  as HTMLButtonElement;
+  const uNext  = document.getElementById('u-orbitalNext')  as HTMLButtonElement;
+
+  let activeOrbitalSet = 'p1';
+
+  function getOrbitalImgs(set: string) {
+    return Array.from(
+      document.getElementById(`u-orbital-${set}`)!
+        .querySelectorAll<HTMLImageElement>('.u-orbital-img')
+    );
+  }
+
+  let uImgs  = getOrbitalImgs('p1');
+  let uTotal = uImgs.length;
+
+  let uCurrent    = 0;
+  let uDragging   = false;
+  let uStartX     = 0;
+  let uStartFrame = 0;
+  const U_THRESHOLD = 40;
+
+  function uShowFrame(index: number) {
+    uImgs[uCurrent].classList.remove('u-orbital-active');
+    uCurrent = ((index % uTotal) + uTotal) % uTotal;
+    uImgs[uCurrent].classList.add('u-orbital-active');
+  }
+
+  uFrame.addEventListener('pointerdown', (e: PointerEvent) => {
+    if ((e.target as HTMLElement).closest('#u-orbital-expand, .u-orbital-nav')) return;
+    uDragging   = true;
+    uStartX     = e.clientX;
+    uStartFrame = uCurrent;
+    uFrame.setPointerCapture(e.pointerId);
+    uFrame.classList.add('dragging');
+  });
+
+  uFrame.addEventListener('pointermove', (e: PointerEvent) => {
+    if (!uDragging) return;
+    const frameDelta = Math.round((e.clientX - uStartX) / U_THRESHOLD);
+    uShowFrame(uStartFrame - frameDelta);
+  });
+
+  const uStopDrag = () => { uDragging = false; uFrame.classList.remove('dragging'); };
+  uFrame.addEventListener('pointerup', uStopDrag);
+  uFrame.addEventListener('pointercancel', uStopDrag);
+  uFrame.addEventListener('contextmenu', (e) => e.preventDefault());
+  uFrame.addEventListener('dragstart',   (e) => e.preventDefault());
+
+  uPrev.addEventListener('click', () => uShowFrame(uCurrent - 1));
+  uNext.addEventListener('click', () => uShowFrame(uCurrent + 1));
+
+  function switchOrbitalSet(set: string) {
+    uImgs[uCurrent]?.classList.remove('u-orbital-active');
+    document.getElementById(`u-orbital-${activeOrbitalSet}`)!.style.display = 'none';
+    document.getElementById(`u-orbital-${set}`)!.style.display = '';
+    activeOrbitalSet = set;
+    uImgs = getOrbitalImgs(set);
+    uTotal = uImgs.length;
+    uCurrent = 0;
+    uImgs[0]?.classList.add('u-orbital-active');
+  }
+
+  document.addEventListener('u:orbital-switch', (e: Event) => {
+    const set = (e as CustomEvent<{ set: string }>).detail.set;
+    if (set !== activeOrbitalSet) switchOrbitalSet(set);
+  });
+
+  // ── Orbital lightbox ─────────────────────────────────────────────────
+  const lb        = document.getElementById('u-orbital-lb')        as HTMLElement;
+  const lbBd      = document.getElementById('u-orbital-lb-bd')     as HTMLElement;
+  const lbClose   = document.getElementById('u-orbital-lb-close')  as HTMLButtonElement;
+  const lbViewer  = document.getElementById('u-orbital-lb-viewer') as HTMLElement;
+  const lbImg     = document.getElementById('u-orbital-lb-img')    as HTMLImageElement;
+  const lbPrevBtn = document.getElementById('u-orbital-lb-prev')   as HTMLButtonElement;
+  const lbNextBtn = document.getElementById('u-orbital-lb-next')   as HTMLButtonElement;
+  const expandBtn = document.getElementById('u-orbital-expand')    as HTMLButtonElement;
+
+  let lbCurrent    = 0;
+  let lbDragging   = false;
+  let lbStartX     = 0;
+  let lbStartFrame = 0;
+
+  function getLbSrc(index: number) {
+    return activeOrbitalSet === 'p2'
+      ? `/assets/units/plano3d-p2/Interior___p2___3D__PLANO_-Camera_${String(index + 1).padStart(4, '0')}.avif`
+      : `/assets/units/plano3d-p1/piso1-${index + 1}.avif`;
+  }
+
+  function lbShowFrame(index: number) {
+    lbCurrent = ((index % uTotal) + uTotal) % uTotal;
+    lbImg.src = getLbSrc(lbCurrent);
+  }
+
+  function openLb() {
+    lbCurrent = uCurrent;
+    lbImg.src = getLbSrc(lbCurrent);
+    lb.style.display = 'flex';
+    requestAnimationFrame(() => requestAnimationFrame(() => lb.classList.add('is-open')));
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeLb() {
+    lb.classList.remove('is-open');
+    lb.addEventListener('transitionend', function handler() {
+      lb.removeEventListener('transitionend', handler);
+      lb.style.display = 'none';
+      document.body.style.overflow = '';
+      uShowFrame(lbCurrent);
+    });
+  }
+
+  expandBtn.addEventListener('click', openLb);
+  lbBd.addEventListener('click', closeLb);
+  lbClose.addEventListener('click', closeLb);
+  lbPrevBtn.addEventListener('click', () => lbShowFrame(lbCurrent - 1));
+  lbNextBtn.addEventListener('click', () => lbShowFrame(lbCurrent + 1));
+
+  lbViewer.addEventListener('pointerdown', (e: PointerEvent) => {
+    lbDragging   = true;
+    lbStartX     = e.clientX;
+    lbStartFrame = lbCurrent;
+    lbViewer.setPointerCapture(e.pointerId);
+    lbViewer.classList.add('dragging');
+  });
+
+  lbViewer.addEventListener('pointermove', (e: PointerEvent) => {
+    if (!lbDragging) return;
+    const frameDelta = Math.round((e.clientX - lbStartX) / U_THRESHOLD);
+    lbShowFrame(lbStartFrame - frameDelta);
+  });
+
+  const lbStopDrag = () => { lbDragging = false; lbViewer.classList.remove('dragging'); };
+  lbViewer.addEventListener('pointerup', lbStopDrag);
+  lbViewer.addEventListener('pointercancel', lbStopDrag);
+  lbViewer.addEventListener('contextmenu', (e) => e.preventDefault());
+  lbViewer.addEventListener('dragstart',   (e) => e.preventDefault());
+
+  document.addEventListener('keydown', (e: KeyboardEvent) => {
+    if (!lb.classList.contains('is-open')) return;
+    if (e.key === 'Escape')     closeLb();
+    if (e.key === 'ArrowLeft')  lbShowFrame(lbCurrent - 1);
+    if (e.key === 'ArrowRight') lbShowFrame(lbCurrent + 1);
+  });
 </script>

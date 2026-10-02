@@ -1,0 +1,129 @@
+---
+interface Props { class?: string; }
+const { class: className = '' } = Astro.props;
+const images = Array.from({ length: 24 }, (_, i) => `/assets/units/plano3d-p1/piso1-${i + 1}.avif`);
+---
+
+<section id="orbital" class:list={["py-24 px-[4vw] flex flex-col items-center gap-6", className]}>
+  <div id="orbitalFrame" class="orbital-frame">
+    {images.map((src, i) => (
+      <img
+        src={src}
+        alt={`Vista orbital ${i + 1}`}
+        class:list={['orbital-img', { active: i === 0 }]}
+        draggable="false"
+        loading="eager"
+      />
+    ))}
+  </div>
+  <div class="flex gap-4">
+    <button id="orbitalPrev" aria-label="Vista anterior" class="orbital-btn">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="22" height="22" aria-hidden="true">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </button>
+    <button id="orbitalNext" aria-label="Vista siguiente" class="orbital-btn">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="22" height="22" aria-hidden="true">
+        <polyline points="9 18 15 12 9 6"/>
+      </svg>
+    </button>
+  </div>
+</section>
+
+<style>
+  .orbital-frame {
+    width: min(60svh, 100%);
+    aspect-ratio: 1;
+    position: relative;
+    overflow: hidden;
+    cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: none;
+  }
+
+  .orbital-frame.dragging {
+    cursor: grabbing;
+  }
+
+  .orbital-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    pointer-events: none;
+    opacity: 0;
+  }
+
+  .orbital-img.active {
+    opacity: 1;
+  }
+
+  .orbital-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 9999px;
+    border: 2px solid var(--color-base, #205469);
+    color: var(--color-base, #205469);
+    background: transparent;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+  }
+
+  .orbital-btn:hover {
+    background-color: var(--color-base, #205469);
+    color: white;
+  }
+</style>
+
+<script>
+  const frame = document.getElementById('orbitalFrame') as HTMLElement;
+  const prevBtn = document.getElementById('orbitalPrev') as HTMLButtonElement;
+  const nextBtn = document.getElementById('orbitalNext') as HTMLButtonElement;
+  const imgs = Array.from(frame.querySelectorAll<HTMLImageElement>('.orbital-img'));
+  const total = imgs.length;
+
+  let current = 0;
+  let isDragging = false;
+  let startX = 0;
+  let startFrame = 0;
+  const THRESHOLD = 40;
+
+  function showFrame(index: number) {
+    imgs[current].classList.remove('active');
+    current = ((index % total) + total) % total;
+    imgs[current].classList.add('active');
+  }
+
+  frame.addEventListener('pointerdown', (e: PointerEvent) => {
+    isDragging = true;
+    startX = e.clientX;
+    startFrame = current;
+    frame.setPointerCapture(e.pointerId);
+    frame.classList.add('dragging');
+  });
+
+  frame.addEventListener('pointermove', (e: PointerEvent) => {
+    if (!isDragging) return;
+    const delta = e.clientX - startX;
+    const frameDelta = Math.round(delta / THRESHOLD);
+    showFrame(startFrame - frameDelta);
+  });
+
+  const stopDrag = () => {
+    isDragging = false;
+    frame.classList.remove('dragging');
+  };
+
+  frame.addEventListener('pointerup', stopDrag);
+  frame.addEventListener('pointercancel', stopDrag);
+  frame.addEventListener('contextmenu', (e) => e.preventDefault());
+  frame.addEventListener('dragstart', (e) => e.preventDefault());
+
+  prevBtn.addEventListener('click', () => showFrame(current - 1));
+  nextBtn.addEventListener('click', () => showFrame(current + 1));
+</script>
