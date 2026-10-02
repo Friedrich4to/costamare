@@ -10,7 +10,10 @@ import cloudflare from '@astrojs/cloudflare';
 // https://astro.build/config
 export default defineConfig({
   vite: {
-    plugins: [tailwindcss()]
+    plugins: [tailwindcss()],
+    optimizeDeps: {
+      exclude: ['@photo-sphere-viewer/core', 'gsap/SplitText'],
+    },
   },
 
   integrations: [

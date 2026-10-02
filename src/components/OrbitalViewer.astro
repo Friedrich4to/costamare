@@ -15,6 +15,14 @@ const images = Array.from({ length: 24 }, (_, i) => `/assets/units/plano3d-p1/pi
         loading="eager"
       />
     ))}
+    <button id="orbitalExpand" class="orbital-expand" aria-label="Ampliar vista">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <polyline points="15 3 21 3 21 9"/>
+        <polyline points="9 21 3 21 3 15"/>
+        <line x1="21" y1="3" x2="14" y2="10"/>
+        <line x1="3" y1="21" x2="10" y2="14"/>
+      </svg>
+    </button>
   </div>
   <div class="flex gap-4">
     <button id="orbitalPrev" aria-label="Vista anterior" class="orbital-btn">
@@ -30,7 +38,51 @@ const images = Array.from({ length: 24 }, (_, i) => `/assets/units/plano3d-p1/pi
   </div>
 </section>
 
+<!-- Orbital lightbox — fuera del section para z-index correcto -->
+<div id="orbitalLb" role="dialog" aria-modal="true" aria-label="Vista orbital ampliada">
+  <div id="orbitalLbBd"></div>
+  <button id="orbitalLbClose" aria-label="Cerrar">&#x2715;</button>
+  <script id="orbital-srcs" type="application/json" is:inline set:html={JSON.stringify(images)}></script>
+  <div id="orbitalLbViewer" class="orbital-lb-viewer">
+    <img id="orbitalLbImg" src={images[0]} alt="Vista orbital" draggable="false" />
+  </div>
+  <div class="orbital-lb-nav">
+    <div class="orbital-lb-nav-group">
+      <button id="orbitalLbPrev" aria-label="Rotar izquierda" class="orbital-lb-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22" aria-hidden="true">
+          <polyline points="1 4 1 10 7 10"/>
+          <path d="M3.51 15a9 9 0 1 0 .49-3.11"/>
+        </svg>
+      </button>
+      <button id="orbitalLbNext" aria-label="Rotar derecha" class="orbital-lb-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22" aria-hidden="true">
+          <polyline points="23 4 23 10 17 10"/>
+          <path d="M20.49 15a9 9 0 1 1-.49-3.11"/>
+        </svg>
+      </button>
+    </div>
+    <div class="orbital-lb-nav-group">
+      <button id="orbitalLbZoomIn" aria-label="Acercar" class="orbital-lb-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22" aria-hidden="true">
+          <circle cx="11" cy="11" r="8"/>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          <line x1="11" y1="8" x2="11" y2="14"/>
+          <line x1="8" y1="11" x2="14" y2="11"/>
+        </svg>
+      </button>
+      <button id="orbitalLbZoomOut" aria-label="Alejar" class="orbital-lb-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22" aria-hidden="true">
+          <circle cx="11" cy="11" r="8"/>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          <line x1="8" y1="11" x2="14" y2="11"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
+
 <style>
+  /* ── Inline viewer ───────────────────────────── */
   .orbital-frame {
     width: min(60svh, 100%);
     aspect-ratio: 1;
@@ -78,18 +130,135 @@ const images = Array.from({ length: 24 }, (_, i) => `/assets/units/plano3d-p1/pi
     background-color: var(--color-base, #205469);
     color: white;
   }
+
+  /* ── Expand button ──────────────────────────── */
+  .orbital-expand {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 2;
+    background: rgba(0, 0, 0, 0.5);
+    border: none;
+    color: #f4f4f4;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.15s;
+    backdrop-filter: blur(4px);
+  }
+  .orbital-expand:hover {
+    background: rgba(0, 0, 0, 0.8);
+  }
+
+  /* ── Lightbox ───────────────────────────────── */
+  #orbitalLb {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    opacity: 0;
+    transition: opacity 220ms ease;
+  }
+  #orbitalLb.is-open {
+    opacity: 1;
+  }
+  #orbitalLbBd {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.9);
+  }
+  #orbitalLbClose {
+    position: absolute;
+    top: 16px;
+    right: 20px;
+    z-index: 2;
+    background: none;
+    border: none;
+    color: #f4f4f4;
+    font-size: 2.5rem;
+    line-height: 1;
+    cursor: pointer;
+    opacity: 0.8;
+    transition: opacity 0.15s;
+    padding: 4px 8px;
+  }
+  #orbitalLbClose:hover {
+    opacity: 1;
+  }
+  .orbital-lb-viewer {
+    position: relative;
+    z-index: 1;
+    width: min(90svh, 90vw);
+    aspect-ratio: 1;
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: none;
+  }
+  .orbital-lb-viewer.dragging {
+    cursor: grabbing;
+  }
+  .orbital-lb-viewer img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    pointer-events: none;
+  }
+  .orbital-lb-nav {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    gap: 2.5rem;
+  }
+  .orbital-lb-nav-group {
+    display: flex;
+    gap: 0.625rem;
+  }
+  .orbital-lb-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 9999px;
+    border: none;
+    background: rgba(248, 248, 248, 0.9);
+    color: #2a2a2a;
+    cursor: pointer;
+    transition: background 0.15s;
+    backdrop-filter: blur(6px);
+  }
+  .orbital-lb-btn:hover {
+    background: rgba(218, 218, 218, 0.98);
+  }
+  .orbital-lb-btn:disabled {
+    opacity: 0.3;
+    cursor: default;
+  }
 </style>
 
 <script>
-  const frame = document.getElementById('orbitalFrame') as HTMLElement;
-  const prevBtn = document.getElementById('orbitalPrev') as HTMLButtonElement;
-  const nextBtn = document.getElementById('orbitalNext') as HTMLButtonElement;
-  const imgs = Array.from(frame.querySelectorAll<HTMLImageElement>('.orbital-img'));
-  const total = imgs.length;
+  // ── Inline viewer ────────────────────────────────────────────────────
+  const frame   = document.getElementById('orbitalFrame') as HTMLElement;
+  const prevBtn = document.getElementById('orbitalPrev')  as HTMLButtonElement;
+  const nextBtn = document.getElementById('orbitalNext')  as HTMLButtonElement;
+  const imgs    = Array.from(frame.querySelectorAll<HTMLImageElement>('.orbital-img'));
+  const total   = imgs.length;
 
-  let current = 0;
+  let current    = 0;
   let isDragging = false;
-  let startX = 0;
+  let startX     = 0;
   let startFrame = 0;
   const THRESHOLD = 40;
 
@@ -100,8 +269,9 @@ const images = Array.from({ length: 24 }, (_, i) => `/assets/units/plano3d-p1/pi
   }
 
   frame.addEventListener('pointerdown', (e: PointerEvent) => {
+    if ((e.target as HTMLElement).closest('#orbitalExpand')) return;
     isDragging = true;
-    startX = e.clientX;
+    startX     = e.clientX;
     startFrame = current;
     frame.setPointerCapture(e.pointerId);
     frame.classList.add('dragging');
@@ -109,21 +279,114 @@ const images = Array.from({ length: 24 }, (_, i) => `/assets/units/plano3d-p1/pi
 
   frame.addEventListener('pointermove', (e: PointerEvent) => {
     if (!isDragging) return;
-    const delta = e.clientX - startX;
-    const frameDelta = Math.round(delta / THRESHOLD);
-    showFrame(startFrame - frameDelta);
+    showFrame(startFrame - Math.round((e.clientX - startX) / THRESHOLD));
   });
 
-  const stopDrag = () => {
-    isDragging = false;
-    frame.classList.remove('dragging');
-  };
-
-  frame.addEventListener('pointerup', stopDrag);
+  const stopDrag = () => { isDragging = false; frame.classList.remove('dragging'); };
+  frame.addEventListener('pointerup',     stopDrag);
   frame.addEventListener('pointercancel', stopDrag);
-  frame.addEventListener('contextmenu', (e) => e.preventDefault());
-  frame.addEventListener('dragstart', (e) => e.preventDefault());
+  frame.addEventListener('contextmenu',   (e) => e.preventDefault());
+  frame.addEventListener('dragstart',     (e) => e.preventDefault());
 
   prevBtn.addEventListener('click', () => showFrame(current - 1));
   nextBtn.addEventListener('click', () => showFrame(current + 1));
+
+  // ── Lightbox ─────────────────────────────────────────────────────────
+  const lbSrcs: string[] = JSON.parse(
+    document.getElementById('orbital-srcs')!.textContent!
+  );
+
+  const lb           = document.getElementById('orbitalLb')        as HTMLElement;
+  const lbBd         = document.getElementById('orbitalLbBd')      as HTMLElement;
+  const lbClose      = document.getElementById('orbitalLbClose')   as HTMLButtonElement;
+  const lbViewer     = document.getElementById('orbitalLbViewer')  as HTMLElement;
+  const lbImg        = document.getElementById('orbitalLbImg')     as HTMLImageElement;
+  const lbPrevBtn    = document.getElementById('orbitalLbPrev')    as HTMLButtonElement;
+  const lbNextBtn    = document.getElementById('orbitalLbNext')    as HTMLButtonElement;
+  const lbZoomInBtn  = document.getElementById('orbitalLbZoomIn')  as HTMLButtonElement;
+  const lbZoomOutBtn = document.getElementById('orbitalLbZoomOut') as HTMLButtonElement;
+  const expandBtn    = document.getElementById('orbitalExpand')    as HTMLButtonElement;
+
+  let lbCurrent  = 0;
+  let lbDragging = false;
+  let lbStartX   = 0;
+  let lbStartFrame = 0;
+
+  let lbZoom = 1;
+  const LB_ZOOM_MIN = 1, LB_ZOOM_MAX = 4, LB_ZOOM_STEP = 0.5;
+
+  function lbSetZoom(z: number) {
+    lbZoom = Math.min(LB_ZOOM_MAX, Math.max(LB_ZOOM_MIN, z));
+    lbImg.style.transform = lbZoom === 1 ? '' : `scale(${lbZoom})`;
+    lbZoomInBtn.disabled  = lbZoom >= LB_ZOOM_MAX;
+    lbZoomOutBtn.disabled = lbZoom <= LB_ZOOM_MIN;
+  }
+
+  function lbOnWheel(e: WheelEvent) {
+    e.preventDefault();
+    lbSetZoom(lbZoom + (e.deltaY < 0 ? LB_ZOOM_STEP : -LB_ZOOM_STEP));
+  }
+
+  function lbShowFrame(index: number) {
+    lbCurrent = ((index % total) + total) % total;
+    lbImg.src = lbSrcs[lbCurrent];
+  }
+
+  function openLb() {
+    lbCurrent = current;
+    lbImg.src = lbSrcs[lbCurrent];
+    lb.style.display = 'flex';
+    requestAnimationFrame(() => requestAnimationFrame(() => lb.classList.add('is-open')));
+    document.body.style.overflow = 'hidden';
+    lbViewer.addEventListener('wheel', lbOnWheel, { passive: false });
+  }
+
+  function closeLb() {
+    lbSetZoom(1);
+    lbViewer.removeEventListener('wheel', lbOnWheel);
+    lb.classList.remove('is-open');
+    lb.addEventListener('transitionend', function handler() {
+      lb.removeEventListener('transitionend', handler);
+      lb.style.display = 'none';
+      document.body.style.overflow = '';
+      showFrame(lbCurrent);
+    });
+  }
+
+  expandBtn.addEventListener('click', openLb);
+  lbBd.addEventListener('click',      closeLb);
+  lbClose.addEventListener('click',   closeLb);
+
+  lbPrevBtn.addEventListener('click',   () => lbShowFrame(lbCurrent - 1));
+  lbNextBtn.addEventListener('click',   () => lbShowFrame(lbCurrent + 1));
+  lbZoomInBtn.addEventListener('click', () => lbSetZoom(lbZoom + LB_ZOOM_STEP));
+  lbZoomOutBtn.addEventListener('click',() => lbSetZoom(lbZoom - LB_ZOOM_STEP));
+
+  lbViewer.addEventListener('pointerdown', (e: PointerEvent) => {
+    lbDragging   = true;
+    lbStartX     = e.clientX;
+    lbStartFrame = lbCurrent;
+    lbViewer.setPointerCapture(e.pointerId);
+    lbViewer.classList.add('dragging');
+  });
+
+  lbViewer.addEventListener('pointermove', (e: PointerEvent) => {
+    if (!lbDragging) return;
+    lbShowFrame(lbStartFrame - Math.round((e.clientX - lbStartX) / THRESHOLD));
+  });
+
+  const lbStopDrag = () => { lbDragging = false; lbViewer.classList.remove('dragging'); };
+  lbViewer.addEventListener('pointerup',     lbStopDrag);
+  lbViewer.addEventListener('pointercancel', lbStopDrag);
+  lbViewer.addEventListener('contextmenu',   (e) => e.preventDefault());
+  lbViewer.addEventListener('dragstart',     (e) => e.preventDefault());
+
+  document.addEventListener('keydown', (e: KeyboardEvent) => {
+    if (!lb.classList.contains('is-open')) return;
+    if (e.key === 'Escape')     closeLb();
+    if (e.key === 'ArrowLeft')  lbShowFrame(lbCurrent - 1);
+    if (e.key === 'ArrowRight') lbShowFrame(lbCurrent + 1);
+    if (e.key === '+' || e.key === '=') lbSetZoom(lbZoom + LB_ZOOM_STEP);
+    if (e.key === '-')                  lbSetZoom(lbZoom - LB_ZOOM_STEP);
+  });
 </script>

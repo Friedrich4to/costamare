@@ -92,7 +92,9 @@
       "PowerShell($files = Get-ChildItem \"c:\\\\Users\\\\frede\\\\Documents\\\\Clientes\\\\0_Inmobiliarias\\\\Costamare\\\\costamare_web\\\\public\\\\assets\\\\units\"; $files.Name)",
       "Bash(Measure-Object)",
       "Bash(Select-Object -ExpandProperty Count)",
-      "PowerShell(\\(ls \"c:\\\\Users\\\\frede\\\\Documents\\\\Clientes\\\\0_Inmobiliarias\\\\Costamare\\\\costamare_web\\\\public\\\\assets\\\\units\\\\plano3d-p2\"\\).Count)"
+      "PowerShell(\\(ls \"c:\\\\Users\\\\frede\\\\Documents\\\\Clientes\\\\0_Inmobiliarias\\\\Costamare\\\\costamare_web\\\\public\\\\assets\\\\units\\\\plano3d-p2\"\\).Count)",
+      "Bash(Remove-Item -Recurse -Force \"c:\\\\Users\\\\frede\\\\Documents\\\\Clientes\\\\0_Inmobiliarias\\\\Costamare\\\\costamare_web\\\\node_modules\\\\.vite\" -ErrorAction SilentlyContinue)",
+      "Bash(Write-Output \"Cache limpiado\")"
     ]
   }
 }

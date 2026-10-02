@@ -214,18 +214,37 @@ const orbitalImagesP2 = Array.from({ length: 24 }, (_, i) => `/assets/units/plan
     <img id="u-orbital-lb-img" src="/assets/units/plano3d-p1/piso1-1.avif" alt="Vista orbital" draggable="false" />
   </div>
   <div class="u-orbital-lb-nav">
-    <button id="u-orbital-lb-prev" aria-label="Rotar izquierda" class="u-orbital-lb-btn">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22" aria-hidden="true">
-        <polyline points="1 4 1 10 7 10"/>
-        <path d="M3.51 15a9 9 0 1 0 .49-3.11"/>
-      </svg>
-    </button>
-    <button id="u-orbital-lb-next" aria-label="Rotar derecha" class="u-orbital-lb-btn">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22" aria-hidden="true">
-        <polyline points="23 4 23 10 17 10"/>
-        <path d="M20.49 15a9 9 0 1 1-.49-3.11"/>
-      </svg>
-    </button>
+    <div class="u-orbital-lb-nav-group">
+      <button id="u-orbital-lb-prev" aria-label="Rotar izquierda" class="u-orbital-lb-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22" aria-hidden="true">
+          <polyline points="1 4 1 10 7 10"/>
+          <path d="M3.51 15a9 9 0 1 0 .49-3.11"/>
+        </svg>
+      </button>
+      <button id="u-orbital-lb-next" aria-label="Rotar derecha" class="u-orbital-lb-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22" aria-hidden="true">
+          <polyline points="23 4 23 10 17 10"/>
+          <path d="M20.49 15a9 9 0 1 1-.49-3.11"/>
+        </svg>
+      </button>
+    </div>
+    <div class="u-orbital-lb-nav-group">
+      <button id="u-orbital-lb-zoomin" aria-label="Acercar" class="u-orbital-lb-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22" aria-hidden="true">
+          <circle cx="11" cy="11" r="8"/>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          <line x1="11" y1="8" x2="11" y2="14"/>
+          <line x1="8" y1="11" x2="14" y2="11"/>
+        </svg>
+      </button>
+      <button id="u-orbital-lb-zoomout" aria-label="Alejar" class="u-orbital-lb-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22" aria-hidden="true">
+          <circle cx="11" cy="11" r="8"/>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          <line x1="8" y1="11" x2="14" y2="11"/>
+        </svg>
+      </button>
+    </div>
   </div>
 </div>
 
@@ -472,7 +491,15 @@ const orbitalImagesP2 = Array.from({ length: 24 }, (_, i) => `/assets/units/plan
     position: relative;
     z-index: 1;
     display: flex;
-    gap: 1rem;
+    gap: 2.5rem;
+  }
+  .u-orbital-lb-nav-group {
+    display: flex;
+    gap: 0.625rem;
+  }
+  .u-orbital-lb-btn:disabled {
+    opacity: 0.3;
+    cursor: default;
   }
   .u-orbital-lb-btn {
     display: flex;
@@ -707,19 +734,36 @@ const orbitalImagesP2 = Array.from({ length: 24 }, (_, i) => `/assets/units/plan
   });
 
   // ── Orbital lightbox ─────────────────────────────────────────────────
-  const lb        = document.getElementById('u-orbital-lb')        as HTMLElement;
-  const lbBd      = document.getElementById('u-orbital-lb-bd')     as HTMLElement;
-  const lbClose   = document.getElementById('u-orbital-lb-close')  as HTMLButtonElement;
-  const lbViewer  = document.getElementById('u-orbital-lb-viewer') as HTMLElement;
-  const lbImg     = document.getElementById('u-orbital-lb-img')    as HTMLImageElement;
-  const lbPrevBtn = document.getElementById('u-orbital-lb-prev')   as HTMLButtonElement;
-  const lbNextBtn = document.getElementById('u-orbital-lb-next')   as HTMLButtonElement;
-  const expandBtn = document.getElementById('u-orbital-expand')    as HTMLButtonElement;
+  const lb           = document.getElementById('u-orbital-lb')          as HTMLElement;
+  const lbBd         = document.getElementById('u-orbital-lb-bd')       as HTMLElement;
+  const lbClose      = document.getElementById('u-orbital-lb-close')    as HTMLButtonElement;
+  const lbViewer     = document.getElementById('u-orbital-lb-viewer')   as HTMLElement;
+  const lbImg        = document.getElementById('u-orbital-lb-img')      as HTMLImageElement;
+  const lbPrevBtn    = document.getElementById('u-orbital-lb-prev')     as HTMLButtonElement;
+  const lbNextBtn    = document.getElementById('u-orbital-lb-next')     as HTMLButtonElement;
+  const lbZoomInBtn  = document.getElementById('u-orbital-lb-zoomin')   as HTMLButtonElement;
+  const lbZoomOutBtn = document.getElementById('u-orbital-lb-zoomout')  as HTMLButtonElement;
+  const expandBtn    = document.getElementById('u-orbital-expand')      as HTMLButtonElement;
 
   let lbCurrent    = 0;
   let lbDragging   = false;
   let lbStartX     = 0;
   let lbStartFrame = 0;
+
+  let lbZoom = 1;
+  const LB_ZOOM_MIN = 1, LB_ZOOM_MAX = 4, LB_ZOOM_STEP = 0.5;
+
+  function lbSetZoom(z: number) {
+    lbZoom = Math.min(LB_ZOOM_MAX, Math.max(LB_ZOOM_MIN, z));
+    lbImg.style.transform = lbZoom === 1 ? '' : `scale(${lbZoom})`;
+    lbZoomInBtn.disabled  = lbZoom >= LB_ZOOM_MAX;
+    lbZoomOutBtn.disabled = lbZoom <= LB_ZOOM_MIN;
+  }
+
+  function lbOnWheel(e: WheelEvent) {
+    e.preventDefault();
+    lbSetZoom(lbZoom + (e.deltaY < 0 ? LB_ZOOM_STEP : -LB_ZOOM_STEP));
+  }
 
   function getLbSrc(index: number) {
     return activeOrbitalSet === 'p2'
@@ -738,9 +782,12 @@ const orbitalImagesP2 = Array.from({ length: 24 }, (_, i) => `/assets/units/plan
     lb.style.display = 'flex';
     requestAnimationFrame(() => requestAnimationFrame(() => lb.classList.add('is-open')));
     document.body.style.overflow = 'hidden';
+    lbViewer.addEventListener('wheel', lbOnWheel, { passive: false });
   }
 
   function closeLb() {
+    lbSetZoom(1);
+    lbViewer.removeEventListener('wheel', lbOnWheel);
     lb.classList.remove('is-open');
     lb.addEventListener('transitionend', function handler() {
       lb.removeEventListener('transitionend', handler);
@@ -753,8 +800,10 @@ const orbitalImagesP2 = Array.from({ length: 24 }, (_, i) => `/assets/units/plan
   expandBtn.addEventListener('click', openLb);
   lbBd.addEventListener('click', closeLb);
   lbClose.addEventListener('click', closeLb);
-  lbPrevBtn.addEventListener('click', () => lbShowFrame(lbCurrent - 1));
-  lbNextBtn.addEventListener('click', () => lbShowFrame(lbCurrent + 1));
+  lbPrevBtn.addEventListener('click',   () => lbShowFrame(lbCurrent - 1));
+  lbNextBtn.addEventListener('click',   () => lbShowFrame(lbCurrent + 1));
+  lbZoomInBtn.addEventListener('click', () => lbSetZoom(lbZoom + LB_ZOOM_STEP));
+  lbZoomOutBtn.addEventListener('click',() => lbSetZoom(lbZoom - LB_ZOOM_STEP));
 
   lbViewer.addEventListener('pointerdown', (e: PointerEvent) => {
     lbDragging   = true;
