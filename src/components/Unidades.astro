@@ -211,7 +211,7 @@ const orbitalImagesP2 = Array.from({ length: 24 }, (_, i) => `/assets/units/plan
   <div id="u-orbital-lb-bd"></div>
   <button id="u-orbital-lb-close" aria-label="Cerrar">&#x2715;</button>
   <div id="u-orbital-lb-viewer" class="u-orbital-lb-viewer">
-    <img id="u-orbital-lb-img" src="/assets/units/plano3d-p1/piso1-1.avif" alt="Vista orbital" draggable="false" />
+    <img id="u-orbital-lb-img" src="/assets/units/plano3d-p1/Interior_p1_3D_PLANO_v3_-Camera_0001.avif" alt="Vista orbital" draggable="false" />
   </div>
   <div class="u-orbital-lb-nav">
     <div class="u-orbital-lb-nav-group">
@@ -766,9 +766,10 @@ const orbitalImagesP2 = Array.from({ length: 24 }, (_, i) => `/assets/units/plan
   }
 
   function getLbSrc(index: number) {
+    const n = String(index + 1).padStart(4, '0');
     return activeOrbitalSet === 'p2'
-      ? `/assets/units/plano3d-p2/piso2-${index + 1}.avif`
-      : `/assets/units/plano3d-p1/piso1-${index + 1}.avif`;
+      ? `/assets/units/plano3d-p2/Interior_p2_3D__PLANO_1200x1200_-Camera_${n}.avif`
+      : `/assets/units/plano3d-p1/Interior_p1_3D_PLANO_v3_-Camera_${n}.avif`;
   }
 
   function lbShowFrame(index: number) {
